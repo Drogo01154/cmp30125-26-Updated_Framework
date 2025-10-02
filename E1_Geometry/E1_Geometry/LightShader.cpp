@@ -83,7 +83,7 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
 
 }
-void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix , Material* material, Light* light)
+void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, std::shared_ptr<Material> material, std::shared_ptr <Light> light)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -122,18 +122,8 @@ void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const 
 	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 
 	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &textureManager->getTexture(material->getTexture()));
+
+	ID3D11ShaderResourceView* texturePtr = textureManager->getTexture(material->getTexture());
+	deviceContext->PSSetShaderResources(0, 1, &texturePtr);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
-}
-
-void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, Material* material, Light* light)
-
-void LightShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, Material* material, Light* light)
-{
-
-
-
-	
-
-	
 }

@@ -1,9 +1,14 @@
 #include "Material.h"
+#include "BaseShader.h"
 
-Material::Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour, float specularPower, const std::wstring& texture) : shader(shader), specularColour(specularColour), specularPower(specularPower), texture(texture)
-{
-
-}
+Material::Material(std::weak_ptr<BaseShader> shader,
+	XMFLOAT4 specularColour,
+	float specularPower,
+	const std::wstring& texture)
+	: shader(shader),
+	specularColour(specularColour),
+	specularPower(specularPower),
+	texture(texture) {}
 
 const XMFLOAT4& Material::getSpecularColour() const
 {

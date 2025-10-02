@@ -17,24 +17,26 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Load texture
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 
-	//mesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	shader = new LightShader(renderer->getDevice(), textureMgr, hwnd);
+
+	shader = make_shared<LightShader>(LightShader(renderer->getDevice(), textureMgr, hwnd));
+
 
 	// Create Mesh object and shader object
-	plane = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+	plane = make_shared<PlaneMesh>(PlaneMesh(renderer->getDevice(), renderer->getDeviceContext()));
+		
 
 	// Create meshes material
-	planeMaterial = new Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = { 1.f, 1.f, 1.f, 1.f }, float specularPower = 32.0f, const std::string & texture = "");
-
-	
+	planeMaterial = make_shared<Material>(Material(shader, { 1.f, 1.f, 1.f, 1.f }, 32.f, L"brick"));
 
 	// Initialise light
-	light = new Light();
+	light = make_shared<Light>(Light());
 	light->setDiffuseColour(lightDiffuseColour.x, lightDiffuseColour.y, lightDiffuseColour.z, lightDiffuseColour.w);
 	light->setPosition(lightPosition.x, lightPosition.y, lightPosition.z);
+	light->setDirection(lightDirection.x, lightDirection.y, lightDirection.z);
+	light->setOuterCone(lightOuterCone);
+	light->setInnerCone(lightInnerCone);
 	light->setAmbientColour(ambientLight.x, ambientLight.y, ambientLight.z, ambientLight.w);
-	
-
+	light->setAttenuation(lightAttenuation.x, lightAttenuation.y, lightAttenuation.z, lightAttenuation.w);
 }
 
 
@@ -42,19 +44,6 @@ App1::~App1()
 {
 	// Run base application deconstructor
 	BaseApplication::~BaseApplication();
-
-	// Release the Direct3D object.
-	if (plane)
-	{
-		delete plane;
-		plane = 0;
-	}
-
-	if (shader)
-	{
-		delete shader;
-		shader = 0;
-	}
 }
 
 
@@ -95,6 +84,7 @@ bool App1::render()
 
 	// Send geometry data, set shader parameters, render object with shader
 	plane->sendData(renderer->getDeviceContext());
+	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, )
 	shader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, , light);
 	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
 

@@ -1,16 +1,18 @@
 #pragma once
-#include "BaseShader.h"
 #include <memory>
+#include <directxmath.h>
 
 enum shaderTypes {
 	lightShader
 };
 
+class BaseShader;
+
 class Material
 {
 public:
 	//Update later when add shader manager??
-	Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = { 1.f, 1.f, 1.f, 1.f }, float specularPower = 32.0f, const std::wstring& texture = L"");
+	Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f), float specularPower = 32.0f, const std::wstring& texture = L"");
 
 
 	//Getters 

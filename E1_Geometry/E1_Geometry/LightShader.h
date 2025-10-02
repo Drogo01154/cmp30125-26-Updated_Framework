@@ -32,7 +32,7 @@ public:
 	LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd);
 	~LightShader();
 
-	void setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, Material* material, Light* light);
+	void setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, std::shared_ptr<Material> material, std::shared_ptr<Light> light);
 
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
