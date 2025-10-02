@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef _SHADOW_MAP_H_
+#define _SHADOW_MAP_H_
+
 #include "d3d.h"
 
 using namespace DirectX;
@@ -19,3 +23,5 @@ private:
 	ID3D11RenderTargetView* renderTargets[1];
 	ID3D11Texture2D* depthMap;
 };
+
+#endif

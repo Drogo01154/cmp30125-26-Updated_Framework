@@ -77,7 +77,7 @@ protected:
 	XMMATRIX projectionMatrix;
 	XMMATRIX orthoMatrix;
 	XMVECTOR lookAt;
-	float innercone;
-	float outercone;
+	float innerCone;
+	float outerCone;
 };
 #endif

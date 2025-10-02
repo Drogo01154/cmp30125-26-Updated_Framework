@@ -136,11 +136,11 @@ void Light::setLookAt(const XMFLOAT3& lookAt)
 
 void Light::setInnerCone(float innerCone)
 {
-	this->innercone = innercone;
+	this->innerCone = innerCone;
 }
 void Light::setOuterCone(float outerCone)
 {
-	this->outercone = outercone;
+	this->outerCone = outerCone;
 }
 
 const XMMATRIX& Light::getViewMatrix() const
@@ -160,10 +160,10 @@ const XMMATRIX& Light::getOrthoMatrix() const
 
 float Light::getInnerCone() const
 {
-	return innercone;
+	return innerCone;
 }
 
 float Light::getOuterCone() const
 {
-	return outercone;
+	return outerCone;
 }

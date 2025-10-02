@@ -112,9 +112,8 @@ void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const 
 	lightPtr->attenuation = light->getAttenuation();
 	lightPtr->position = light->getPosition();
 	lightPtr->direction = light->getDirection();
-	
-	lightPtr->innerCone = light->getInnerCone();
-	lightPtr->outerCone = light->getOuterCone();
+	lightPtr->innerCone = std::cos(light->getInnerCone());
+	lightPtr->outerCone = std::cos(light->getOuterCone());
 	lightPtr->ambient = light->getAmbientColour();
 	lightPtr->diffuse = light->getDiffuseColour();
 

@@ -8,6 +8,12 @@ BaseShader::BaseShader(ID3D11Device* device, HWND lhwnd)
 {
 	renderer = device;
 	hwnd = hwnd;
+	pixelShader = nullptr;
+	vertexShader = nullptr;
+	hullShader = nullptr;
+	domainShader = nullptr;
+	geometryShader = nullptr;
+	computeShader = nullptr;
 }
 
 // Release resources (if used).

@@ -11,6 +11,7 @@ App1::App1()
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
 {
+
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
@@ -18,15 +19,15 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 
 
-	shader = make_shared<LightShader>(LightShader(renderer->getDevice(), textureMgr, hwnd));
+	shader = make_shared<LightShader>(renderer->getDevice(), textureMgr, hwnd);
 
 
 	// Create Mesh object and shader object
-	plane = make_shared<PlaneMesh>(PlaneMesh(renderer->getDevice(), renderer->getDeviceContext()));
+	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext());
 		
 
 	// Create meshes material
-	planeMaterial = make_shared<Material>(Material(shader, { 1.f, 1.f, 1.f, 1.f }, 32.f, L"brick"));
+	planeMaterial = make_shared<Material>(shader, XMFLOAT4(1.f, 1.f, 1.f, 1.f), 32.f, L"brick");
 
 	// Initialise light
 	light = make_shared<Light>(Light());
@@ -37,6 +38,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light->setInnerCone(lightInnerCone);
 	light->setAmbientColour(ambientLight.x, ambientLight.y, ambientLight.z, ambientLight.w);
 	light->setAttenuation(lightAttenuation.x, lightAttenuation.y, lightAttenuation.z, lightAttenuation.w);
+
+	camera->setPosition(35.f, 20.f, 0.f);
 }
 
 
@@ -106,6 +109,65 @@ void App1::gui()
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+
+	XMFLOAT3 camPos = camera->getPosition();
+	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
+	ImGui::Text(outputPos.c_str());
+	//Light Data
+	if (ImGui::CollapsingHeader("Light")) {
+
+		//Ambient Light Settings
+		if (ImGui::TreeNode("Ambient Light")) {
+			if (ImGui::ColorPicker4("Ambient Light: ", &ambientLight.x)) {
+				light->setAmbientColour(ambientLight);
+			}
+			ImGui::TreePop();
+		}
+
+		//Light Settings
+		if (ImGui::TreeNode("Light Values"))
+		{
+			//Lights Diffuse Colour setting
+			if (ImGui::TreeNode("Light Diffuse Colour")) {
+				if (ImGui::ColorPicker4("Light Diffuse Colour: ", &lightDiffuseColour.x)) {
+					light->setDiffuseColour(lightDiffuseColour);
+				}
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Attenuation")) {
+				if (ImGui::DragFloat("Constant ", &lightAttenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {
+					light->setAttenuation(lightAttenuation);
+				}
+				if (ImGui::DragFloat("Linear ", &lightAttenuation.y, 0.01f, 0.01f, 0.15f,"%.2f")) {
+					light->setAttenuation(lightAttenuation);
+				}
+				if (ImGui::DragFloat("Quadratic ", &lightAttenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {
+					light->setAttenuation(lightAttenuation);
+				}
+				if (ImGui::DragFloat("Falloff ", &lightAttenuation.w, 0.1f, 0.01f, 1000.f,"%.2f")) {
+					light->setAttenuation(lightAttenuation);
+				}
+				ImGui::TreePop();
+			}
+
+			//Lights Transform Settings
+			if (ImGui::DragFloat3("Light Position: ", &lightPosition.x, 1.f)) {
+				light->setPosition(lightPosition);
+			}
+			if (ImGui::DragFloat3("Light Direction: ", &lightDirection.x, 1.f)) {
+				light->setDirection(lightDirection);
+			}
+			if (ImGui::SliderAngle("Inner Cone: ", &lightInnerCone, 0.f, 90.f)) {
+				light->setInnerCone(lightInnerCone);
+			}
+			if (ImGui::SliderAngle("Outer Cone: ", &lightOuterCone, 0.f, 90.f)) {
+				light->setOuterCone(lightOuterCone);
+			}
+			ImGui::TreePop();
+		}
+		
+	}
 
 	// Render UI
 	ImGui::Render();

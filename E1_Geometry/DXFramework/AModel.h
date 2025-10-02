@@ -8,6 +8,9 @@
 * \author Paul Robertson
 */
 
+#ifndef _AMODEL_H_
+#define _AMODEL_H_
+
 #pragma once
 
 #include "BaseMesh.h"
@@ -42,3 +45,5 @@ protected:
 	std::vector<VertexType> vertices;
 	std::vector<unsigned long> indices;
 };
+
+#endif
