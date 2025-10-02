@@ -33,6 +33,7 @@
 #include "Light.h"
 #include "RenderTexture.h"
 #include "ShadowMap.h"
+#include "Material.h"
 
 // imGUI includes
 //#include "imgui.h"

@@ -124,6 +124,12 @@
       <TargetMachine>MachineX64</TargetMachine>
       <OutputFile>$(SolutionDir)lib\debug\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
+    <PostBuildEvent>
+      <Command>REM Delete all headers in include folder and replace with those in framework
+if exist "$(SolutionDir)Include\*.h" del /Q "$(SolutionDir)Include\*.h"
+
+xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -192,6 +198,7 @@
     <ClInclude Include="FPCamera.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="OrthoMesh.h" />
     <ClInclude Include="PlaneMesh.h" />
@@ -225,6 +232,7 @@
     <ClCompile Include="FPCamera.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoMesh.cpp" />
     <ClCompile Include="PlaneMesh.cpp" />

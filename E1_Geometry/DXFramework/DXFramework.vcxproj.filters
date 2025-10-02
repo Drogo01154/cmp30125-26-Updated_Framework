@@ -138,6 +138,9 @@
     <ClInclude Include="..\include\imgui\imstb_truetype.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseMesh.cpp">
@@ -232,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

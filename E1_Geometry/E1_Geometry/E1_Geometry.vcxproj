@@ -165,6 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
+    <ClCompile Include="LightShader.cpp" />
     <ClCompile Include="staticMeshComponent.h" />
     <FxCompile Include="colourGradient_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -173,18 +174,17 @@
       <FileType>Document</FileType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <ClCompile Include="ColourQuad.cpp" />
-    <ClCompile Include="ColourQuad.h" />
     <ClCompile Include="ColourShader.cpp" />
     <ClCompile Include="ColourShaderGradient.cpp" />
-    <ClCompile Include="ColourTriangle.cpp" />
     <ClCompile Include="Main.cpp" />
+    <FxCompile Include="shaders\light_ps.hlsl" />
+    <FxCompile Include="shaders\light_vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
-    <ClInclude Include="ColourTriangle.h" />
+    <ClInclude Include="LightShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">

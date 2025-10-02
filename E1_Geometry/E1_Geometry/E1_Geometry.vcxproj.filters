@@ -16,6 +16,18 @@
     <Filter Include="Header Files\Components">
       <UniqueIdentifier>{89f81120-59be-451c-838e-51953e8afd84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{1c05ad22-aff5-4bac-a5ba-f3a05366e03e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{4e3de12a-27aa-4c05-912e-8a65defb49a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Colour Shaders">
+      <UniqueIdentifier>{efb85c8f-a1de-44c1-8911-4e8223243e7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\light shaders">
+      <UniqueIdentifier>{2013a94e-6741-4ab3-bb93-9ef502b0a76c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -24,51 +36,51 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ColourShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ColourTriangle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ColourQuad.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ColourQuad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ColourShaderGradient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="staticMeshComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
+    <ClCompile Include="LightShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourShaderGradient.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ColourShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourShaderGradient.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
     <ClInclude Include="App1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ColourShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ColourTriangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ColourShaderGradient.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="LightShader.h">
+      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Colour Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\colour_vs.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="colourGradient_vs.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Colour Shaders</Filter>
     </FxCompile>
     <FxCompile Include="colourGradient_ps.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Colour Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="colourGradient_vs.hlsl">
+      <Filter>Resource Files\Colour Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\light_ps.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\light_vs.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

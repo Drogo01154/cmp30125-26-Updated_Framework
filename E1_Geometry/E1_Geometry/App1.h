@@ -4,10 +4,7 @@
 
 // Includes
 #include "../DXFramework/DXF.h"
-#include "ColourShader.h"
-#include "ColourShaderGradient.h"
-#include "ColourTriangle.h"
-#include "ColourQuad.h"
+#include "LightShader.h"
 
 class App1 : public BaseApplication
 {
@@ -24,10 +21,13 @@ protected:
 	void gui();
 
 private:
-	ColourShader* colourShader;
-	ColourGradientShader* colourGradientShader;
-	ColourTriangle* triangleMesh;
-	ColourQuad* quadMesh;
+	LightShader* shader;
+	PlaneMesh* plane;
+	Light* light;
+	Material* planeMaterial;
+	XMFLOAT3 lightPosition = { 0.0f, 0.0f, 0.0f };
+	XMFLOAT4 ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
+	XMFLOAT4 lightDiffuseColour = { 1.0f, 1.0f, 1.0f, 1.f };
 };
 
 #endif

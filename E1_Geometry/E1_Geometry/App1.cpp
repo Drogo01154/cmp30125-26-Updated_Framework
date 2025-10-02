@@ -4,9 +4,9 @@
 
 App1::App1()
 {
-	triangleMesh = nullptr;
-	quadMesh = nullptr;
-	colourShader = nullptr;
+	plane = nullptr;
+	shader = nullptr;
+	planeMaterial = nullptr;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -14,12 +14,23 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
-	// Create Mesh object
-	triangleMesh = new ColourTriangle(renderer->getDevice(), renderer->getDeviceContext());
-	quadMesh = new ColourQuad(renderer->getDevice(), renderer->getDeviceContext());
+	// Load texture
+	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 
-	colourGradientShader = new ColourGradientShader(renderer->getDevice(), hwnd);
-	colourShader = new ColourShader(renderer->getDevice(), hwnd);
+	// Create Mesh object and shader object
+	plane = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+
+	// Create meshes material
+	planeMaterial = new Material()
+
+	//mesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
+	shader = new LightShader(renderer->getDevice(), textureMgr, hwnd);
+
+	// Initialise light
+	light = new Light();
+	light->setDiffuseColour(lightDiffuseColour.x, lightDiffuseColour.y, lightDiffuseColour.z, lightDiffuseColour.w);
+	light->setPosition(lightPosition.x, lightPosition.y, lightPosition.z);
+	light->setAmbientColour(ambientLight.x, ambientLight.y, ambientLight.z, ambientLight.w);
 	
 
 }
@@ -31,27 +42,16 @@ App1::~App1()
 	BaseApplication::~BaseApplication();
 
 	// Release the Direct3D object.
-	if (triangleMesh)
+	if (plane)
 	{
-		delete triangleMesh;
-		triangleMesh = 0;
+		delete plane;
+		plane = 0;
 	}
 
-	if (quadMesh) {
-		delete quadMesh;
-		quadMesh = 0;
-	}
-
-	if (colourShader)
+	if (shader)
 	{
-		delete colourShader;
-		colourShader = 0;
-	}
-
-	if (colourGradientShader)
-	{
-		delete colourGradientShader;
-		colourGradientShader = 0;
+		delete shader;
+		shader = 0;
 	}
 }
 
@@ -78,6 +78,8 @@ bool App1::frame()
 
 bool App1::render()
 {
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+
 	// Clear the scene. (default blue colour)
 	renderer->beginScene(0.39f, 0.58f, 0.92f, 1.0f);
 
@@ -85,32 +87,19 @@ bool App1::render()
 	camera->update();
 
 	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
-	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX viewMatrix = camera->getViewMatrix();
-	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
+	worldMatrix = renderer->getWorldMatrix();
+	viewMatrix = camera->getViewMatrix();
+	projectionMatrix = renderer->getProjectionMatrix();
 
-	// Send geometry data (from mesh), send shader pararmeters and render geometry with set shaders
-	
-	triangleMesh->sendData(renderer->getDeviceContext());
-	
-	colourShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix);
-	colourShader->render(renderer->getDeviceContext(), triangleMesh->getIndexCount());
-
-	worldMatrix *= XMMATRIX(
-	1.0f, 0.0f, 0.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 0.0f,
-	0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, -1.0f, 0.0f, 1.0f
-	);
-
-	quadMesh->sendData(renderer->getDeviceContext());
-	colourGradientShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix);
-	colourGradientShader->render(renderer->getDeviceContext(), quadMesh->getIndexCount());
+	// Send geometry data, set shader parameters, render object with shader
+	plane->sendData(renderer->getDeviceContext());
+	shader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, , light);
+	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
 
 	// Render GUI
 	gui();
 
-	// Present the rendered scene to the screen.
+	// Swap the buffers
 	renderer->endScene();
 
 	return true;

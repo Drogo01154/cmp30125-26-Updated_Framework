@@ -1,6 +1,6 @@
 // Light class
 // Holds data that represents a single light source
-#include "light.h"
+#include "Light.h"
 
 // create view matrix, based on light position and lookat. Used for shadow mapping.
 void Light::generateViewMatrix()
@@ -42,9 +42,24 @@ void Light::generateOrthoMatrix(float screenWidth, float screenHeight, float nea
 	orthoMatrix = XMMatrixOrthographicLH(screenWidth, screenHeight, near, far);
 }
 
+void Light::setAttenuation(float constant, float linear, float quadratic, float cutoffDistance)
+{
+	attenuation = XMFLOAT4(constant, linear, quadratic, cutoffDistance);
+}
+
+void Light::setAttenuation(const XMFLOAT4& attenuation)
+{
+	this->attenuation = attenuation;
+}
+
 void Light::setAmbientColour(float red, float green, float blue, float alpha)
 {
 	ambientColour = XMFLOAT4(red, green, blue, alpha);
+}
+
+void Light::setAmbientColour(const XMFLOAT4& ambientColour)
+{
+	this->ambientColour = ambientColour;
 }
 
 void Light::setDiffuseColour(float red, float green, float blue, float alpha)
@@ -52,19 +67,19 @@ void Light::setDiffuseColour(float red, float green, float blue, float alpha)
 	diffuseColour = XMFLOAT4(red, green, blue, alpha);
 }
 
+void Light::setDiffuseColour(const XMFLOAT4& diffuseColour)
+{
+	this->diffuseColour = diffuseColour;
+}
+
 void Light::setDirection(float x, float y, float z)
 {
 	direction = XMFLOAT3(x, y, z);
 }
 
-void Light::setSpecularColour(float red, float green, float blue, float alpha)
+void Light::setDirection(const XMFLOAT3& direction)
 {
-	specularColour = XMFLOAT4(red, green, blue, alpha);
-}
-
-void Light::setSpecularPower(float power)
-{
-	specularPower = power;
+	this->direction = direction;
 }
 
 void Light::setPosition(float x, float y, float z)
@@ -72,37 +87,41 @@ void Light::setPosition(float x, float y, float z)
 	position = XMVectorSet(x, y, z, 1.0f);
 }
 
-XMFLOAT4 Light::getAmbientColour()
+void Light::setPosition(const XMFLOAT3& position)
+{
+	this->position = XMVectorSet(position.x, position.y, position.z, 1.0f);
+}
+
+void Light::setPosition(const XMVECTOR& position)
+{
+	this->position = position;
+}
+
+const XMFLOAT4& Light::getAttenuation() const
+{
+	return attenuation;
+}
+
+const XMFLOAT4& Light::getAmbientColour() const
 {
 	return ambientColour;
 }
 
-XMFLOAT4 Light::getDiffuseColour()
+const XMFLOAT4& Light::getDiffuseColour() const
 {
 	return diffuseColour;
 }
 
 
-XMFLOAT3 Light::getDirection()
+const XMFLOAT3& Light::getDirection() const
 {
 	return direction;
 }
 
-XMFLOAT4 Light::getSpecularColour()
-{
-	return specularColour;
-}
 
-
-float Light::getSpecularPower()
+XMFLOAT3 Light::getPosition() const
 {
-	return specularPower;
-}
-
-XMFLOAT3 Light::getPosition()
-{
-	XMFLOAT3 temp(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
-	return temp;
+	return XMFLOAT3(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
 }
 
 void Light::setLookAt(float x, float y, float z)
@@ -110,17 +129,41 @@ void Light::setLookAt(float x, float y, float z)
 	lookAt = XMVectorSet(x, y, z, 1.0f);
 }
 
-XMMATRIX Light::getViewMatrix()
+void Light::setLookAt(const XMFLOAT3& lookAt)
+{
+	this->lookAt = XMVectorSet(lookAt.x, lookAt.y, lookAt.z, 1.0f);
+}
+
+void Light::setInnerCone(float innerCone)
+{
+	this->innercone = innercone;
+}
+void Light::setOuterCone(float outerCone)
+{
+	this->outercone = outercone;
+}
+
+const XMMATRIX& Light::getViewMatrix() const
 {
 	return viewMatrix;
 }
 
-XMMATRIX Light::getProjectionMatrix()
+const XMMATRIX& Light::getProjectionMatrix() const
 {
 	return projectionMatrix;
 }
 
-XMMATRIX Light::getOrthoMatrix()
+const XMMATRIX& Light::getOrthoMatrix() const
 {
 	return orthoMatrix;
+}
+
+float Light::getInnerCone() const
+{
+	return innercone;
+}
+
+float Light::getOuterCone() const
+{
+	return outercone;
 }
