@@ -125,10 +125,13 @@
       <OutputFile>$(SolutionDir)lib\debug\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>REM Delete all headers in include folder and replace with those in framework
+      <Command>
+REM Delete all headers in include folder
 if exist "$(SolutionDir)Include\*.h" del /Q "$(SolutionDir)Include\*.h"
 
-xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"</Command>
+REM Copy all headers from DXFramework to Include
+xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

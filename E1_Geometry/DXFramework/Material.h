@@ -1,6 +1,13 @@
 #pragma once
-#include <memory>
+#ifndef _MATERIAL_H_
+#define _MATERIAL_H_
+
+//#include <memory>
 #include <directxmath.h>
+#include <string>
+#include <memory>
+
+using namespace DirectX;
 
 enum shaderTypes {
 	lightShader
@@ -13,7 +20,6 @@ class Material
 public:
 	//Update later when add shader manager??
 	Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f), float specularPower = 32.0f, const std::wstring& texture = L"");
-
 
 	//Getters 
 	const XMFLOAT4& getSpecularColour() const;		///< Get specular colour, returns float4
@@ -34,3 +40,5 @@ private:
 	std::wstring texture;
 	std::weak_ptr<BaseShader> shader;
 };
+
+#endif

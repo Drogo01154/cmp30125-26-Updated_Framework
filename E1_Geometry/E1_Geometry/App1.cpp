@@ -84,8 +84,7 @@ bool App1::render()
 
 	// Send geometry data, set shader parameters, render object with shader
 	plane->sendData(renderer->getDeviceContext());
-	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, )
-	shader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, , light);
+	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, planeMaterial, light);
 	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
 
 	// Render GUI

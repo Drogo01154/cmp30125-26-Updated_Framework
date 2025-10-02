@@ -31,9 +31,9 @@
 
 // Include additional rendering headers
 #include "Light.h"
+#include "Material.h"
 #include "RenderTexture.h"
 #include "ShadowMap.h"
-#include "Material.h"
 
 // imGUI includes
 //#include "imgui.h"
