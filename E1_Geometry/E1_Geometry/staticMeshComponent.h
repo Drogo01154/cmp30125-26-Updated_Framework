@@ -37,6 +37,5 @@ struct StaticMeshComponent {
 	}
 	std::unique_ptr<std::string> modelName = nullptr;
 	meshTypes meshType;
-	std::shared_ptr<BaseShader> AppliedShader = nullptr;
-	std::unique_ptr<BaseMesh> mesh = nullptr;
+	std::weak_ptr<Material> material;
 };

@@ -10,7 +10,7 @@ class Material
 {
 public:
 	//Update later when add shader manager??
-	Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = { 1.f, 1.f, 1.f, 1.f }, float specularPower = 32.0f, const std::string& texture = "");
+	Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = { 1.f, 1.f, 1.f, 1.f }, float specularPower = 32.0f, const std::wstring& texture = L"");
 
 
 	//Getters 

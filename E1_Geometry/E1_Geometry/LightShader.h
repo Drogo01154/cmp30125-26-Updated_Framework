@@ -17,15 +17,15 @@ class LightShader : public BaseShader
 private:
 	struct LightBufferType
 	{
-		XMFLOAT4 attenuation; // 16
-		XMFLOAT3 direction; // 12
-		XMFLOAT3 positon; // 12
-		
-		float innerCone; // 4
-		float outerCone; // 4
+		XMFLOAT4 attenuation;	// 16
+		XMFLOAT4 ambient;		// 16
+		XMFLOAT4 diffuse;		// 16
 
-		XMFLOAT4 ambient; // 16
-		XMFLOAT4 diffuse; // 16
+		XMFLOAT3 direction;		// 12
+		float innerCone;		// 4
+
+		XMFLOAT3 position;		// 12
+		float outerCone;		// 4
 	};
 
 public:

@@ -17,14 +17,16 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Load texture
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 
+	//mesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
+	shader = new LightShader(renderer->getDevice(), textureMgr, hwnd);
+
 	// Create Mesh object and shader object
 	plane = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
 
 	// Create meshes material
-	planeMaterial = new Material()
+	planeMaterial = new Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = { 1.f, 1.f, 1.f, 1.f }, float specularPower = 32.0f, const std::string & texture = "");
 
-	//mesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
-	shader = new LightShader(renderer->getDevice(), textureMgr, hwnd);
+	
 
 	// Initialise light
 	light = new Light();

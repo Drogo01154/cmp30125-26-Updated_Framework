@@ -1,6 +1,6 @@
 #include "Material.h"
 
-Material::Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour = { 1.f, 1.f, 1.f, 1.f }, float specularPower = 32.0f, const std::string& texture = "") : shader(shader), specularColour(specularColour), specularPower(specularPower), texture(texture)
+Material::Material(std::weak_ptr<BaseShader> shader, XMFLOAT4 specularColour, float specularPower, const std::wstring& texture) : shader(shader), specularColour(specularColour), specularPower(specularPower), texture(texture)
 {
 
 }

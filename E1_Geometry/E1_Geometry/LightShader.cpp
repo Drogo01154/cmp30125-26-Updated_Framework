@@ -110,7 +110,7 @@ void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const 
 	lightPtr = (LightBufferType*)mappedResource.pData;
 
 	lightPtr->attenuation = light->getAttenuation();
-	lightPtr->positon = light->getPosition();
+	lightPtr->position = light->getPosition();
 	lightPtr->direction = light->getDirection();
 	
 	lightPtr->innerCone = light->getInnerCone();

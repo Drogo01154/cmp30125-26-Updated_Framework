@@ -177,8 +177,12 @@
     <ClCompile Include="ColourShader.cpp" />
     <ClCompile Include="ColourShaderGradient.cpp" />
     <ClCompile Include="Main.cpp" />
-    <FxCompile Include="shaders\light_ps.hlsl" />
-    <FxCompile Include="shaders\light_vs.hlsl" />
+    <FxCompile Include="shaders\light_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\light_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h" />
