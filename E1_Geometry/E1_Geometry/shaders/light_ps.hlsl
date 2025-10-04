@@ -61,17 +61,21 @@ float4 main(InputType input) : SV_TARGET
                 spotFactor = (cosTheta - cosLightOuterCone) / (cosLightInnerCone - cosLightOuterCone);
             }
         }
-        
+        //Calculate Lambert factor
+        float lambert = saturate(dot(input.normal, pixelToLightVec));
         //Calculate Light's Distance Falloff factor
-        float attenuation = 1 / (lightAttenuation[0] + (lightAttenuation[1] * distance)) + (lightAttenuation[2] * (distance * distance));
+        float attenuation =  1 / (lightAttenuation[0] + (lightAttenuation[1] * distance) + (lightAttenuation[2] * (distance * distance)));
         
-        finalColour = lightAmbient + diffuse * attenuation * spotFactor;
+        finalColour = lightAmbient + diffuse * lambert * spotFactor * attenuation;
     }
     else
     {
         //Make only lit by ambient
-        finalColour = diffuse.rgb * lightAmbient.rgb;
+        finalColour = lightAmbient.rgb;
     }
+    
+    //Clamp value
+    finalColour = saturate(finalColour);
     
     //Return Final Color
     return float4(finalColour, diffuse.a);
