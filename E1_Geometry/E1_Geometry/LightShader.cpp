@@ -1,6 +1,6 @@
 #include "LightShader.h"
 
-LightShader::LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd) : BaseShader(device, hwnd), textureManager(textureManager)
+LightShader::LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd, int maxLights) : BaseShader(device, hwnd), textureManager(textureManager), maxLights(maxLights)
 {
 	initShader(L"light_vs.cso", L"light_ps.cso");
 }
@@ -36,6 +36,19 @@ LightShader::~LightShader()
 		lightBuffer = 0;
 	}
 
+	// Relase the Light Shader Resource View
+	if (lightBufferSRV)
+	{
+		lightBufferSRV->Release();
+		lightBufferSRV = 0;
+	}
+
+	if (worldDataBuffer)
+	{
+		worldDataBuffer->Release();
+		worldDataBuffer = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }
@@ -43,12 +56,24 @@ LightShader::~LightShader()
 void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC worldDataBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
+
+	// Setup the description of the dynamic world data constant buffer that is used in the pixel shader. 
+	worldDataBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	worldDataBufferDesc.ByteWidth = sizeof(WorldBufferType);
+	worldDataBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	worldDataBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	worldDataBufferDesc.MiscFlags = 0;
+	worldDataBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&worldDataBufferDesc, NULL, &worldDataBuffer);
+	
+
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -72,24 +97,34 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	renderer->CreateSamplerState(&samplerDesc, &sampleState);
 
 	// Setup light buffer
-	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	// Setup the description of the light dynamic structured buffer that is in the pixel shader.
 	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
-	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	lightBufferDesc.MiscFlags = 0;
-	lightBufferDesc.StructureByteStride = 0;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * maxLights;
+	lightBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	lightBufferDesc.CPUAccessFlags = (lightBufferDesc.Usage == D3D11_USAGE_DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
+	lightBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	lightBufferDesc.StructureByteStride = sizeof(LightBufferType);
 	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
 
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Required for structured buffers
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = maxLights;
+
+	renderer->CreateShaderResourceView(lightBuffer, &srvDesc, &lightBufferSRV);
+
 }
-void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, std::shared_ptr<Material> material, std::shared_ptr <Light> light)
+void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, std::shared_ptr<Material> material, std::vector<std::shared_ptr<Light>>& lights, const XMFLOAT4& ambient)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
 
 	XMMATRIX tworld, tview, tproj;
+
+	int numLights = lights.size();
 
 	// Transpose the matrices to prepare them for the shader.
 	tworld = XMMatrixTranspose(worldMatrix);
@@ -104,21 +139,47 @@ void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const 
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 
 	//Additional
+	// Send world data to pixel shader
+	WorldBufferType* worldPtr;
+	deviceContext->Map(worldDataBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	worldPtr = (WorldBufferType*)mappedResource.pData;
+
+	worldPtr->ambientLight = ambient;
+	worldPtr->numberOfLights = numLights;
+	worldPtr->specular = material->getSpecularColour();
+	worldPtr->specularPower = material->getSpecularPower();
+
+	deviceContext->Unmap(worldDataBuffer, 0);
+	deviceContext->PSSetConstantBuffers(0, 1, &worldDataBuffer);
+	
 	// Send light data to pixel shader
 	LightBufferType* lightPtr;
 	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	
 	lightPtr = (LightBufferType*)mappedResource.pData;
 
-	lightPtr->attenuation = light->getAttenuation();
-	lightPtr->position = light->getPosition();
-	lightPtr->direction = light->getDirection();
-	lightPtr->innerCone = std::cos(light->getInnerCone());
-	lightPtr->outerCone = std::cos(light->getOuterCone());
-	lightPtr->ambient = light->getAmbientColour();
-	lightPtr->diffuse = light->getDiffuseColour();
+	for (int i = 0; i < maxLights; i++)
+	{
+		if (i < lights.size())
+		{
+			lightPtr[i].attenuation = lights[i]->getAttenuation();
+			lightPtr[i].position = lights[i]->getPosition();
+			lightPtr[i].direction = lights[i]->getDirection();
+			lightPtr[i].innerCone = lights[i]->getInnerCone();
+			lightPtr[i].outerCone = lights[i]->getOuterCone();
+			lightPtr[i].diffuse = lights[i]->getDiffuseColour();
+			lightPtr[i].type = static_cast<int>(lights[i]->getType());
+		}
+		else {
+			// Zero out the remaining lights
+			lightPtr[i] = {};
+		}
+		
+		
+	}
 
 	deviceContext->Unmap(lightBuffer, 0);
-	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
+	deviceContext->PSSetShaderResources(1, 1, &lightBufferSRV);
 
 	// Set shader texture resource in the pixel shader.
 

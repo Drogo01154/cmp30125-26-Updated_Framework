@@ -2,6 +2,17 @@
 // Holds data that represents a single light source
 #include "Light.h"
 
+//Constructor
+
+Light::Light(lightTypes type) : 
+	attenuation(0.05f, 0.01f, 0.001f, 100.f),
+	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
+	direction(0.0f, -1.f, 0.0f),
+	innerCone(XMConvertToRadians(20.f)),
+	position(XMVectorSet(35.0f, 30.0f, 25.0f, 1.0f)),
+	outerCone(XMConvertToRadians(40.f)),
+	type(type) {}
+
 // create view matrix, based on light position and lookat. Used for shadow mapping.
 void Light::generateViewMatrix()
 {
@@ -42,6 +53,11 @@ void Light::generateOrthoMatrix(float screenWidth, float screenHeight, float nea
 	orthoMatrix = XMMatrixOrthographicLH(screenWidth, screenHeight, near, far);
 }
 
+void Light::setType(lightTypes type) 
+{
+	this->type = type;
+}
+
 void Light::setAttenuation(float constant, float linear, float quadratic, float cutoffDistance)
 {
 	attenuation = XMFLOAT4(constant, linear, quadratic, cutoffDistance);
@@ -50,16 +66,6 @@ void Light::setAttenuation(float constant, float linear, float quadratic, float 
 void Light::setAttenuation(const XMFLOAT4& attenuation)
 {
 	this->attenuation = attenuation;
-}
-
-void Light::setAmbientColour(float red, float green, float blue, float alpha)
-{
-	ambientColour = XMFLOAT4(red, green, blue, alpha);
-}
-
-void Light::setAmbientColour(const XMFLOAT4& ambientColour)
-{
-	this->ambientColour = ambientColour;
 }
 
 void Light::setDiffuseColour(float red, float green, float blue, float alpha)
@@ -97,14 +103,30 @@ void Light::setPosition(const XMVECTOR& position)
 	this->position = position;
 }
 
+void Light::setInnerCone(float innerCone)
+{
+	this->innerCone = innerCone;
+}
+void Light::setOuterCone(float outerCone)
+{
+	this->outerCone = outerCone;
+}
+
+void Light::setLookAt(float x, float y, float z)
+{
+	lookAt = XMVectorSet(x, y, z, 1.0f);
+}
+
+void Light::setLookAt(const XMFLOAT3& lookAt)
+{
+	this->lookAt = XMVectorSet(lookAt.x, lookAt.y, lookAt.z, 1.0f);
+}
+
+
+
 const XMFLOAT4& Light::getAttenuation() const
 {
 	return attenuation;
-}
-
-const XMFLOAT4& Light::getAmbientColour() const
-{
-	return ambientColour;
 }
 
 const XMFLOAT4& Light::getDiffuseColour() const
@@ -124,23 +146,19 @@ XMFLOAT3 Light::getPosition() const
 	return XMFLOAT3(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
 }
 
-void Light::setLookAt(float x, float y, float z)
+float Light::getInnerCone() const
 {
-	lookAt = XMVectorSet(x, y, z, 1.0f);
+	return innerCone;
 }
 
-void Light::setLookAt(const XMFLOAT3& lookAt)
+float Light::getOuterCone() const
 {
-	this->lookAt = XMVectorSet(lookAt.x, lookAt.y, lookAt.z, 1.0f);
+	return outerCone;
 }
 
-void Light::setInnerCone(float innerCone)
+lightTypes Light::getType() const
 {
-	this->innerCone = innerCone;
-}
-void Light::setOuterCone(float outerCone)
-{
-	this->outerCone = outerCone;
+	return type;
 }
 
 const XMMATRIX& Light::getViewMatrix() const
@@ -158,12 +176,3 @@ const XMMATRIX& Light::getOrthoMatrix() const
 	return orthoMatrix;
 }
 
-float Light::getInnerCone() const
-{
-	return innerCone;
-}
-
-float Light::getOuterCone() const
-{
-	return outerCone;
-}

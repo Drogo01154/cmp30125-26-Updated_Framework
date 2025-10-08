@@ -26,13 +26,7 @@ private:
 	std::shared_ptr<PlaneMesh> plane;
 
 	std::shared_ptr<Material> planeMaterial;
-	XMFLOAT3 lightPosition = { 35.0f, 30.0f, 25.0f };
-	XMFLOAT3 lightDirection = { 0.0f, -1.f, 0.0f };
-	XMFLOAT4 lightAttenuation = { 0.05f, 0.01f, 0.001f, 100.f };
-	float lightInnerCone = XMConvertToRadians(20.f);
-	float lightOuterCone = XMConvertToRadians(40.f);
 	XMFLOAT4 ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
-	XMFLOAT4 lightDiffuseColour = { 1.0f, 1.0f, 1.0f, 1.f };
 };
 
 #endif
