@@ -54,6 +54,9 @@ public:
 	void setDiffuseColour(const XMFLOAT4& diffuseColour);						///< Set diffuse colour RGBA						
 	void setDirection(float x, float y, float z);								///< Set light direction (for directional and spot lights)
 	void setDirection(const XMFLOAT3& direction);								///< Set light direction (for directional and spot lights)
+	void setDirection(const XMVECTOR& direction);								///< Set light direction (for directional and spot lights)
+	void setDirectionEuler(float x, float y, float z);							///< Set light direction as euler angles (for directional and spot lights)
+	void setDirectionEuler(const XMFLOAT3& rotation);							///< Set light direction as euler angles (for directional and spot lights)
 	void setPosition(float x, float y, float z);								///< Set light position (for point and spot lights)
 	void setPosition(const XMFLOAT3& position);									///< Set light Position (for point and spot lights)
 	void setPosition(const XMVECTOR& position);									///< set light position (for point and spot lights)
@@ -65,7 +68,8 @@ public:
 	// Getters
 	const XMFLOAT4& getAttenuation() const;			///< Get attenuation, returns float4
 	const XMFLOAT4& getDiffuseColour() const;		///< Get diffuse colour, returns float4
-	const XMFLOAT3& getDirection() const;			///< Get light direction, returns float3
+	XMFLOAT3 getDirection() const;			///< Get light direction, returns float3
+	XMFLOAT3 getDirectionEuler() const;		///< Get light direction as Euler angles, returns float3
 	XMFLOAT3 getPosition() const;					///< Get light position, returns XMVECTOR
 	const XMMATRIX& getViewMatrix() const;			///< Get light view matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getProjectionMatrix() const;	///< Get light projection matrix for shadow mapping, returns XMMATRIX
@@ -78,7 +82,7 @@ public:
 protected:
 	XMFLOAT4 attenuation; // Constant, Linear, Quadratic, Cutoff Distance
 	XMFLOAT4 diffuseColour;
-	XMFLOAT3 direction;
+	XMVECTOR direction;
 	float innerCone;
 	XMVECTOR position;
 	XMMATRIX viewMatrix;

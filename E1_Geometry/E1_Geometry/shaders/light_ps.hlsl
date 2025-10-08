@@ -4,7 +4,7 @@
 Texture2D texture0 : register(t0);
 SamplerState sampler0 : register(s0);
 
-cbuffer WorldDataBuffer : register(b1)
+cbuffer WorldDataBuffer : register(b0)
 {
     float4 ambientLight;    // 16
     float4 specularColour;  // 16
@@ -33,7 +33,7 @@ struct InputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
-    float3 viewVector : TEXCOORD1;
+    float3 viewVector : TEXCOORD2;
 };
 
 float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector, float4
@@ -91,12 +91,12 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
             
             float4 specular = calcSpecular(pixelToLightVec, normal, viewVector, specularColour, specularPower);
             
-            if (lightType == 2) // Point Light
+            if (lightType == 1) // Point Light
             {
                 returnValue = (intensity + specular) * attenuation;
 
             }
-            else if (lightType == 3) //  Spot Light
+            else if (lightType == 2) //  Spot Light
             {
                 //Calculate cos of angle between inverted light direction and pixel to light
                 float cosTheta = dot(pixelToLightVec, normalize(-lights[lightNumber].lightDirection));
@@ -136,7 +136,6 @@ float4 main(InputType input) : SV_Target
     for (int i = 0; i < numberOfLights; i++)
     {
         finalColour += saturate(calculateLight(i, input.worldPosition, input.normal, input.viewVector));
-
     }
     
     // Multiply by diffuse texture and clamp to 0..1

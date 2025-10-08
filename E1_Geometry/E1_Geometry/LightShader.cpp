@@ -49,6 +49,12 @@ LightShader::~LightShader()
 		worldDataBuffer = 0;
 	}
 
+	if (cameraBuffer)
+	{
+		cameraBuffer->Release();
+		cameraBuffer = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }
@@ -59,10 +65,25 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	D3D11_BUFFER_DESC worldDataBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_BUFFER_DESC cameraBufferDesc;
 
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
+
+
+	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
+	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
+	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cameraBufferDesc.MiscFlags = 0;
+	cameraBufferDesc.StructureByteStride = 0;
+	HRESULT result = renderer->CreateBuffer(&cameraBufferDesc, NULL, &cameraBuffer);
+	if (FAILED(result))
+	{
+		assert(false);
+	}
 
 	// Setup the description of the dynamic world data constant buffer that is used in the pixel shader. 
 	worldDataBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -116,7 +137,15 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	renderer->CreateShaderResourceView(lightBuffer, &srvDesc, &lightBufferSRV);
 
 }
-void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, std::shared_ptr<Material> material, std::vector<std::shared_ptr<Light>>& lights, const XMFLOAT4& ambient)
+void LightShader::setShaderParamaters(
+	ID3D11DeviceContext* deviceContext, 
+	const XMMATRIX& worldMatrix, 
+	const XMMATRIX& viewMatrix, 
+	const XMMATRIX& projectionMatrix, 
+	std::shared_ptr<Material> material, 
+	std::vector<std::shared_ptr<Light>>& lights, 
+	const XMFLOAT4& ambient, 
+	Camera* camera)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -139,11 +168,18 @@ void LightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext, const 
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
 
 	//Additional
+	// Send camera data to vertex shader
+	CameraBufferType* cameraPtr;
+	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	cameraPtr = (CameraBufferType*)mappedResource.pData;
+	cameraPtr->cameraPosition = camera->getPosition();
+	deviceContext->Unmap(cameraBuffer, 0);
+	deviceContext->VSSetConstantBuffers(1, 1, &cameraBuffer);
+
 	// Send world data to pixel shader
 	WorldBufferType* worldPtr;
 	deviceContext->Map(worldDataBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	worldPtr = (WorldBufferType*)mappedResource.pData;
-
 	worldPtr->ambientLight = ambient;
 	worldPtr->numberOfLights = numLights;
 	worldPtr->specular = material->getSpecularColour();

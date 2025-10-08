@@ -202,6 +202,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MathHelpers.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="OrthoMesh.h" />
     <ClInclude Include="PlaneMesh.h" />

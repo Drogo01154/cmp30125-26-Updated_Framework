@@ -188,6 +188,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
+    <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="LightShader.h" />
   </ItemGroup>
   <ItemGroup>

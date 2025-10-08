@@ -1,12 +1,18 @@
 // Lab1.cpp
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
+#include "ImGuiHelpers.h"
 
 App1::App1()
 {
 	plane = nullptr;
 	shader = nullptr;
 	planeMaterial = nullptr;
+	UIConstants::InitialiseSystem();
+
+	ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
+	selectedLight = -1;
+
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -19,7 +25,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 
 
-	shader = make_shared<LightShader>(renderer->getDevice(), textureMgr, hwnd);
+	shader = make_shared<LightShader>(renderer->getDevice(), textureMgr, hwnd, 6);
 
 
 	// Create Mesh object and shader object
@@ -30,14 +36,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	planeMaterial = make_shared<Material>(shader, XMFLOAT4(1.f, 1.f, 1.f, 1.f), 32.f, L"brick");
 
 	// Initialise light
-	light = make_shared<Light>(Light());
-	light->setDiffuseColour(lightDiffuseColour.x, lightDiffuseColour.y, lightDiffuseColour.z, lightDiffuseColour.w);
-	light->setPosition(lightPosition.x, lightPosition.y, lightPosition.z);
-	light->setDirection(lightDirection.x, lightDirection.y, lightDirection.z);
-	light->setOuterCone(lightOuterCone);
-	light->setInnerCone(lightInnerCone);
-	light->setAmbientColour(ambientLight.x, ambientLight.y, ambientLight.z, ambientLight.w);
-	light->setAttenuation(lightAttenuation.x, lightAttenuation.y, lightAttenuation.z, lightAttenuation.w);
+	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
+	selectedLight = 0;
 
 	camera->setPosition(35.f, 20.f, 0.f);
 }
@@ -52,6 +52,8 @@ App1::~App1()
 
 bool App1::frame()
 {
+	UIConstants::UpdateConstants(sWidth, sHeight);
+
 	bool result;
 
 	result = BaseApplication::frame();
@@ -87,7 +89,7 @@ bool App1::render()
 
 	// Send geometry data, set shader parameters, render object with shader
 	plane->sendData(renderer->getDeviceContext());
-	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, planeMaterial, light);
+	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, planeMaterial, lights, ambientLight, camera);
 	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
 
 	// Render GUI
@@ -114,59 +116,92 @@ void App1::gui()
 	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
 	ImGui::Text(outputPos.c_str());
 	//Light Data
-	if (ImGui::CollapsingHeader("Light")) {
+
+
+	if (ImGui::CollapsingHeader("Lighting")) {
 
 		//Ambient Light Settings
 		if (ImGui::TreeNode("Ambient Light")) {
-			if (ImGui::ColorPicker4("Ambient Light: ", &ambientLight.x)) {
-				light->setAmbientColour(ambientLight);
-			}
+			if (ImGui::ColorPicker4("Ambient Light: ", &ambientLight.x)) {}
 			ImGui::TreePop();
 		}
 
-		//Light Settings
-		if (ImGui::TreeNode("Light Values"))
-		{
-			//Lights Diffuse Colour setting
-			if (ImGui::TreeNode("Light Diffuse Colour")) {
-				if (ImGui::ColorPicker4("Light Diffuse Colour: ", &lightDiffuseColour.x)) {
-					light->setDiffuseColour(lightDiffuseColour);
-				}
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Attenuation")) {
-				if (ImGui::DragFloat("Constant ", &lightAttenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {
-					light->setAttenuation(lightAttenuation);
-				}
-				if (ImGui::DragFloat("Linear ", &lightAttenuation.y, 0.01f, 0.01f, 0.15f,"%.2f")) {
-					light->setAttenuation(lightAttenuation);
-				}
-				if (ImGui::DragFloat("Quadratic ", &lightAttenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {
-					light->setAttenuation(lightAttenuation);
-				}
-				if (ImGui::DragFloat("Falloff ", &lightAttenuation.w, 0.1f, 0.01f, 1000.f,"%.2f")) {
-					light->setAttenuation(lightAttenuation);
-				}
-				ImGui::TreePop();
-			}
-
-			//Lights Transform Settings
-			if (ImGui::DragFloat3("Light Position: ", &lightPosition.x, 1.f)) {
-				light->setPosition(lightPosition);
-			}
-			if (ImGui::DragFloat3("Light Direction: ", &lightDirection.x, 1.f)) {
-				light->setDirection(lightDirection);
-			}
-			if (ImGui::SliderAngle("Inner Cone: ", &lightInnerCone, 0.f, 90.f)) {
-				light->setInnerCone(lightInnerCone);
-			}
-			if (ImGui::SliderAngle("Outer Cone: ", &lightOuterCone, 0.f, 90.f)) {
-				light->setOuterCone(lightOuterCone);
-			}
-			ImGui::TreePop();
-		}
 		
+		if (lights.size() > 0) {
+
+			
+			uint32_t test = selectedLight;
+			uint32_t test2 = lights.size();
+
+			if ((lights.size() > 1) && ArrowIterators("Selected_Light", selectedLight, (uint32_t)lights.size())) {}
+
+			if (selectedLight >= 0) {
+				std::shared_ptr<Light> light = lights[selectedLight];
+
+				//Light Settings
+				if (ImGui::TreeNode("Light Values"))
+				{
+					lightTypes type = light->getType();
+
+					ImGui::Text(("Light Type: " + LightTypeStrings[type]).c_str());
+
+					//Lights Diffuse Colour setting
+					XMFLOAT4 diffuse = light->getDiffuseColour();
+					if (ImGui::TreeNode("Light Diffuse Colour")) {
+						if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuse.x)) {
+							light->setDiffuseColour(diffuse);
+						}
+						ImGui::TreePop();
+					}
+
+					if (type != lightTypes::directional)
+					{
+						if (ImGui::TreeNode("Attenuation")) {
+							XMFLOAT4 attenuation = light->getAttenuation();
+							if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {
+								light->setAttenuation(attenuation);
+							}
+							if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) {
+								light->setAttenuation(attenuation);
+							}
+							if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {
+								light->setAttenuation(attenuation);
+							}
+							if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) {
+								light->setAttenuation(attenuation);
+							}
+							ImGui::TreePop();
+						}
+
+						//Lights Transform Settings
+						XMFLOAT3 position = light->getPosition();
+						if (ImGui::DragFloat3("Light Position: ", &position.x, 1.f)) {
+							light->setPosition(position);
+						}
+					}
+
+					if (type != lightTypes::point) {
+						XMFLOAT3 direction = light->getDirection();
+						if (ImGui::DragFloat3("Light Direction: ", &direction.x, 0.01f)) {
+							light->setDirection(direction);
+						}
+					}
+
+					if (type == lightTypes::spot) {
+						float innerCone = light->getInnerCone();
+						if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {
+							light->setInnerCone(innerCone);
+						}
+						float outerCone = light->getOuterCone();
+
+						if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {
+							light->setOuterCone(outerCone);
+						}
+					}
+					ImGui::TreePop();
+				}
+			}
+		}
 	}
 
 	// Render UI

@@ -7,7 +7,7 @@
 Light::Light(lightTypes type) : 
 	attenuation(0.05f, 0.01f, 0.001f, 100.f),
 	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
-	direction(0.0f, -1.f, 0.0f),
+	direction(XMVectorSet(0.0f, -1.f, 0.0f, 1.0f)),
 	innerCone(XMConvertToRadians(20.f)),
 	position(XMVectorSet(35.0f, 30.0f, 25.0f, 1.0f)),
 	outerCone(XMConvertToRadians(40.f)),
@@ -16,18 +16,20 @@ Light::Light(lightTypes type) :
 // create view matrix, based on light position and lookat. Used for shadow mapping.
 void Light::generateViewMatrix()
 {
+	XMFLOAT3 directionFloat = XMFLOAT3(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
+
 	// default up vector
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	if (direction.y == 1 || (direction.x == 0 && direction.z == 0))
+	if (directionFloat.y == 1 || (directionFloat.x == 0 && directionFloat.z == 0))
 	{
 		up = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0);
 	}
-	else if (direction.y == -1 || (direction.x == 0 && direction.z == 0))
+	else if (directionFloat.y == -1 || (directionFloat.x == 0 && directionFloat.z == 0))
 	{
 		up = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0);
 	}
 	//XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	XMVECTOR dir = XMVectorSet(direction.x, direction.y, direction.z, 1.0f);
+	XMVECTOR dir = XMVectorSet(directionFloat.x, directionFloat.y, directionFloat.z, 1.0f);
 	XMVECTOR right = XMVector3Cross(dir, up);
 	up = XMVector3Cross(right, dir);
 	// Create the view matrix from the three vectors.
@@ -80,12 +82,40 @@ void Light::setDiffuseColour(const XMFLOAT4& diffuseColour)
 
 void Light::setDirection(float x, float y, float z)
 {
-	direction = XMFLOAT3(x, y, z);
+	direction = XMVectorSet(x, y, z, 1.0f);
+	direction = XMVector3Normalize(direction);
+}
+
+void Light::setDirection(const XMVECTOR& direction)
+{
+	this->direction = direction;
+	this->direction = XMVector3Normalize(this->direction);
 }
 
 void Light::setDirection(const XMFLOAT3& direction)
 {
-	this->direction = direction;
+	this->direction = XMVectorSet(direction.x, direction.y, direction.z, 1.0f);
+	this->direction = XMVector3Normalize(this->direction);
+}
+
+void Light::setDirectionEuler(float x, float y, float z)
+{
+
+}
+void Light::setDirectionEuler(const XMFLOAT3& rotation)
+{
+	const float& pitch = rotation.x;
+	const float& yaw = rotation.y;
+	const float& roll = rotation.z;
+
+
+	XMFLOAT3 directionFloat;
+
+	float x = sinf(rotation.y) * cosf(rotation.x);
+	float y = -sinf(rotation.x);
+	float z = cosf(rotation.y) * cosf(rotation.x);
+
+	direction =  XMVector3Normalize(XMVectorSet(x, y, z, 1.0f));
 }
 
 void Light::setPosition(float x, float y, float z)
@@ -135,9 +165,20 @@ const XMFLOAT4& Light::getDiffuseColour() const
 }
 
 
-const XMFLOAT3& Light::getDirection() const
+XMFLOAT3 Light::getDirection() const
 {
-	return direction;
+	return XMFLOAT3(XMVectorGetX(direction), XMVectorGetY(direction), XMVectorGetZ(direction));
+}
+
+XMFLOAT3 Light::getDirectionEuler() const
+{
+	XMFLOAT3 angles;
+	XMFLOAT3 directionFloat = getDirection();
+	angles.y = atan2f(directionFloat.x, directionFloat.z); // Yaw
+	angles.x = asinf(-directionFloat.y);				   // Pitch
+	angles.z = 0.0f;									   // Roll - none for direction
+
+	return angles;
 }
 
 

@@ -28,6 +28,9 @@
     <Filter Include="Resource Files\light shaders">
       <UniqueIdentifier>{2013a94e-6741-4ab3-bb93-9ef502b0a76c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{a95bc871-9fc7-46c4-911b-2542350eafbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="LightShader.h">
       <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiHelpers.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

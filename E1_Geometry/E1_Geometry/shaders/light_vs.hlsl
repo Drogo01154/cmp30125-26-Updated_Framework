@@ -26,7 +26,7 @@ struct OutputType
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
     float3 worldPosition : TEXCOORD1;
-    float3 viewVector : TEXCOORD1;
+    float3 viewVector : TEXCOORD2;
 };
 
 OutputType main(InputType input)

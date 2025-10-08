@@ -22,11 +22,21 @@ protected:
 
 private:
 	std::shared_ptr<LightShader> shader;
-	std::shared_ptr<Light> light;
+	std::vector<std::shared_ptr<Light>> lights;
+	uint32_t currentLight;
+
 	std::shared_ptr<PlaneMesh> plane;
 
 	std::shared_ptr<Material> planeMaterial;
-	XMFLOAT4 ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
+	XMFLOAT4 ambientLight;
+	uint32_t selectedLight;
+
+	std::string LightTypeStrings[3] =
+	{
+		"directional",
+		"point",
+		"spot"
+	};
 };
 
 #endif

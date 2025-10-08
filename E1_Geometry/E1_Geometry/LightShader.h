@@ -15,6 +15,13 @@ using namespace DirectX;
 class LightShader : public BaseShader
 {
 private:
+
+	struct CameraBufferType
+	{
+		XMFLOAT3 cameraPosition;
+		float padding;
+	};
+
 	struct WorldBufferType
 	{
 		XMFLOAT4 ambientLight; // 16
@@ -42,13 +49,22 @@ public:
 	LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd, int maxLights);
 	~LightShader();
 
-	void setShaderParamaters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, std::shared_ptr<Material> material, std::vector<std::shared_ptr<Light>>& light, const XMFLOAT4& ambient);
+	void setShaderParamaters(
+		ID3D11DeviceContext* deviceContext, 
+		const XMMATRIX& world, 
+		const XMMATRIX& view, 
+		const XMMATRIX& projection, 
+		std::shared_ptr<Material> material, 
+		std::vector<std::shared_ptr<Light>>& light, 
+		const XMFLOAT4& ambient,
+		Camera* camera);
 
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
 
 private:
 	TextureManager* textureManager;
+	ID3D11Buffer* cameraBuffer;
 	ID3D11Buffer* matrixBuffer;
 	ID3D11SamplerState* sampleState;
 	ID3D11Buffer* lightBuffer;

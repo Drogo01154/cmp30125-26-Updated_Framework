@@ -34,6 +34,9 @@
     <Filter Include="Header Files\Scene">
       <UniqueIdentifier>{2ea50d53-a2b9-4ad9-8bb3-8ea45d20f72a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{18727cf6-9bf4-4a7c-96fb-7cc11f2ab0a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -140,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="MathHelpers.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

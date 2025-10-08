@@ -1,5 +1,6 @@
 // texture shader.cpp
 #include "colourshader.h"
+#include "Camera.h"
 
 
 ColourShader::ColourShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
@@ -51,7 +52,7 @@ void ColourShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilena
 }
 
 
-void ColourShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix)
+void ColourShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
