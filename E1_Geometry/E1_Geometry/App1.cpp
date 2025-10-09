@@ -2,6 +2,7 @@
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
 #include "ImGuiHelpers.h"
+#include "MathHelpers.h"
 
 App1::App1()
 {
@@ -12,7 +13,6 @@ App1::App1()
 
 	ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
 	selectedLight = -1;
-
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -24,20 +24,30 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Load texture
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 
-
-	shader = make_shared<LightShader>(renderer->getDevice(), textureMgr, hwnd, 6);
+	// Load light shader
+	shader = make_shared<LightShader>(renderer->getDevice(), textureMgr, hwnd);
 
 
 	// Create Mesh object and shader object
 	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext());
+
+	sphere = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
 		
+	planeMaterial = make_shared<Material>();
 
-	// Create meshes material
-	planeMaterial = make_shared<Material>(shader, XMFLOAT4(1.f, 1.f, 1.f, 1.f), 32.f, L"brick");
+	// Create planes material
+	planeMaterial->shader = shader;
+	planeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	planeMaterial->specularPower = 32.f;
+	planeMaterial->texture = L"brick";
 
-	// Initialise light
-	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
-	selectedLight = 0;
+	sphereMaterial = make_shared<Material>();
+
+	// Create sphere material
+	sphereMaterial->shader = shader;
+	sphereMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	sphereMaterial->specularPower = 32.f;
+	sphereMaterial->texture = L"brick";
 
 	camera->setPosition(35.f, 20.f, 0.f);
 }
@@ -86,11 +96,22 @@ bool App1::render()
 	worldMatrix = renderer->getWorldMatrix();
 	viewMatrix = camera->getViewMatrix();
 	projectionMatrix = renderer->getProjectionMatrix();
-
 	// Send geometry data, set shader parameters, render object with shader
 	plane->sendData(renderer->getDeviceContext());
 	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, planeMaterial, lights, ambientLight, camera);
 	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
+
+	XMMATRIX translation = XMMatrixTranslation(50.f, 25.f, 50.f);
+	XMMATRIX scale = XMMatrixScaling(25.f, 25.f, 25.f);
+
+	worldMatrix *= scale;
+	worldMatrix *= translation;
+	
+
+	sphere->sendData(renderer->getDeviceContext());
+	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, sphereMaterial, lights, ambientLight, camera);
+	shader->render(renderer->getDeviceContext(), sphere->getIndexCount());
+
 
 	// Render GUI
 	gui();
@@ -115,9 +136,30 @@ void App1::gui()
 	XMFLOAT3 camPos = camera->getPosition();
 	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
 	ImGui::Text(outputPos.c_str());
+
+	if (ImGui::CollapsingHeader("Materials")) {
+
+		if (ImGui::TreeNode("Plane Material")) {
+			if (ImGui::TreeNode("Specular Colour: ## 0")) {
+				if (ImGui::ColorPicker4("Ambient Light: ", &planeMaterial->specularColour.x)) {}
+				ImGui::TreePop();
+			}
+			if (ImGui::SliderFloat("Specular Power: ## 0", &planeMaterial->specularPower, 1.f, 1000.f)) {}
+			ImGui::TreePop();
+		}
+		
+		if (ImGui::TreeNode("Sphere Material")) {
+			if (ImGui::TreeNode("Specular Colour: ## 1")) {
+				if (ImGui::ColorPicker4("Ambient Light: ", &sphereMaterial->specularColour.x)) {}
+				ImGui::TreePop();
+			}
+			if (ImGui::SliderFloat("Specular Power: ## 1", &sphereMaterial->specularPower, 1.f, 1000.f)) {}
+			ImGui::TreePop();
+		}
+	}
+
+
 	//Light Data
-
-
 	if (ImGui::CollapsingHeader("Lighting")) {
 
 		//Ambient Light Settings
@@ -126,12 +168,19 @@ void App1::gui()
 			ImGui::TreePop();
 		}
 
+		if (ImGui::TreeNode("Spawn Lights")) {
+			for (int i = 0; i < 3; i++) {
+				if (ImGui::Button(LightTypeStrings[i].c_str()))
+				{
+					lights.emplace_back(make_shared<Light>(Light(static_cast<lightTypes>(i))));
+					selectedLight = lights.size() - 1;
+				}
+				if (i < 2) { ImGui::SameLine(); }
+			}
+			ImGui::TreePop();
+		}
 		
-		if (lights.size() > 0) {
-
-			
-			uint32_t test = selectedLight;
-			uint32_t test2 = lights.size();
+		if ((lights.size() > 0) && ImGui::TreeNode("Existing Lights: ")) {
 
 			if ((lights.size() > 1) && ArrowIterators("Selected_Light", selectedLight, (uint32_t)lights.size())) {}
 
@@ -139,68 +188,71 @@ void App1::gui()
 				std::shared_ptr<Light> light = lights[selectedLight];
 
 				//Light Settings
-				if (ImGui::TreeNode("Light Values"))
+				lightTypes type = light->getType();
+
+				ImGui::Text(("Light Type: " + LightTypeStrings[type]).c_str());
+
+				//Lights Diffuse Colour setting
+				XMFLOAT4 diffuse = light->getDiffuseColour();
+				if (ImGui::TreeNode("Light Diffuse Colour")) {
+					if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuse.x)) {
+						light->setDiffuseColour(diffuse);
+					}
+					ImGui::TreePop();
+				}
+
+				if (type != lightTypes::directional)
 				{
-					lightTypes type = light->getType();
-
-					ImGui::Text(("Light Type: " + LightTypeStrings[type]).c_str());
-
-					//Lights Diffuse Colour setting
-					XMFLOAT4 diffuse = light->getDiffuseColour();
-					if (ImGui::TreeNode("Light Diffuse Colour")) {
-						if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuse.x)) {
-							light->setDiffuseColour(diffuse);
+					if (ImGui::TreeNode("Attenuation")) {
+						XMFLOAT4 attenuation = light->getAttenuation();
+						if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {
+							light->setAttenuation(attenuation);
+						}
+						if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) {
+							light->setAttenuation(attenuation);
+						}
+						if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {
+							light->setAttenuation(attenuation);
+						}
+						if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) {
+							light->setAttenuation(attenuation);
 						}
 						ImGui::TreePop();
 					}
 
-					if (type != lightTypes::directional)
-					{
-						if (ImGui::TreeNode("Attenuation")) {
-							XMFLOAT4 attenuation = light->getAttenuation();
-							if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {
-								light->setAttenuation(attenuation);
-							}
-							if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) {
-								light->setAttenuation(attenuation);
-							}
-							if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {
-								light->setAttenuation(attenuation);
-							}
-							if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) {
-								light->setAttenuation(attenuation);
-							}
-							ImGui::TreePop();
-						}
-
-						//Lights Transform Settings
-						XMFLOAT3 position = light->getPosition();
-						if (ImGui::DragFloat3("Light Position: ", &position.x, 1.f)) {
-							light->setPosition(position);
-						}
+					//Lights Transform Settings
+					XMFLOAT3 position = light->getPosition();
+					if (ImGui::DragFloat3("Light Position: ", &position.x, 1.f)) {
+						light->setPosition(position);
 					}
+				}
 
-					if (type != lightTypes::point) {
-						XMFLOAT3 direction = light->getDirection();
-						if (ImGui::DragFloat3("Light Direction: ", &direction.x, 0.01f)) {
-							light->setDirection(direction);
-						}
+				if (type != lightTypes::point) {
+					XMFLOAT3 direction = ToDegrees(light->getDirectionEuler());
+					if (ImGui::DragFloat3("Light Direction Euler: ", &direction.x, 0.1f)) {
+						light->setDirectionEuler(ToRadians(direction));
 					}
+				}
 
-					if (type == lightTypes::spot) {
-						float innerCone = light->getInnerCone();
-						if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {
-							light->setInnerCone(innerCone);
-						}
-						float outerCone = light->getOuterCone();
-
-						if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {
-							light->setOuterCone(outerCone);
-						}
+				if (type == lightTypes::spot) {
+					float innerCone = XMConvertToDegrees(light->getInnerCone());
+					if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {
+						light->setInnerCone(XMConvertToRadians(innerCone));
 					}
-					ImGui::TreePop();
+					float outerCone = XMConvertToDegrees(light->getOuterCone());
+
+					if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {
+						light->setOuterCone(XMConvertToRadians(outerCone));
+					}
+				}
+
+				if (ImGui::Button("Delete Light")) {
+					lights.erase(lights.begin() + selectedLight);
+					--selectedLight;
+					if (selectedLight < 0) { selectedLight = lights.size() - 1; }
 				}
 			}
+			ImGui::TreePop();
 		}
 	}
 

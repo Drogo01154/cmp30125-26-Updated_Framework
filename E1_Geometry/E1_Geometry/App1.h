@@ -26,8 +26,10 @@ private:
 	uint32_t currentLight;
 
 	std::shared_ptr<PlaneMesh> plane;
+	std::shared_ptr<SphereMesh> sphere;
 
 	std::shared_ptr<Material> planeMaterial;
+	std::shared_ptr<Material> sphereMaterial;
 	XMFLOAT4 ambientLight;
 	uint32_t selectedLight;
 

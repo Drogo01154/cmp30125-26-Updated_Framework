@@ -83,39 +83,33 @@ void Light::setDiffuseColour(const XMFLOAT4& diffuseColour)
 void Light::setDirection(float x, float y, float z)
 {
 	direction = XMVectorSet(x, y, z, 1.0f);
-	direction = XMVector3Normalize(direction);
 }
 
 void Light::setDirection(const XMVECTOR& direction)
 {
 	this->direction = direction;
-	this->direction = XMVector3Normalize(this->direction);
 }
 
 void Light::setDirection(const XMFLOAT3& direction)
 {
 	this->direction = XMVectorSet(direction.x, direction.y, direction.z, 1.0f);
-	this->direction = XMVector3Normalize(this->direction);
 }
 
 void Light::setDirectionEuler(float x, float y, float z)
 {
+	float dirX = sinf(y) * cosf(x);
+	float dirY = -sinf(x);
+	float dirZ = cosf(y) * cosf(x);
 
+	direction = XMVectorSet(dirX, dirY, dirZ, 1.0f);
 }
 void Light::setDirectionEuler(const XMFLOAT3& rotation)
 {
-	const float& pitch = rotation.x;
-	const float& yaw = rotation.y;
-	const float& roll = rotation.z;
-
-
-	XMFLOAT3 directionFloat;
-
 	float x = sinf(rotation.y) * cosf(rotation.x);
 	float y = -sinf(rotation.x);
 	float z = cosf(rotation.y) * cosf(rotation.x);
 
-	direction =  XMVector3Normalize(XMVectorSet(x, y, z, 1.0f));
+	direction =  XMVectorSet(x, y, z, 1.0f);
 }
 
 void Light::setPosition(float x, float y, float z)
@@ -170,6 +164,17 @@ XMFLOAT3 Light::getDirection() const
 	return XMFLOAT3(XMVectorGetX(direction), XMVectorGetY(direction), XMVectorGetZ(direction));
 }
 
+XMVECTOR Light::getDirectionVector() const
+{
+	return direction;
+}
+
+XMFLOAT3 Light::getDirectionNormalized() const
+{
+	XMVECTOR normalizedDirection = XMVector3Normalize(direction);
+	return XMFLOAT3(XMVectorGetX(normalizedDirection), XMVectorGetY(normalizedDirection), XMVectorGetZ(normalizedDirection));
+}
+
 XMFLOAT3 Light::getDirectionEuler() const
 {
 	XMFLOAT3 angles;
@@ -185,6 +190,11 @@ XMFLOAT3 Light::getDirectionEuler() const
 XMFLOAT3 Light::getPosition() const
 {
 	return XMFLOAT3(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
+}
+
+XMVECTOR Light::getPositionVector() const
+{
+	return position;
 }
 
 float Light::getInnerCone() const

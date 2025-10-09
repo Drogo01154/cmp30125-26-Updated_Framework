@@ -1,7 +1,11 @@
 #include "LightShader.h"
 
-LightShader::LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd, int maxLights) : BaseShader(device, hwnd), textureManager(textureManager), maxLights(maxLights)
+LightShader::LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd) : BaseShader(device, hwnd), textureManager(textureManager)
 {
+	lightBufferSRV = nullptr;
+	lightBuffer = nullptr;
+	maxLights = 10;
+
 	initShader(L"light_vs.cso", L"light_ps.cso");
 }
 
@@ -59,12 +63,48 @@ LightShader::~LightShader()
 	BaseShader::~BaseShader();
 }
 
+void LightShader::setLightBuffer() {
+	// Relase the Light Shader Resource View
+	if (lightBufferSRV)
+	{
+		lightBufferSRV->Release();
+		lightBufferSRV = 0;
+	}
+
+	// Release the light constant buffer.
+	if (lightBuffer)
+	{
+		lightBuffer->Release();
+		lightBuffer = 0;
+	}
+
+	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+
+	// Setup light buffer
+	// Setup the description of the light dynamic structured buffer that is in the pixel shader.
+	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * maxLights;
+	lightBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	lightBufferDesc.CPUAccessFlags = (lightBufferDesc.Usage == D3D11_USAGE_DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
+	lightBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	lightBufferDesc.StructureByteStride = sizeof(LightBufferType);
+	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
+
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Required for structured buffers
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = maxLights;
+
+	renderer->CreateShaderResourceView(lightBuffer, &srvDesc, &lightBufferSRV);
+}
+
 void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC worldDataBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
-	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_BUFFER_DESC cameraBufferDesc;
 
 	// Load (+ compile) shader files
@@ -117,25 +157,7 @@ void LightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	renderer->CreateSamplerState(&samplerDesc, &sampleState);
 
-	// Setup light buffer
-	// Setup the description of the light dynamic structured buffer that is in the pixel shader.
-	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * maxLights;
-	lightBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	lightBufferDesc.CPUAccessFlags = (lightBufferDesc.Usage == D3D11_USAGE_DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
-	lightBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	lightBufferDesc.StructureByteStride = sizeof(LightBufferType);
-	renderer->CreateBuffer(&lightBufferDesc, NULL, &lightBuffer);
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Required for structured buffers
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-	srvDesc.Buffer.FirstElement = 0;
-	srvDesc.Buffer.NumElements = maxLights;
-
-	renderer->CreateShaderResourceView(lightBuffer, &srvDesc, &lightBufferSRV);
-
+	setLightBuffer();
 }
 void LightShader::setShaderParamaters(
 	ID3D11DeviceContext* deviceContext, 
@@ -154,6 +176,15 @@ void LightShader::setShaderParamaters(
 	XMMATRIX tworld, tview, tproj;
 
 	int numLights = lights.size();
+
+	if (numLights > maxLights * expandThreshold) {
+		maxLights *= 2;
+		setLightBuffer();
+	}
+	else if ((maxLights > 10) && numLights < maxLights * shrinkThreshold) {
+		maxLights /= 2;
+		setLightBuffer();
+	}
 
 	// Transpose the matrices to prepare them for the shader.
 	tworld = XMMatrixTranspose(worldMatrix);
@@ -182,8 +213,8 @@ void LightShader::setShaderParamaters(
 	worldPtr = (WorldBufferType*)mappedResource.pData;
 	worldPtr->ambientLight = ambient;
 	worldPtr->numberOfLights = numLights;
-	worldPtr->specular = material->getSpecularColour();
-	worldPtr->specularPower = material->getSpecularPower();
+	worldPtr->specular = material->specularColour;
+	worldPtr->specularPower = material->specularPower;
 
 	deviceContext->Unmap(worldDataBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &worldDataBuffer);
@@ -200,7 +231,7 @@ void LightShader::setShaderParamaters(
 		{
 			lightPtr[i].attenuation = lights[i]->getAttenuation();
 			lightPtr[i].position = lights[i]->getPosition();
-			lightPtr[i].direction = lights[i]->getDirection();
+			lightPtr[i].direction = lights[i]->getDirectionNormalized();
 			lightPtr[i].innerCone = lights[i]->getInnerCone();
 			lightPtr[i].outerCone = lights[i]->getOuterCone();
 			lightPtr[i].diffuse = lights[i]->getDiffuseColour();
@@ -219,7 +250,7 @@ void LightShader::setShaderParamaters(
 
 	// Set shader texture resource in the pixel shader.
 
-	ID3D11ShaderResourceView* texturePtr = textureManager->getTexture(material->getTexture());
+	ID3D11ShaderResourceView* texturePtr = textureManager->getTexture(material->texture);
 	deviceContext->PSSetShaderResources(0, 1, &texturePtr);
 	deviceContext->PSSetSamplers(0, 1, &sampleState);
 }

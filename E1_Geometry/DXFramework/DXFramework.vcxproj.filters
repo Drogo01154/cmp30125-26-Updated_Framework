@@ -242,9 +242,6 @@
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Source Files\Scene</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\include\imgui\.editorconfig">

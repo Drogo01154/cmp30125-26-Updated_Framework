@@ -46,7 +46,7 @@ private:
 	};
 
 public:
-	LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd, int maxLights);
+	LightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd);
 	~LightShader();
 
 	void setShaderParamaters(
@@ -62,6 +62,8 @@ public:
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
 
+	void setLightBuffer();
+
 private:
 	TextureManager* textureManager;
 	ID3D11Buffer* cameraBuffer;
@@ -72,5 +74,8 @@ private:
 	ID3D11ShaderResourceView* lightBufferSRV;
 	int numLights;
 	int maxLights;
+
+	static constexpr float expandThreshold = 1.0f;   // 100% of capacity
+	static constexpr float shrinkThreshold = 0.25f;  // 25% of capacity
 };
 

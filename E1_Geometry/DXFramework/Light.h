@@ -68,9 +68,12 @@ public:
 	// Getters
 	const XMFLOAT4& getAttenuation() const;			///< Get attenuation, returns float4
 	const XMFLOAT4& getDiffuseColour() const;		///< Get diffuse colour, returns float4
-	XMFLOAT3 getDirection() const;			///< Get light direction, returns float3
-	XMFLOAT3 getDirectionEuler() const;		///< Get light direction as Euler angles, returns float3
+	XMFLOAT3 getDirection() const;					///< Get light direction, returns float3
+	XMVECTOR getDirectionVector() const;			///< Get light direction vector, returns XMVECTOR
+	XMFLOAT3 getDirectionNormalized() const;		///< Get light direction normalized, returns float3
+	XMFLOAT3 getDirectionEuler() const;				///< Get light direction as Euler angles, returns float3
 	XMFLOAT3 getPosition() const;					///< Get light position, returns XMVECTOR
+	XMVECTOR getPositionVector() const;				///< get light position, returns XMVECTOR
 	const XMMATRIX& getViewMatrix() const;			///< Get light view matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getProjectionMatrix() const;	///< Get light projection matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getOrthoMatrix() const;			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
