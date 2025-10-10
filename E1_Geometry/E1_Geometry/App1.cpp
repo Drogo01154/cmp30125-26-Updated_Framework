@@ -96,10 +96,7 @@ bool App1::render()
 	worldMatrix = renderer->getWorldMatrix();
 	viewMatrix = camera->getViewMatrix();
 	projectionMatrix = renderer->getProjectionMatrix();
-	// Send geometry data, set shader parameters, render object with shader
-	plane->sendData(renderer->getDeviceContext());
-	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, planeMaterial, lights, ambientLight, camera);
-	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
+	
 
 	XMMATRIX translation = XMMatrixTranslation(50.f, 25.f, 50.f);
 	XMMATRIX scale = XMMatrixScaling(25.f, 25.f, 25.f);
@@ -111,6 +108,12 @@ bool App1::render()
 	sphere->sendData(renderer->getDeviceContext());
 	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, sphereMaterial, lights, ambientLight, camera);
 	shader->render(renderer->getDeviceContext(), sphere->getIndexCount());
+
+	worldMatrix = renderer->getWorldMatrix();
+	// Send geometry data, set shader parameters, render object with shader
+	plane->sendData(renderer->getDeviceContext());
+	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, planeMaterial, lights, ambientLight, camera);
+	shader->render(renderer->getDeviceContext(), plane->getIndexCount());
 
 
 	// Render GUI

@@ -4,7 +4,7 @@
 Texture2D texture0 : register(t0);
 SamplerState sampler0 : register(s0);
 
-cbuffer WorldDataBuffer : register(b0)
+cbuffer WorldDataBuffer : register(b0) // 48 bytes
 {
     float4 ambientLight;    // 16
     float4 specularColour;  // 16
@@ -13,7 +13,7 @@ cbuffer WorldDataBuffer : register(b0)
     float2 padding;         // 8
 }
 
-struct Light
+struct Light // 80 bytes
 {
     float4 lightAttenuation;
     float4 lightDiffuse;
@@ -66,9 +66,8 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
         float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
         //Calculate light specular
         float4 specular = calcSpecular(lights[lightNumber].lightDirection, normal, viewVector, specularColour, specularPower);
-        //
-        returnValue = intensity
-        + specular;
+        //Return only intensity and specular
+        returnValue = intensity + specular;
     } 
     else
     {
@@ -94,13 +93,13 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
             if (lightType == 1) // Point Light
             {
                 returnValue = (intensity + specular) * attenuation;
-
             }
             else if (lightType == 2) //  Spot Light
             {
                 //Calculate cos of angle between inverted light direction and pixel to light
                 float cosTheta = dot(pixelToLightVec, normalize(-lights[lightNumber].lightDirection));
-                float spotFactor = spotFactor = saturate((cosTheta - lights[lightNumber].cosLightOuterCone) / (lights[lightNumber].cosLightInnerCone - lights[lightNumber].cosLightOuterCone));
+                //Calculate spot factor multiplie interpolating based on position between inner and outer cone angle
+                float spotFactor = saturate((cosTheta - lights[lightNumber].cosLightOuterCone) / (lights[lightNumber].cosLightInnerCone - lights[lightNumber].cosLightOuterCone));
                 returnValue = (intensity + specular) * attenuation * spotFactor;
             }
         }
