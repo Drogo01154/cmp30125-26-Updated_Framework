@@ -63,7 +63,7 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
     if (lightType == 0) // Directional Light
     {
         //Calculate light intensity muiltiplied by diffuse
-        float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, ligshts[lightNumber].lightDiffuse);
+        float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
         //Calculate light specular
         float4 specular = calcSpecular(lights[lightNumber].lightDirection, normal, viewVector, specularColour, specularPower);
         //Return only intensity and specular
