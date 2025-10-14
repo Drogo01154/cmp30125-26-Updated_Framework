@@ -232,8 +232,8 @@ void LightShader::setShaderParamaters(
 			lightPtr[i].attenuation = lights[i]->getAttenuation();
 			lightPtr[i].position = lights[i]->getPosition();
 			lightPtr[i].direction = lights[i]->getDirectionNormalized();
-			lightPtr[i].innerCone = lights[i]->getInnerCone();
-			lightPtr[i].outerCone = lights[i]->getOuterCone();
+			lightPtr[i].innerCone = cos(lights[i]->getInnerCone());
+			lightPtr[i].outerCone = cos(lights[i]->getOuterCone());
 			lightPtr[i].diffuse = lights[i]->getDiffuseColour();
 			lightPtr[i].type = static_cast<int>(lights[i]->getType());
 		}

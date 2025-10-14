@@ -238,14 +238,14 @@ void App1::gui()
 				}
 
 				if (type == lightTypes::spot) {
-					float innerCone = XMConvertToDegrees(light->getInnerCone());
+					float test = light->getInnerCone();
+					float innerCone = light->getInnerCone();
 					if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {
-						light->setInnerCone(XMConvertToRadians(innerCone));
+						light->setInnerCone(innerCone);
 					}
-					float outerCone = XMConvertToDegrees(light->getOuterCone());
-
+					float outerCone = light->getOuterCone();
 					if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {
-						light->setOuterCone(XMConvertToRadians(outerCone));
+						light->setOuterCone(outerCone);
 					}
 				}
 

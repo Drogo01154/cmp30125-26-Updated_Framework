@@ -63,7 +63,7 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
     if (lightType == 0) // Directional Light
     {
         //Calculate light intensity muiltiplied by diffuse
-        float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
+        float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, ligshts[lightNumber].lightDiffuse);
         //Calculate light specular
         float4 specular = calcSpecular(lights[lightNumber].lightDirection, normal, viewVector, specularColour, specularPower);
         //Return only intensity and specular
@@ -96,11 +96,9 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
             }
             else if (lightType == 2) //  Spot Light
             {
-                //Calculate cos of angle between inverted light direction and pixel to light
                 float cosTheta = dot(pixelToLightVec, normalize(-lights[lightNumber].lightDirection));
-                //Calculate spot factor multiplie interpolating based on position between inner and outer cone angle
                 float spotFactor = saturate((cosTheta - lights[lightNumber].cosLightOuterCone) / (lights[lightNumber].cosLightInnerCone - lights[lightNumber].cosLightOuterCone));
-                returnValue = (intensity + specular) * attenuation * spotFactor;
+                returnValue = (intensity + specular) * attenuation * spotFactor;    
             }
         }
         else
