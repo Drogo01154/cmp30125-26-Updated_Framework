@@ -1,8 +1,7 @@
-#include "entt/entt.hpp"
 #include "../DXFramework/BaseShader.h"
 #include "../DXFramework/DXF.h"
 #include <memory>
-
+/*
 enum meshTypes {
 	AModel,
 	CubeMesh,
@@ -39,3 +38,4 @@ struct StaticMeshComponent {
 	meshTypes meshType;
 	std::weak_ptr<Material> material;
 };
+*/

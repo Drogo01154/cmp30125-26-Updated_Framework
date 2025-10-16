@@ -31,6 +31,9 @@
     <Filter Include="Header Files\Utility">
       <UniqueIdentifier>{a95bc871-9fc7-46c4-911b-2542350eafbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Geometry Shaders">
+      <UniqueIdentifier>{562a2028-c27b-4795-941c-dbe908f59e54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -51,6 +54,9 @@
     <ClCompile Include="ColourShaderGradient.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="ManipulationShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColourShader.h">
@@ -67,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="ImGuiHelpers.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ManipulationShader.h">
+      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +96,12 @@
     </FxCompile>
     <FxCompile Include="shaders\light_vs.hlsl">
       <Filter>Resource Files\light shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\manipulation_ps.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\manipulation_vs.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -30,8 +30,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	// Create Mesh object and shader object
 	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext());
-
-	sphere = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
 		
 	planeMaterial = make_shared<Material>();
 
@@ -103,11 +101,6 @@ bool App1::render()
 
 	worldMatrix *= scale;
 	worldMatrix *= translation;
-	
-
-	sphere->sendData(renderer->getDeviceContext());
-	shader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, sphereMaterial, lights, ambientLight, camera);
-	shader->render(renderer->getDeviceContext(), sphere->getIndexCount());
 
 	worldMatrix = renderer->getWorldMatrix();
 	// Send geometry data, set shader parameters, render object with shader

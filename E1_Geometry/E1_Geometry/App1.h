@@ -23,10 +23,8 @@ protected:
 private:
 	std::shared_ptr<LightShader> shader;
 	std::vector<std::shared_ptr<Light>> lights;
-	uint32_t currentLight;
 
 	std::shared_ptr<PlaneMesh> plane;
-	std::shared_ptr<SphereMesh> sphere;
 
 	std::shared_ptr<Material> planeMaterial;
 	std::shared_ptr<Material> sphereMaterial;
