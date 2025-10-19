@@ -36,8 +36,7 @@ struct InputType
     float3 viewVector : TEXCOORD2;
 };
 
-float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector, float4
-specularColour, float specularPower)
+float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector)
 {
     // blinn-phong specular calculation
     float3 halfway = normalize(lightDirection + viewVector);
@@ -54,7 +53,7 @@ float4 calculateLightingIntensity(float3 lightDirection, float3 normal, float4 l
     return colour;
 }
 
-float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, float3 viewVector)
+float4 calculateLight(float4 diffuse, int lightNumber, float3 pixelPosition, float3 normal, float3 viewVector)
 {
     int lightType = lights[lightNumber].type;
     
@@ -65,9 +64,9 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
         //Calculate light intensity muiltiplied by diffuse
         float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
         //Calculate light specular
-        float4 specular = calcSpecular(lights[lightNumber].lightDirection, normal, viewVector, specularColour, specularPower);
+        float4 specular = calcSpecular(lights[lightNumber].lightDirection, normal, viewVector);
         //Return only intensity and specular
-        returnValue = intensity + specular;
+        returnValue = intensity * diffuse + specular;
     } 
     else
     {
@@ -80,15 +79,15 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
         //If within light range
         if (distance <= lights[lightNumber].lightAttenuation[3])
         {
-             //Normalize pixel to light to unit vector
+            //Normalize pixel to light to unit vector
             pixelToLightVec /= distance;
             
              //Calculate Light's Distance Falloff factor
             float attenuation = 1 / (lights[lightNumber].lightAttenuation[0] + (lights[lightNumber].lightAttenuation[1] * distance) + (lights[lightNumber].lightAttenuation[2] * (distance * distance)));
             
-            float4 intensity = calculateLightingIntensity(pixelToLightVec, normal, lights[lightNumber].lightDiffuse);
+            float4 intensity = calculateLightingIntensity(pixelToLightVec, normal, lights[lightNumber].lightDiffuse) * diffuse;
             
-            float4 specular = calcSpecular(pixelToLightVec, normal, viewVector, specularColour, specularPower);
+            float4 specular = calcSpecular(pixelToLightVec, normal, viewVector);
             
             if (lightType == 1) // Point Light
             {
@@ -98,7 +97,7 @@ float4 calculateLight(int lightNumber, float3 pixelPosition, float3 normal, floa
             {
                 float cosTheta = dot(pixelToLightVec, normalize(-lights[lightNumber].lightDirection));
                 float spotFactor = saturate((cosTheta - lights[lightNumber].cosLightOuterCone) / (lights[lightNumber].cosLightInnerCone - lights[lightNumber].cosLightOuterCone));
-                returnValue = (intensity + specular) * attenuation * spotFactor;    
+                returnValue = (intensity + specular) * attenuation * spotFactor;
             }
         }
         else
@@ -114,13 +113,13 @@ float4 main(InputType input) : SV_Target
     // Get diffuse Colour
     float4 diffuse = texture0.Sample(sampler0, input.tex);
     
-    float4 finalColour = ambientLight;
+    float4 finalColour = ambientLight * diffuse;
     
     for (int i = 0; i < numberOfLights; i++)
     {
-        finalColour += saturate(calculateLight(i, input.worldPosition, input.normal, input.viewVector));
+        finalColour += calculateLight(diffuse, i, input.worldPosition, input.normal, input.viewVector);
     }
     
     // Multiply by diffuse texture and clamp to 0..1
-    return saturate(finalColour * diffuse);
+    return saturate(finalColour);
 }
