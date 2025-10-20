@@ -141,9 +141,6 @@
     <ClInclude Include="..\include\imgui\imstb_truetype.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="MathHelpers.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>

@@ -48,7 +48,6 @@ void ColourShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilena
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	renderer->CreateBuffer(&matrixBufferDesc, NULL, &matrixBuffer);
-
 }
 
 

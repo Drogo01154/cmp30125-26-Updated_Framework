@@ -10,7 +10,8 @@
 using namespace DirectX;
 
 enum shaderTypes {
-	lightShader
+	light,
+	manipulation
 };
 
 class BaseShader;

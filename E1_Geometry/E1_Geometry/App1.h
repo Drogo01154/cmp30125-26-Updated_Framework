@@ -5,6 +5,7 @@
 // Includes
 #include "../DXFramework/DXF.h"
 #include "LightShader.h"
+#include "ManipulationShader.h"
 
 class App1 : public BaseApplication
 {
@@ -21,16 +22,22 @@ protected:
 	void gui();
 
 private:
-	std::shared_ptr<LightShader> shader;
+	std::shared_ptr<ManipulationShader> manipulationShader;
+
 	std::vector<std::shared_ptr<Light>> lights;
 
 	std::shared_ptr<PlaneMesh> plane;
 	std::shared_ptr<SphereMesh> sphere;
 
 	std::shared_ptr<Material> planeMaterial;
-	std::shared_ptr<Material> sphereMaterial;
 	XMFLOAT4 ambientLight;
 	uint32_t selectedLight;
+
+	float totalTime;
+	float speed;
+	float amplitude;
+	float frequency;
+	
 
 	std::string LightTypeStrings[3] =
 	{

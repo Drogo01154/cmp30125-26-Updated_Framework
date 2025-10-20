@@ -77,6 +77,9 @@
     <ClInclude Include="ManipulationShader.h">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="..\DXFramework\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">
