@@ -165,6 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
+    <ClCompile Include="HeightMapShader.cpp" />
     <ClCompile Include="LightShader.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
     <ClCompile Include="staticMeshComponent.h" />
@@ -180,6 +181,12 @@
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <FxCompile Include="shaders\heightMap_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\heightMap_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\light_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -198,6 +205,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
+    <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="LightShader.h" />
     <ClInclude Include="ManipulationShader.h" />

@@ -39,9 +39,6 @@
     <ClCompile Include="App1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="staticMeshComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
@@ -55,6 +52,12 @@
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="ManipulationShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,6 +83,9 @@
     <ClInclude Include="..\DXFramework\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HeightMapShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">
@@ -104,6 +110,12 @@
       <Filter>Resource Files\Geometry Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\manipulation_vs.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\heightMap_ps.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\heightMap_vs.hlsl">
       <Filter>Resource Files\Geometry Shaders</Filter>
     </FxCompile>
   </ItemGroup>

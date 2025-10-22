@@ -7,16 +7,13 @@
 App1::App1()
 {
 	plane = nullptr;
-	manipulationShader = nullptr;
+	heightMapShader = nullptr;
 	planeMaterial = nullptr;
 	UIConstants::InitialiseSystem();
 
 	ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
 	selectedLight = -1;
-	totalTime = 0.f;
-	speed = 3.0f;
-	amplitude = 0.5f;
-	frequency = 2.0f;
+	heightMultiplier = 20;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -27,18 +24,18 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	// Load texture
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
+	textureMgr->loadTexture(L"height", L"res/height.png");
 
-	manipulationShader = std::make_shared<ManipulationShader>(renderer->getDevice(), hwnd);
+	heightMapShader = std::make_shared<HeightMapShader>(renderer->getDevice(), hwnd);
 
 
 	// Create Mesh object and shader object
 	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), 200);
-	sphere = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
 
 	planeMaterial = make_shared<Material>();
 
 	// Create planes material
-	planeMaterial->shader = manipulationShader;
+	planeMaterial->shader = heightMapShader;
 	planeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	planeMaterial->specularPower = 32.f;
 	planeMaterial->texture = L"brick";
@@ -107,13 +104,11 @@ bool App1::render()
 
 	worldMatrix = renderer->getWorldMatrix();
 
-	totalTime += timer->getTime();
-
 	// Send geometry data, set shader parameters, render object with shader
 	plane->sendData(renderer->getDeviceContext());
 	
-	manipulationShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), lights[0].get(), totalTime, speed, amplitude, frequency);
-	manipulationShader->render(renderer->getDeviceContext(), plane->getIndexCount());
+	heightMapShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), textureMgr->getTexture(L"height"), lights[0].get(), heightMultiplier);
+	heightMapShader->render(renderer->getDeviceContext(), plane->getIndexCount());
 
 
 	// Render GUI
@@ -134,16 +129,14 @@ void App1::gui()
 
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
-	ImGui::Text("TIME: %.5f", totalTime);
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 
 	XMFLOAT3 camPos = camera->getPosition();
 	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
 	ImGui::Text(outputPos.c_str());
 
-	ImGui::SliderFloat("Speed", &speed, 0.0f, 10.0f);
-	ImGui::SliderFloat("Amplitude", &amplitude, 0.0f, 2.0f);
-	ImGui::SliderFloat("Frequency", &frequency, 0.1f, 10.0f);
+	ImGui::SliderFloat("Height Multiplier", &heightMultiplier, 0.0f, 100.0f);
+
 
 	XMFLOAT3 direction = ToDegrees(lights[0]->getDirectionEuler());
 	if (ImGui::DragFloat3("Light Direction Euler: ", &direction.x, 0.1f)) {

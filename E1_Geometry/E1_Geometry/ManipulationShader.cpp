@@ -60,7 +60,7 @@ void ManipulationShader::initShader(const wchar_t* vsFilename, const wchar_t* ps
 	// Setup time buffer 
 	// Setup the description of the time dynammic constant buffer this is in the vertex shader.
 	timeBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	timeBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	timeBufferDesc.ByteWidth = sizeof(TimeBufferType);
 	timeBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	timeBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	timeBufferDesc.MiscFlags = 0;

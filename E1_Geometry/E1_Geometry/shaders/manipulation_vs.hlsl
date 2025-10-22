@@ -30,26 +30,22 @@ struct OutputType
 };
 
 
-/*/Shape Deformation
+//Shape Deformation
 OutputType main(InputType input)
 {
     OutputType output;
 
 	//Offset position based on sine wave
-    float offset = amplitude * sin(input.position.x * frequency + time * speed) + (amplitude * cos(input.position.z * frequency + time * speed));
+    float offset = amplitude * (sin(input.position.x * frequency + time * speed) + cos(input.position.z * frequency + time * speed));
 	
-    input.position += offset * input.normal;
-
-	
-	//Modify normals
-    //input.normal = float3(-cos(input.position.x + time), 1, 0);
+    input.position += float4(offset * normalize(input.position.xyz), 0);
 	
 	//Get derivative of sin and cos equatins to get tangent
-    float dy_dx = amplitude * frequency * cos(input.position.x * frequency + time * speed);
-    float dy_dz = -amplitude * frequency * sin(input.position.z * frequency + time * speed);
+    float3 dy_dx = input.normal * amplitude * frequency * cos(frequency * input.position.x + time * speed);
+    float3 dy_dz = input.normal * amplitude * frequency * -sin(frequency * input.position.z + time * speed);
 	
 	//Calculate normal as cross of tangents (if only use single wave calculate normal as perpendicular of tangent)
-    input.normal = normalize(cross(float3(0, dy_dz, 1), float3(1, dy_dx, 0)));
+    input.normal = normalize(cross(dy_dz, dy_dx));
 	
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
@@ -65,8 +61,8 @@ OutputType main(InputType input)
 
     return output;
 }
-*/
 
+/*
 //Plane Deformation
 OutputType main(InputType input)
 {
@@ -82,12 +78,6 @@ OutputType main(InputType input)
 
 	//Offset position based on sine wave
     input.position.y = amplitude * sin(input.position.x * frequency + time * speed) + (amplitude * cos(input.position.z * frequency + time * speed));
-	
-	/*
-	float offset = amplitude * sin(input.position.x * frequency + time * speed) + (amplitude * cos(input.position.z * frequency + time * speed));
-    input.position += offset * input.normal;
-	*/	
-
 
 	//Get derivative of sin and cos equatins to get tangent
     float dy_dx = amplitude * frequency * cos(input.position.x * frequency + time * speed);
@@ -111,7 +101,7 @@ OutputType main(InputType input)
 
 	return output;
 }
-
+*/
 
 /*
 	If y = sin(x + t)
