@@ -32,7 +32,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 
 	// Create Mesh object and shader object
-	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext());
+	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), 200);
 	sphere = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
 
 	planeMaterial = make_shared<Material>();
@@ -144,6 +144,11 @@ void App1::gui()
 	ImGui::SliderFloat("Speed", &speed, 0.0f, 10.0f);
 	ImGui::SliderFloat("Amplitude", &amplitude, 0.0f, 2.0f);
 	ImGui::SliderFloat("Frequency", &frequency, 0.1f, 10.0f);
+
+	XMFLOAT3 direction = ToDegrees(lights[0]->getDirectionEuler());
+	if (ImGui::DragFloat3("Light Direction Euler: ", &direction.x, 0.1f)) {
+		lights[0]->setDirectionEuler(ToRadians(direction));
+	}
 
 	// Render UI
 	ImGui::Render();
