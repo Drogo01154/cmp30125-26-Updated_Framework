@@ -73,7 +73,7 @@ void HeightMapShader::initShader(const wchar_t* vsFilename, const wchar_t* psFil
 }
 
 
-void HeightMapShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* heightMap, Light* light, float HeightMultiplier)
+void HeightMapShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& worldMatrix, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* heightMap, Light* light, float HeightMultiplier, int resolution)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -117,6 +117,7 @@ void HeightMapShader::setShaderParameters(ID3D11DeviceContext* deviceContext, co
 	mapPtr = (MapBufferType*)mappedResource.pData;
 	mapPtr->heightMultiplier = HeightMultiplier;
 	mapPtr->pixelOffset = pixelOffset;
+	mapPtr->resolution = resolution;
 	deviceContext->Unmap(mapDataBuffer.Get(), 0);
 
 	ID3D11Buffer* VertexBuffers[] = { matrixBuffer.Get(), mapDataBuffer.Get() };

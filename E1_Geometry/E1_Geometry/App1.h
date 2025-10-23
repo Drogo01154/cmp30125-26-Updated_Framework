@@ -33,6 +33,7 @@ private:
 	uint32_t selectedLight;
 
 	float heightMultiplier;
+	int resolution;
 
 	std::string LightTypeStrings[3] =
 	{

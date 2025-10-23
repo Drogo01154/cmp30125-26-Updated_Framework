@@ -16,21 +16,21 @@ private:
 	{
 		XMFLOAT4 diffuse;
 		XMFLOAT3 direction;
-		float padding;
+		int padding;
 	};
 
 	struct MapBufferType
 	{
 		XMFLOAT2 pixelOffset;
 		float heightMultiplier;
-		float padding;
+		int resolution;
 	};
 
 public:
 	HeightMapShader(ID3D11Device* device, HWND hwnd);
 	~HeightMapShader();
 
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* heightMap, Light* light, float HeightMultiplier);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX& world, const XMMATRIX& view, const XMMATRIX& projection, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* heightMap, Light* light, float HeightMultiplier, int resolution);
 
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);

@@ -15,7 +15,7 @@ cbuffer mapData : register(b1)
 {
     float2 offset;
     float heightMultiplier;
-    float padding1;
+    int resolution;
 }
 
 struct InputType
@@ -37,7 +37,7 @@ struct OutputType
 OutputType main(InputType input)
 {
     OutputType output;
-    input.position.y = texture0.SampleLevel(sampler0, input.tex, 0) * heightMultiplier;
+    input.position.y += texture0.SampleLevel(sampler0, input.tex, 0) * heightMultiplier;
 	
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);

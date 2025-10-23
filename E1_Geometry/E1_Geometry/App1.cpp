@@ -14,6 +14,8 @@ App1::App1()
 	ambientLight = { 0.1f, 0.1f, 0.1f, 1.f };
 	selectedLight = -1;
 	heightMultiplier = 20;
+
+	resolution = 100;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -30,7 +32,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 
 	// Create Mesh object and shader object
-	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), 200);
+	plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), resolution);
 
 	planeMaterial = make_shared<Material>();
 
@@ -107,7 +109,7 @@ bool App1::render()
 	// Send geometry data, set shader parameters, render object with shader
 	plane->sendData(renderer->getDeviceContext());
 	
-	heightMapShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), textureMgr->getTexture(L"height"), lights[0].get(), heightMultiplier);
+	heightMapShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), textureMgr->getTexture(L"height"), lights[0].get(), heightMultiplier, resolution);
 	heightMapShader->render(renderer->getDeviceContext(), plane->getIndexCount());
 
 
@@ -136,6 +138,13 @@ void App1::gui()
 	ImGui::Text(outputPos.c_str());
 
 	ImGui::SliderFloat("Height Multiplier", &heightMultiplier, 0.0f, 100.0f);
+
+	if (ImGui::SliderInt("Resolution: ", &resolution, 2, 1000)) {
+		plane.reset(); // Delete Plane
+
+		//Make new plane
+		plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), resolution);
+	}
 
 
 	XMFLOAT3 direction = ToDegrees(lights[0]->getDirectionEuler());
