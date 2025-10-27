@@ -167,8 +167,10 @@
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="HeightMapShader.cpp" />
     <ClCompile Include="LightShader.cpp" />
+    <ClCompile Include="LightsModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
     <ClCompile Include="staticMeshComponent.h" />
+    <ClCompile Include="TextureShader.cpp" />
     <FxCompile Include="colourGradient_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -187,7 +189,14 @@
     <FxCompile Include="shaders\heightMap_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\light_ps.hlsl">
+    <None Include="shaders\lightCommon_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ShaderModel>
+      <FileType>Document</FileType>
+    </None>
+    <FxCompile Include="shaders\lightTexture_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\light_vs.hlsl">
@@ -199,6 +208,12 @@
     <FxCompile Include="shaders\manipulation_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="shaders\texture_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\texture_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DXFramework\Material.h" />
@@ -207,8 +222,10 @@
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
-    <ClInclude Include="LightShader.h" />
+    <ClInclude Include="LightsModule.h" />
+    <ClInclude Include="LightTextureShader.h" />
     <ClInclude Include="ManipulationShader.h" />
+    <ClInclude Include="TextureShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">

@@ -5,7 +5,7 @@
 // Includes
 #include "../DXFramework/DXF.h"
 #include "LightShader.h"
-#include "HeightMapShader.h"
+#include "TextureShader.h"
 
 class App1 : public BaseApplication
 {
@@ -19,21 +19,35 @@ public:
 
 protected:
 	bool render();
+	void firstPass();
+	void finalPass();
 	void gui();
 
 private:
-	std::shared_ptr<HeightMapShader> heightMapShader;
 
+	//Shaders
+	std::shared_ptr<LightShader> lightShader;
+	std::shared_ptr<TextureShader> textureShader;
+
+	//Objects
+	std::shared_ptr<CubeMesh> cubeMesh;
+	std::shared_ptr<SphereMesh> sphereMesh;
+	std::shared_ptr<OrthoMesh> orthoMesh;
+
+	//Lights
 	std::vector<std::shared_ptr<Light>> lights;
+	
+	//Materials
+	std::shared_ptr<Material> shapeMaterial;
 
-	std::shared_ptr<PlaneMesh> plane;
+	//Textures
+	std::shared_ptr<RenderTexture> renderTexture;
 
-	std::shared_ptr<Material> planeMaterial;
+	//Cameras
+	std::shared_ptr<Camera> secondCamera;
+
 	XMFLOAT4 ambientLight;
 	uint32_t selectedLight;
-
-	float heightMultiplier;
-	int resolution;
 
 	std::string LightTypeStrings[3] =
 	{

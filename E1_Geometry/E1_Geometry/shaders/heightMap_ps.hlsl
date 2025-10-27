@@ -51,9 +51,8 @@ float4 main(InputType input) : SV_TARGET
     float3 tangent = normalize(float3(2.f * worldStep.x, heightE - heightW, 0.f));
     float3 bitangent = normalize(float3(0.f, heightN - heightS, 2.f * worldStep.y));
     input.normal = cross(bitangent, tangent);
-    return float4(normalize(input.normal), 1.f);
+    //return float4(normalize(input.normal), 1.f);
     
-    /*
     float4 textureColour;
 	float4 lightColour;
 	
@@ -62,7 +61,7 @@ float4 main(InputType input) : SV_TARGET
     lightColour =  calculateLighting(-lightDirection, input.normal, diffuseColour);
     
     return lightColour * textureColour;
-    */
+
 }
 
 
