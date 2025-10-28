@@ -13,6 +13,7 @@ class LightsDataModule : BaseShaderModule {
 private:
 	struct SceneBufferType
 	{
+		XMFLOAT4 baseColour;   // 16
 		XMFLOAT4 ambientLight; // 16
 		XMFLOAT4 specular;     // 16
 		float specularPower;   // 4

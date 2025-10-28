@@ -223,6 +223,11 @@ void App1::gui()
 	if (ImGui::CollapsingHeader("Materials")) {
 
 		if (ImGui::TreeNode("Shape Material")) {
+			if (ImGui::TreeNode("Colour: ## 0")) {
+				if(ImGui::ColorPicker4("Base Colour: ## 0", &shapeMaterial->baseColour.x)) {}
+				ImGui::TreePop();
+			}
+
 			if (ImGui::TreeNode("Specular Colour: ## 0")) {
 				if (ImGui::ColorPicker4("Ambient Light: ", &shapeMaterial->specularColour.x)) {}
 				ImGui::TreePop();

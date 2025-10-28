@@ -29,6 +29,8 @@ void LightTextureShader::initShader(const wchar_t* vsFilename, const wchar_t* ps
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
 
+	matrixDataModule.initModule();
+
 
 	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
 	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -67,6 +69,7 @@ void LightTextureShader::setShaderParamaters(
 	const XMFLOAT4& ambient, 
 	Camera* camera)
 {
+	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
 	lightsDataModule.setModuleParamaters(deviceContext, material, lights, ambient);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;

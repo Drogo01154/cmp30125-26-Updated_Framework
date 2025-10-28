@@ -2,7 +2,7 @@
 
 
 
-TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(ID3D11Device* device, HWND hwnd)
+TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd)
 {
 	initShader(L"texture_vs.cso", L"texture_ps.cso");
 }
@@ -30,6 +30,7 @@ void TextureShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
 
+	matrixDataModule.initModule();
 
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -60,14 +61,7 @@ void TextureShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 	tview = XMMatrixTranspose(viewMatrix);
 	tproj = XMMatrixTranspose(projectionMatrix);
 
-	// Sned matrix data
-	result = deviceContext->Map(matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
-	dataPtr->world = tworld;// worldMatrix;
-	dataPtr->view = tview;
-	dataPtr->projection = tproj;
-	deviceContext->Unmap(matrixBuffer, 0);
-	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
 
 	// Set shader texture and sampler resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);

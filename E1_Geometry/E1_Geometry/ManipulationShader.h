@@ -37,7 +37,7 @@ private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
 
 private:
-	ComPtr<ID3D11Buffer> matrixBuffer;
+	MatrixDataModule matrixDataModule;
 	ComPtr<ID3D11Buffer> timeBuffer;
 	ComPtr<ID3D11SamplerState> sampleState;
 	ComPtr<ID3D11Buffer> lightBuffer;

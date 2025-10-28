@@ -72,6 +72,7 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, s
 	SceneBufferType* scenePtr;
 	deviceContext->Map(sceneDataBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	scenePtr = (SceneBufferType*)mappedResource.pData;
+	scenePtr->baseColour = material->baseColour;
 	scenePtr->ambientLight = ambient;
 	scenePtr->numberOfLights = numLights;
 	scenePtr->specular = material->specularColour;
