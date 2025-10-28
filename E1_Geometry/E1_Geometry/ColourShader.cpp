@@ -3,7 +3,7 @@
 #include "Camera.h"
 
 
-ColourShader::ColourShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+ColourShader::ColourShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd)
 {
 	initShader(L"colour_vs.cso", L"colour_ps.cso");
 }
@@ -11,13 +11,6 @@ ColourShader::ColourShader(ID3D11Device* device, HWND hwnd) : BaseShader(device,
 
 ColourShader::~ColourShader()
 {
-	// Release the matrix constant buffer.
-	if (matrixBuffer)
-	{
-		matrixBuffer->Release();
-		matrixBuffer = 0;
-	}
-
 	// Release the layout.
 	if (layout)
 	{

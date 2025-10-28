@@ -1,6 +1,6 @@
 #include "LightTextureShader.h"
 
-LightTextureShader::LightTextureShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd) : BaseShader(device, hwnd), LightsDataModule(device, hwnd), textureManager(textureManager)
+LightTextureShader::LightTextureShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd), lightsDataModule(device, hwnd), textureManager(textureManager)
 {
 	initShader(L"light_vs.cso", L"lightTexture_ps.cso");
 }
@@ -8,6 +8,13 @@ LightTextureShader::LightTextureShader(ID3D11Device* device, TextureManager* tex
 
 LightTextureShader::~LightTextureShader()
 {
+	// Release the layout.
+	if (layout)
+	{
+		layout->Release();
+		layout = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }

@@ -27,15 +27,6 @@ using namespace DirectX;
 
 class BaseShader
 {
-protected:
-	/** Default world, view, projection matrix buffer struct */
-	struct MatrixBufferType
-	{
-		XMMATRIX world;
-		XMMATRIX view;
-		XMMATRIX projection;
-	};
-
 public:
 	void* operator new(size_t i)
 	{
@@ -78,7 +69,6 @@ protected:
 	ID3D11GeometryShader* geometryShader;
 	ID3D11ComputeShader* computeShader;
 	ID3D11InputLayout* layout;
-	ID3D11Buffer* matrixBuffer;
 	ID3D11SamplerState* sampleState;
 };
 

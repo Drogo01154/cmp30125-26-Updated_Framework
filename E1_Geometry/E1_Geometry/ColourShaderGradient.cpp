@@ -2,7 +2,7 @@
 #include "ColourShaderGradient.h"
 
 
-ColourGradientShader::ColourGradientShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+ColourGradientShader::ColourGradientShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(ID3D11Device* device, HWND hwnd)
 {
 	initShader(L"colourGradient_vs.cso", L"colourGradient_ps.cso");
 }
@@ -10,13 +10,6 @@ ColourGradientShader::ColourGradientShader(ID3D11Device* device, HWND hwnd) : Ba
 
 ColourGradientShader::~ColourGradientShader()
 {
-	// Release the matrix constant buffer.
-	if (matrixBuffer)
-	{
-		matrixBuffer->Release();
-		matrixBuffer = 0;
-	}
-
 	// Release the layout.
 	if (layout)
 	{

@@ -21,7 +21,7 @@ private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 
 private:
-	LightsDataModule lightsDataModule;
+	MatrixDataModule matrixDataModule;
 };
 
 #endif

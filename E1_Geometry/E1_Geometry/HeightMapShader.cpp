@@ -1,7 +1,7 @@
 #include "HeightMapShader.h"
 
 
-HeightMapShader::HeightMapShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+HeightMapShader::HeightMapShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(ID3D11Device* device, HWND hwnd)
 {
 	initShader(L"heightMap_vs.cso", L"heightMap_ps.cso");
 }
@@ -9,6 +9,13 @@ HeightMapShader::HeightMapShader(ID3D11Device* device, HWND hwnd) : BaseShader(d
 
 HeightMapShader::~HeightMapShader()
 {
+	// Release the layout.
+	if (layout)
+	{
+		layout->Release();
+		layout = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }

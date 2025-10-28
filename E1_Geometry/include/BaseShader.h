@@ -69,7 +69,6 @@ protected:
 	ID3D11GeometryShader* geometryShader;
 	ID3D11ComputeShader* computeShader;
 	ID3D11InputLayout* layout;
-	ID3D11Buffer* matrixBuffer;
 	ID3D11SamplerState* sampleState;
 };
 

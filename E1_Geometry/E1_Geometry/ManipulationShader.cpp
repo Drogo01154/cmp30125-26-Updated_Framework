@@ -1,6 +1,6 @@
 #include "ManipulationShader.h"
 
-ManipulationShader::ManipulationShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+ManipulationShader::ManipulationShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(ID3D11Device* device, HWND hwnd)
 {
 	initShader(L"manipulation_vs.cso", L"manipulation_ps.cso");
 }
@@ -8,6 +8,13 @@ ManipulationShader::ManipulationShader(ID3D11Device* device, HWND hwnd) : BaseSh
 
 ManipulationShader::~ManipulationShader()
 {
+	// Release the layout.
+	if (layout)
+	{
+		layout->Release();
+		layout = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }

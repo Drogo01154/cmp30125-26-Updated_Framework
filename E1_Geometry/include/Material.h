@@ -18,6 +18,7 @@ class BaseShader;
 
 struct Material
 {
+	XMFLOAT4 baseColour;				///< Colour value of texture;
 	XMFLOAT4 specularColour;			///< Specular colour value
 	float specularPower;				///< Specular power exponent
 	std::wstring texture;				///< String for materials texture

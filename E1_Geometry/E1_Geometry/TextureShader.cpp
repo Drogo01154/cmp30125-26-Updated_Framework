@@ -2,7 +2,7 @@
 
 
 
-TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(ID3D11Device* device, HWND hwnd)
 {
 	initShader(L"texture_vs.cso", L"texture_ps.cso");
 }
@@ -10,20 +10,6 @@ TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(devic
 
 TextureShader::~TextureShader()
 {
-	// Release the sampler state.
-	if (sampleState)
-	{
-		sampleState->Release();
-		sampleState = 0;
-	}
-
-	// Release the matrix constant buffer.
-	if (matrixBuffer)
-	{
-		matrixBuffer->Release();
-		matrixBuffer = 0;
-	}
-
 	// Release the layout.
 	if (layout)
 	{
@@ -66,7 +52,6 @@ void TextureShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* dataPtr;
 	XMMATRIX tworld, tview, tproj;
 
 
