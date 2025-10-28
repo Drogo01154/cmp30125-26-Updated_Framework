@@ -27,15 +27,6 @@ using namespace DirectX;
 
 class BaseShader
 {
-protected:
-	/** Default world, view, projection matrix buffer struct */
-	struct MatrixBufferType
-	{
-		XMMATRIX world;
-		XMMATRIX view;
-		XMMATRIX projection;
-	};
-
 public:
 	void* operator new(size_t i)
 	{

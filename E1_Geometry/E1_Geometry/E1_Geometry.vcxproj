@@ -166,11 +166,12 @@
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="HeightMapShader.cpp" />
-    <ClCompile Include="LightShader.cpp" />
-    <ClCompile Include="LightsModule.cpp" />
+    <ClCompile Include="LightTextureShader.cpp" />
+    <ClCompile Include="LightsDataModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
     <ClCompile Include="staticMeshComponent.h" />
     <ClCompile Include="TextureShader.cpp" />
+    <ClCompile Include="MatrixDataModule.cpp" />
     <FxCompile Include="colourGradient_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -222,10 +223,11 @@
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
-    <ClInclude Include="LightsModule.h" />
+    <ClInclude Include="LightsDataModule.h" />
     <ClInclude Include="LightTextureShader.h" />
     <ClInclude Include="ManipulationShader.h" />
     <ClInclude Include="TextureShader.h" />
+    <ClInclude Include="MatrixDataModule.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">

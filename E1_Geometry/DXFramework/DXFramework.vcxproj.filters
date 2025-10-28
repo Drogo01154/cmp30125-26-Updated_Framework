@@ -239,6 +239,12 @@
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="BaseShaderModule.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseShaderModule.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\include\imgui\.editorconfig">

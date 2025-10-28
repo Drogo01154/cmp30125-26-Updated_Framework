@@ -1,13 +1,6 @@
 #pragma once
-
-#include "LightsModule.h"
-
-/*
-	So we need attenuation - has range?
-
-
-
-*/
+#include "MatrixDataModule.h"
+#include "LightsDataModule.h"
 
 class LightTextureShader : public BaseShader
 {
@@ -38,9 +31,10 @@ private:
 private:
 	TextureManager* textureManager;
 	ComPtr<ID3D11Buffer> cameraBuffer;
-	ComPtr<ID3D11Buffer> matrixBuffer;
+	
 	ComPtr<ID3D11SamplerState> sampleState;
 	
-	LightsModule lightsModule;
+	MatrixDataModule matrixDataModule;
+	LightsDataModule lightsDataModule;
 };
 

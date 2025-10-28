@@ -37,7 +37,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Initialise shaders
 	// Lighting for normal rendering
 	// Texture to output the result (we don't need to do lighting again, as it has already be calculated)
-	lightShader = std::make_shared<LightShader>(renderer->getDevice(), textureMgr, hwnd);
+	lightShader = std::make_shared<LightTextureShader>(renderer->getDevice(), textureMgr, hwnd);
 	textureShader = std::make_shared<TextureShader>(renderer->getDevice(), hwnd);
 
 
@@ -48,12 +48,12 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	// Create planes material
 	shapeMaterial->shader = lightShader;
+	shapeMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	shapeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	shapeMaterial->specularPower = 32.f;
 	shapeMaterial->texture = L"brick";
 
 	// Create light
-
 	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
 	selectedLight = lights.size() - 1;
 	lights[0]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);

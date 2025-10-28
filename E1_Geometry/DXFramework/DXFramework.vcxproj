@@ -229,6 +229,8 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="BaseMesh.cpp" />
     <ClCompile Include="BaseShader.cpp" />
+    <ClCompile Include="BaseShaderModule.cpp" />
+    <ClCompile Include="BaseShaderModule.h" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />

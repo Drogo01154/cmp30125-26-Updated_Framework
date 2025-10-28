@@ -2,6 +2,7 @@
 
 #include "DXF.h"
 #include <wrl/client.h>
+#include "MatrixDataModule.h"
 
 using namespace std;
 using namespace DirectX;

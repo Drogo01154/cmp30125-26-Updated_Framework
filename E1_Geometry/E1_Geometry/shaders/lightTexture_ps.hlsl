@@ -18,7 +18,7 @@ struct InputType
 float4 main(InputType input) : SV_Target
 {
     // Get diffuse Colour
-    float4 diffuse = texture0.Sample(sampler0, input.tex);
+    float4 diffuse = texture0.Sample(sampler0, input.tex) * baseColour;
     
     float4 finalColour = ambientLight * diffuse;
     

@@ -40,6 +40,9 @@
     <Filter Include="Header Files\ShaderModules">
       <UniqueIdentifier>{35ff11a1-1eb5-4757-b79e-98f585dc823d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ShaderModules">
+      <UniqueIdentifier>{14b53fd6-d159-498a-9f0e-b9d264a4dad1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -48,7 +51,7 @@
     <ClCompile Include="staticMeshComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="LightShader.cpp">
+    <ClCompile Include="LightTextureShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="ColourShader.cpp">
@@ -69,8 +72,11 @@
     <ClCompile Include="TextureShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="LightsModule.cpp">
-      <Filter>Source Files\Shaders</Filter>
+    <ClCompile Include="LightsDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="MatrixDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -101,7 +107,10 @@
     <ClInclude Include="TextureShader.h">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="LightsModule.h">
+    <ClInclude Include="LightsDataModule.h">
+      <Filter>Header Files\ShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixDataModule.h">
       <Filter>Header Files\ShaderModules</Filter>
     </ClInclude>
   </ItemGroup>

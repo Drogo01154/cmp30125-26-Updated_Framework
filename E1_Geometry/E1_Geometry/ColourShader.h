@@ -4,6 +4,7 @@
 #define _COLOURSHADER_H_
 
 #include "../DXFramework/BaseShader.h"
+#include "MatrixDataModule.h"
 
 using namespace std;
 using namespace DirectX;
@@ -23,7 +24,7 @@ private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 
 private:
-	ID3D11Buffer* matrixBuffer;
+	MatrixDataModule matrixDataModule;
 };
 
 #endif

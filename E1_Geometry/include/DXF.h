@@ -14,6 +14,7 @@
 //#include "D3D.h"
 #include "BaseApplication.h"
 #include "BaseShader.h"
+#include "BaseShaderModule.h"
 //#include "TextureManager.h"
 
 // Inlcude geometry headers

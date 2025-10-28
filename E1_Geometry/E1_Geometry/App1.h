@@ -4,7 +4,7 @@
 
 // Includes
 #include "../DXFramework/DXF.h"
-#include "LightShader.h"
+#include "LightTextureShader.h"
 #include "TextureShader.h"
 
 class App1 : public BaseApplication
@@ -26,7 +26,7 @@ protected:
 private:
 
 	//Shaders
-	std::shared_ptr<LightShader> lightShader;
+	std::shared_ptr<LightTextureShader> lightShader;
 	std::shared_ptr<TextureShader> textureShader;
 
 	//Objects

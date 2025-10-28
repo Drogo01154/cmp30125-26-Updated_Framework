@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseShader.h"
+#include "MatrixDataModule.h"
 
 using namespace std;
 using namespace DirectX;

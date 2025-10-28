@@ -1,8 +1,11 @@
 // Light pixel shader
 // Calculate diffuse lighting for a single spot light (also texturing)
 
+//Utilises B0 and t0 pixel shader buffers
+
 cbuffer SceneDataBuffer : register(b0) // 48 bytes
 {
+    float4 baseColour; // 16
     float4 ambientLight; // 16
     float4 specularColour; // 16
     float specularPower; // 4
@@ -76,7 +79,7 @@ float4 calculateLight(float4 diffuse, int lightNumber, float3 pixelPosition, flo
             
             float4 intensity = calculateLightingIntensity(pixelToLightVec, normal, lights[lightNumber].lightDiffuse) * diffuse;
             
-            float4 specular = calcSpecular(pixelToLightVec, normal, viewVector, specularColour, specularPower);
+            float4 specular = calcSpecular(pixelToLightVec, normal, viewVector);
             
             if (lightType == 1) // Point Light
             {

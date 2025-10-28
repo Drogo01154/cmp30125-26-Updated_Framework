@@ -5,6 +5,7 @@
 #define _COLOURGRADIENTSHADER_H_
 
 #include "../DXFramework/BaseShader.h"
+#include "MatrixDataModule.h"
 
 class ColourGradientShader : public BaseShader
 {
@@ -20,7 +21,7 @@ private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 
 private:
-	ID3D11Buffer* matrixBuffer;
+	LightsDataModule lightsDataModule;
 };
 
 #endif
