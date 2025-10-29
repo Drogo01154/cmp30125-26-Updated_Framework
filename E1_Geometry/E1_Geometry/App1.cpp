@@ -10,9 +10,11 @@ App1::App1()
 	cubeMesh = nullptr;
 	sphereMesh = nullptr;
 	sphereMesh = nullptr;
-	lightShader = nullptr;
+	lightTextureShader = nullptr;
+	lightAlbedoShader = nullptr;
 	textureShader = nullptr;
-	shapeMaterial = nullptr;
+	shapeTextureMaterial = nullptr;
+	shapeAlbedoMaterial = nullptr;
 	UIConstants::InitialiseSystem();
 
 	ambientLight = { 0.0f, 0.0f, 0.0f, 1.f };
@@ -32,26 +34,35 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 	cubeMesh = make_shared<CubeMesh>(renderer->getDevice(), renderer->getDeviceContext());
 	sphereMesh = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
-	orthoMesh = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, -screenWidth / 2.7, screenHeight / 2.7);
+	orthoMeshTL = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, -screenWidth / 2.7, screenHeight / 2.7);
+	otherMeshTR = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, +screenWidth / 2.7, screenHeight / 2.7);
 
 	// Initialise shaders
 	// Lighting for normal rendering
 	// Texture to output the result (we don't need to do lighting again, as it has already be calculated)
-	lightShader = std::make_shared<LightTextureShader>(renderer->getDevice(), textureMgr, hwnd);
+	lightTextureShader = std::make_shared<LightTextureShader>(renderer->getDevice(), textureMgr, hwnd);
+	lightAlbedoShader = std::make_shared<LightAlbedoShader>(renderer->getDevice(), hwnd);
 	textureShader = std::make_shared<TextureShader>(renderer->getDevice(), hwnd);
 
 
 	// Build RenderTexture, this will be our alternative render target.
-	renderTexture = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
+	renderTextureTL = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
+	renderTextureTR = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 
-	shapeMaterial = make_shared<Material>();
+	shapeTextureMaterial = make_shared<Material>();
+	// Create textured material
+	shapeTextureMaterial->shader = lightTextureShader;
+	shapeTextureMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	shapeTextureMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	shapeTextureMaterial->specularPower = 32.f;
+	shapeTextureMaterial->texture = L"brick";
 
-	// Create planes material
-	shapeMaterial->shader = lightShader;
-	shapeMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeMaterial->specularPower = 32.f;
-	shapeMaterial->texture = L"brick";
+	// Create Albedo Material
+	shapeAlbedoMaterial = make_shared<Material>();
+	shapeAlbedoMaterial->shader = lightAlbedoShader;
+	shapeAlbedoMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	shapeAlbedoMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	shapeAlbedoMaterial->specularPower = 32.f;
 
 	// Create light
 	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
@@ -103,6 +114,9 @@ bool App1::render()
 	// Render first pass to render texture
 	firstPass();
 
+	// Render second pass to render texture
+	secondPass();
+
 	// Render final pass to frame buffer
 	finalPass();
 
@@ -111,9 +125,10 @@ bool App1::render()
 
 void App1::firstPass()
 {
+	
 	// Set the render target to be the render to terxture and clear it
-	renderTexture->setRenderTarget(renderer->getDeviceContext());
-	renderTexture->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 0.0f, 0.0f, 1.0f);
+	renderTextureTL->setRenderTarget(renderer->getDeviceContext());
+	renderTextureTL->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// Get Matrices
 	secondCamera->update();
@@ -123,18 +138,31 @@ void App1::firstPass()
 
 	// Render shape with simple lighting shader set.
 	cubeMesh->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, secondCamera.get());
-	lightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
-
-	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
-	sphereMesh->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, secondCamera.get());
-	lightShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
+	lightAlbedoShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeAlbedoMaterial, lights, ambientLight, secondCamera.get());
+	lightAlbedoShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
+}
 
+void App1::secondPass()
+{
+	// Set the render target to be the render to terxture and clear it
+	renderTextureTR->setRenderTarget(renderer->getDeviceContext());
+	renderTextureTR->clearRenderTarget(renderer->getDeviceContext(), 0.0f, 1.0f, 0.0f, 1.0f);
 
+	// Get Matrices
+	XMMATRIX worldMatrix = renderer->getWorldMatrix();
+	XMMATRIX viewMatrix = secondCamera->getViewMatrix();
+	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
+
+	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
+	sphereMesh->sendData(renderer->getDeviceContext());
+	lightAlbedoShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeAlbedoMaterial, lights, ambientLight, secondCamera.get());
+	lightAlbedoShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	renderer->setBackBufferRenderTarget();
 }
  
 VOID App1::finalPass()
@@ -151,14 +179,14 @@ VOID App1::finalPass()
 
 	// Render normal scene, with light shader set.
 	cubeMesh->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
-	lightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
+	lightTextureShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeTextureMaterial, lights, ambientLight, camera);
+	lightTextureShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
 
 	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
 
 	sphereMesh->sendData(renderer->getDeviceContext());
-	lightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
-	lightShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
+	lightTextureShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeTextureMaterial, lights, ambientLight, camera);
+	lightTextureShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
 
 	// RENDER THE RENDER TEXTURE SCENE
 	// Requires 2D rendering and an ortho mesh.
@@ -166,9 +194,15 @@ VOID App1::finalPass()
 	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
 	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
 
-	orthoMesh->sendData(renderer->getDeviceContext());
-	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTexture->getShaderResourceView());
-	textureShader->render(renderer->getDeviceContext(), orthoMesh->getIndexCount());
+	orthoMeshTL->sendData(renderer->getDeviceContext());
+	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTL->getShaderResourceView());
+	textureShader->render(renderer->getDeviceContext(), orthoMeshTL->getIndexCount());
+
+
+	otherMeshTR->sendData(renderer->getDeviceContext());
+	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTR->getShaderResourceView());
+	textureShader->render(renderer->getDeviceContext(), otherMeshTR->getIndexCount());
+	
 	renderer->setZBuffer(true);
 
 	// Render GUI
@@ -222,17 +256,31 @@ void App1::gui()
 
 	if (ImGui::CollapsingHeader("Materials")) {
 
-		if (ImGui::TreeNode("Shape Material")) {
+		if (ImGui::TreeNode("Shape Texture Material")) {
 			if (ImGui::TreeNode("Colour: ## 0")) {
-				if(ImGui::ColorPicker4("Base Colour: ## 0", &shapeMaterial->baseColour.x)) {}
+				if(ImGui::ColorPicker4("Base Colour: ## 0", &shapeTextureMaterial->baseColour.x)) {}
 				ImGui::TreePop();
 			}
 
 			if (ImGui::TreeNode("Specular Colour: ## 0")) {
-				if (ImGui::ColorPicker4("Ambient Light: ", &shapeMaterial->specularColour.x)) {}
+				if (ImGui::ColorPicker4("Ambient Light: ", &shapeTextureMaterial->specularColour.x)) {}
 				ImGui::TreePop();
 			}
-			if (ImGui::SliderFloat("Specular Power: ## 0", &shapeMaterial->specularPower, 1.f, 1000.f)) {}
+			if (ImGui::SliderFloat("Specular Power: ## 0", &shapeTextureMaterial->specularPower, 1.f, 1000.f)) {}
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Shape Albedo Material")) {
+			if (ImGui::TreeNode("Colour: ## 1")) {
+				if (ImGui::ColorPicker4("Base Colour: ## 0", &shapeAlbedoMaterial->baseColour.x)) {}
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Specular Colour: ## 1")) {
+				if (ImGui::ColorPicker4("Ambient Light: ", &shapeAlbedoMaterial->specularColour.x)) {}
+				ImGui::TreePop();
+			}
+			if (ImGui::SliderFloat("Specular Power: ## 1", &shapeAlbedoMaterial->specularPower, 1.f, 1000.f)) {}
 			ImGui::TreePop();
 		}
 	}

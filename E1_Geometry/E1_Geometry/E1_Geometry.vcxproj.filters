@@ -78,6 +78,9 @@
     <ClCompile Include="MatrixDataModule.cpp">
       <Filter>Source Files\ShaderModules</Filter>
     </ClCompile>
+    <ClCompile Include="LightAlbedoShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColourShader.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="MatrixDataModule.h">
       <Filter>Header Files\ShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="LightAlbedoShader.h">
+      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -150,6 +156,9 @@
     </FxCompile>
     <FxCompile Include="shaders\texture_vs.hlsl">
       <Filter>Resource Files\Texture Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\lightAlbedo_ps.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -166,6 +166,7 @@
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="HeightMapShader.cpp" />
+    <ClCompile Include="LightAlbedoShader.cpp" />
     <ClCompile Include="LightTextureShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
@@ -197,6 +198,9 @@
       </ShaderModel>
       <FileType>Document</FileType>
     </None>
+    <FxCompile Include="shaders\lightAlbedo_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\lightTexture_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -223,6 +227,7 @@
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
+    <ClInclude Include="LightAlbedoShader.h" />
     <ClInclude Include="LightsDataModule.h" />
     <ClInclude Include="LightTextureShader.h" />
     <ClInclude Include="ManipulationShader.h" />

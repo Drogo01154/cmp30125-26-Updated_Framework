@@ -5,6 +5,7 @@
 // Includes
 #include "../DXFramework/DXF.h"
 #include "LightTextureShader.h"
+#include "LightAlbedoShader.h"
 #include "TextureShader.h"
 
 class App1 : public BaseApplication
@@ -20,28 +21,34 @@ public:
 protected:
 	bool render();
 	void firstPass();
+	void secondPass();
 	void finalPass();
 	void gui();
 
 private:
 
 	//Shaders
-	std::shared_ptr<LightTextureShader> lightShader;
+	std::shared_ptr<LightTextureShader> lightTextureShader;
+	std::shared_ptr<LightAlbedoShader> lightAlbedoShader;
 	std::shared_ptr<TextureShader> textureShader;
+
 
 	//Objects
 	std::shared_ptr<CubeMesh> cubeMesh;
 	std::shared_ptr<SphereMesh> sphereMesh;
-	std::shared_ptr<OrthoMesh> orthoMesh;
+	std::shared_ptr<OrthoMesh> orthoMeshTL;
+	std::shared_ptr<OrthoMesh> otherMeshTR;
 
 	//Lights
 	std::vector<std::shared_ptr<Light>> lights;
 	
 	//Materials
-	std::shared_ptr<Material> shapeMaterial;
+	std::shared_ptr<Material> shapeTextureMaterial;
+	std::shared_ptr<Material> shapeAlbedoMaterial;
 
 	//Textures
-	std::shared_ptr<RenderTexture> renderTexture;
+	std::shared_ptr<RenderTexture> renderTextureTL;
+	std::shared_ptr<RenderTexture> renderTextureTR;
 
 	//Cameras
 	std::shared_ptr<Camera> secondCamera;

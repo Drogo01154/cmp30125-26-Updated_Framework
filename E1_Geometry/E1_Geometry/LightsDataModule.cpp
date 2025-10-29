@@ -103,8 +103,6 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, s
 			// Zero out the remaining lights
 			lightPtr[i] = {};
 		}
-
-
 	}
 
 	deviceContext->Unmap(lightsBuffer.Get(), 0);
