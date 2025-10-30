@@ -48,5 +48,6 @@ void MatrixDataModule::setModuleParamaters(
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer.Get(), 0);
-	deviceContext->VSSetConstantBuffers(0, 1, matrixBuffer.GetAddressOf());
+	ID3D11Buffer* matrixBufferPtr = matrixBuffer.Get();
+	deviceContext->VSSetConstantBuffers(0, 1, &matrixBufferPtr);
 }

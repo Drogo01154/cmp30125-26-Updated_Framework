@@ -79,7 +79,8 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, s
 	scenePtr->specularPower = material->specularPower;
 
 	deviceContext->Unmap(sceneDataBuffer.Get(), 0);
-	deviceContext->PSSetConstantBuffers(0, 1, sceneDataBuffer.GetAddressOf());
+	ID3D11Buffer* sceneDataBufferPtr = sceneDataBuffer.Get();
+	deviceContext->PSSetConstantBuffers(0, 1, &sceneDataBufferPtr);
 
 	// Send light data to pixel shader
 	LightBufferType* lightPtr;
@@ -106,6 +107,7 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, s
 	}
 
 	deviceContext->Unmap(lightsBuffer.Get(), 0);
-	deviceContext->PSSetShaderResources(0, 1, lightBufferSRV.GetAddressOf());
+	ID3D11ShaderResourceView* lightBufferSRVPtr = lightBufferSRV.Get();
+	deviceContext->PSSetShaderResources(0, 1, &lightBufferSRVPtr);
 
 }

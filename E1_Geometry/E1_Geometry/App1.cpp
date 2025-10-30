@@ -10,17 +10,28 @@ App1::App1()
 	cubeMesh = nullptr;
 	sphereMesh = nullptr;
 	sphereMesh = nullptr;
-	lightTextureShader = nullptr;
-	lightAlbedoShader = nullptr;
+	texturedLightShader = nullptr;
 	textureShader = nullptr;
-	shapeTextureMaterial = nullptr;
-	shapeAlbedoMaterial = nullptr;
+	shapeMaterial = nullptr;
 	UIConstants::InitialiseSystem();
 
 	ambientLight = { 0.0f, 0.0f, 0.0f, 1.f };
 	selectedLight = -1;
 
-	secondCamera = nullptr;
+	miniMapCamera = nullptr;
+
+	miniMapWidth = 20.f;
+	miniMapHeight = 20.f;
+	miniMapNearZ = 0.1f;
+	miniMapFarZ = 100.f;
+
+	playerIconColour = XMFLOAT4(1.f, 0.0f, 0.0f, 1.0f);
+	playerIconRadius = 5.f;
+	greyScaleValues = { 0.299, 0.587, 0.114 };
+
+
+	//Calulcate the orthographic projection matrix
+	orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -34,35 +45,28 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 	cubeMesh = make_shared<CubeMesh>(renderer->getDevice(), renderer->getDeviceContext());
 	sphereMesh = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
-	orthoMeshTL = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, -screenWidth / 2.7, screenHeight / 2.7);
-	otherMeshTR = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, +screenWidth / 2.7, screenHeight / 2.7);
+	orthoMeshTR = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, screenWidth / 2.7f, screenHeight / 2.7f);
+	orthoMeshMain = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth, screenHeight, 0.0f, 0.0f);
 
 	// Initialise shaders
 	// Lighting for normal rendering
 	// Texture to output the result (we don't need to do lighting again, as it has already be calculated)
-	lightTextureShader = std::make_shared<LightTextureShader>(renderer->getDevice(), textureMgr, hwnd);
-	lightAlbedoShader = std::make_shared<LightAlbedoShader>(renderer->getDevice(), hwnd);
+	texturedLightShader = std::make_shared<TexturedLightShader>(renderer->getDevice(), textureMgr, hwnd);
 	textureShader = std::make_shared<TextureShader>(renderer->getDevice(), hwnd);
+	miniMapTextureShader = std::make_shared<MiniMapTextureShader>(renderer->getDevice(), hwnd);
 
 
 	// Build RenderTexture, this will be our alternative render target.
-	renderTextureTL = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 	renderTextureTR = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
+	renderTextureMain = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 
-	shapeTextureMaterial = make_shared<Material>();
+	shapeMaterial = make_shared<Material>();
 	// Create textured material
-	shapeTextureMaterial->shader = lightTextureShader;
-	shapeTextureMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeTextureMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeTextureMaterial->specularPower = 32.f;
-	shapeTextureMaterial->texture = L"brick";
-
-	// Create Albedo Material
-	shapeAlbedoMaterial = make_shared<Material>();
-	shapeAlbedoMaterial->shader = lightAlbedoShader;
-	shapeAlbedoMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeAlbedoMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeAlbedoMaterial->specularPower = 32.f;
+	shapeMaterial->shader = texturedLightShader;
+	shapeMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	shapeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	shapeMaterial->specularPower = 32.f;
+	shapeMaterial->texture = L"brick";
 
 	// Create light
 	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
@@ -71,9 +75,10 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights[0]->setDirection(0.7f, 0.0f, 0.7f);
 
 	//Create second camera
-	secondCamera = std::make_shared<Camera>();
-	secondCamera->setPosition(0.0f, 0.0f, 10.f);
-	secondCamera->setRotation(0.0f, 180.f, 0.0f);
+	miniMapCamera = std::make_shared<Camera>();
+	miniMapCamera->setRotation(90.0f, 0.0f, 0.0f);
+	miniMapCamera->setPosition(0.0f, 10.f, 0.0f);
+	miniMapCamera->update();
 
 
 	//camera->setPosition(35.f, 20.f, 0.f);
@@ -111,10 +116,13 @@ bool App1::frame()
 
 bool App1::render()
 {
-	// Render first pass to render texture
+	// Get matrices
+	camera->update();
+
+	// Render first pass to top left render texture
 	firstPass();
 
-	// Render second pass to render texture
+	// Render second pass to top right render texture
 	secondPass();
 
 	// Render final pass to frame buffer
@@ -125,21 +133,27 @@ bool App1::render()
 
 void App1::firstPass()
 {
-	
 	// Set the render target to be the render to terxture and clear it
-	renderTextureTL->setRenderTarget(renderer->getDeviceContext());
-	renderTextureTL->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 0.0f, 0.0f, 1.0f);
+	renderTextureTR->setRenderTarget(renderer->getDeviceContext());
+	renderTextureTR->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
 
 	// Get Matrices
-	secondCamera->update();
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX viewMatrix = secondCamera->getViewMatrix();
-	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
+	XMMATRIX viewMatrix = miniMapCamera->getViewMatrix();
+	XMMATRIX projectionMatrix = orthographicProjectionMatrix;
 
-	// Render shape with simple lighting shader set.
+	// Render normal scene, with light shader set.
 	cubeMesh->sendData(renderer->getDeviceContext());
-	lightAlbedoShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeAlbedoMaterial, lights, ambientLight, secondCamera.get());
-	lightAlbedoShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
+	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, miniMapCamera.get());
+	texturedLightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
+
+	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
+
+	sphereMesh->sendData(renderer->getDeviceContext());
+	Camera* c = miniMapCamera.get();
+
+	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, miniMapCamera.get());
+	texturedLightShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
@@ -147,19 +161,25 @@ void App1::firstPass()
 
 void App1::secondPass()
 {
-	// Set the render target to be the render to terxture and clear it
-	renderTextureTR->setRenderTarget(renderer->getDeviceContext());
-	renderTextureTR->clearRenderTarget(renderer->getDeviceContext(), 0.0f, 1.0f, 0.0f, 1.0f);
 
-	// Get Matrices
+	// Set the render target to be the render to terxture and clear it
+	renderTextureMain->setRenderTarget(renderer->getDeviceContext());
+	renderTextureMain->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
+
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX viewMatrix = secondCamera->getViewMatrix();
+	XMMATRIX viewMatrix = camera->getViewMatrix();
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
 
+	// Render normal scene, with light shader set.
+	cubeMesh->sendData(renderer->getDeviceContext());
+	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
+	texturedLightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
+
 	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
+
 	sphereMesh->sendData(renderer->getDeviceContext());
-	lightAlbedoShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeAlbedoMaterial, lights, ambientLight, secondCamera.get());
-	lightAlbedoShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
+	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
+	texturedLightShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
@@ -168,7 +188,7 @@ void App1::secondPass()
 VOID App1::finalPass()
 {
 	// Clear the scene. (default blue colour)
-	renderer->beginScene(0.39f, 0.58f, 0.92f, 1.0f);
+	renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Get matrices
 	camera->update();
@@ -176,33 +196,57 @@ VOID App1::finalPass()
 	XMMATRIX viewMatrix = camera->getViewMatrix();
 	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
 
-
-	// Render normal scene, with light shader set.
-	cubeMesh->sendData(renderer->getDeviceContext());
-	lightTextureShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeTextureMaterial, lights, ambientLight, camera);
-	lightTextureShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
-
-	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
-
-	sphereMesh->sendData(renderer->getDeviceContext());
-	lightTextureShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeTextureMaterial, lights, ambientLight, camera);
-	lightTextureShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
-
 	// RENDER THE RENDER TEXTURE SCENE
 	// Requires 2D rendering and an ortho mesh.
 	renderer->setZBuffer(false);
 	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
 	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
 
-	orthoMeshTL->sendData(renderer->getDeviceContext());
-	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTL->getShaderResourceView());
-	textureShader->render(renderer->getDeviceContext(), orthoMeshTL->getIndexCount());
 
+	orthoMeshMain->sendData(renderer->getDeviceContext());
+	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureMain->getShaderResourceView());
+	textureShader->render(renderer->getDeviceContext(), orthoMeshMain->getIndexCount());
 
-	otherMeshTR->sendData(renderer->getDeviceContext());
-	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTR->getShaderResourceView());
-	textureShader->render(renderer->getDeviceContext(), otherMeshTR->getIndexCount());
-	
+	XMFLOAT3 cameraPos = camera->getPosition();
+
+	XMFLOAT2 screenSize = { float(sWidth), float(sHeight) };
+
+	XMVECTOR projectedPos = XMVector3Project(
+		XMLoadFloat3(&cameraPos),
+		0.0f, 0.0f,
+		screenSize.x,
+		screenSize.y,
+		0.0f,
+		1.0f,
+		orthographicProjectionMatrix,
+		miniMapCamera->getViewMatrix(),
+		XMMatrixIdentity()
+	);
+	XMFLOAT3 screenPos;
+	XMStoreFloat3(&screenPos, projectedPos);
+
+	//Calculate miniMap width and height
+	float miniMapWidth = screenSize.x / 4.f;
+	float miniMapHeight = screenSize.y / 4.f;
+
+	//Calculate offset to recentre minimmap
+	float xOffset = (screenSize.x - miniMapWidth) / 2.f;
+	float yOffset = (screenSize.y - miniMapHeight) / 2.f;
+
+	//Scale down target to minimap size and recentre
+	screenPos.x = screenPos.x / 4.f + xOffset;
+	screenPos.y = screenPos.y / 4.f + yOffset;
+
+	// Offset to top right of screen
+	screenPos.x += screenSize.x / 2.7f;
+	screenPos.y -= screenSize.y / 2.7f;
+
+	cameraScreenPos = "Screen Pos: X: " + std::to_string(screenPos.x) + " Y: " + std::to_string(screenPos.y) + " Z: " + std::to_string(screenPos.z);
+
+	orthoMeshTR->sendData(renderer->getDeviceContext());
+	miniMapTextureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTR->getShaderResourceView(), screenPos, playerIconColour, greyScaleValues, playerIconRadius);
+	miniMapTextureShader->render(renderer->getDeviceContext(), orthoMeshTR->getIndexCount());
+
 	renderer->setZBuffer(true);
 
 	// Render GUI
@@ -226,6 +270,7 @@ void App1::gui()
 	XMFLOAT3 camPos = camera->getPosition();
 	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
 	ImGui::Text(outputPos.c_str());
+	ImGui::Text(cameraScreenPos.c_str());
 
 	/*
 	if (ImGui::SliderInt("Resolution: ", &resolution, 2, 1000)) {
@@ -236,51 +281,53 @@ void App1::gui()
 	}
 	*/
 
-	//Camera Imgui
-	if (ImGui::CollapsingHeader("Second Camera")) {
-		//Camera position settings
-		XMFLOAT3 position = secondCamera->getPosition();
-		if (ImGui::DragFloat3("Camera Position: ", &position.x, 1.f)) {
-			secondCamera->setPosition(position.x, position.y, position.z);
+	//Light ImGui
+
+	if (ImGui::CollapsingHeader("MiniMapControl"))
+	{
+		if (ImGui::TreeNode("ProjectionMatrixSettings")) {
+			bool matrixUpdated = false;
+
+			if (ImGui::SliderFloat("orthoWidth: ", &miniMapWidth, 0.0f, 1000.f)) { matrixUpdated = true; }
+			if (ImGui::SliderFloat("orthoHeight: ", &miniMapHeight, 0.0f, 1000.f)) { matrixUpdated = true; }
+			if (ImGui::SliderFloat("orthoNearZ: ", &miniMapNearZ, 0.1f, 1000.f)) { matrixUpdated = true; }
+			if (ImGui::SliderFloat("orthoFarZ: ", &miniMapFarZ, 0.1f, 1000.f)) { matrixUpdated = true; }
+
+			if(matrixUpdated) {
+				//Calulcate the orthographic projection matrix
+				orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
+			}
+			ImGui::TreePop();
 		}
-
-
-		//Camera direction settings
-		XMFLOAT3 direction = secondCamera->getRotation();
-		if (ImGui::DragFloat3("Light Direction: ", &direction.x, 1.f)) {
-			secondCamera->setRotation(direction.x, direction.y, direction.z);
+		if (ImGui::TreeNode("Player Icon Control")) {
+			if (ImGui::TreeNode("Player Icon Colour")) {
+				if (ImGui::ColorPicker4("Icon Colour", &playerIconColour.x)) {}
+				ImGui::TreePop();
+			}
+			if (ImGui::SliderFloat("Icon Radius", &playerIconRadius, 1.f, 50.f)) {}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("GreyScale Value")) {
+			if (ImGui::SliderFloat("Red Weight", &greyScaleValues.x, 0.0f, 1.0f)) { }
+			if (ImGui::SliderFloat("Green Weight", &greyScaleValues.y, 0.0f, 1.0f)) { }
+			if (ImGui::SliderFloat("Blue Weight", &greyScaleValues.z, 0.0f, 1.0f)) { }
+			ImGui::TreePop();
 		}
 	}
 
-	//Light ImGui
-
 	if (ImGui::CollapsingHeader("Materials")) {
 
-		if (ImGui::TreeNode("Shape Texture Material")) {
+		if (ImGui::TreeNode("Shape Material")) {
 			if (ImGui::TreeNode("Colour: ## 0")) {
-				if(ImGui::ColorPicker4("Base Colour: ## 0", &shapeTextureMaterial->baseColour.x)) {}
+				if(ImGui::ColorPicker4("Base Colour: ## 0", &shapeMaterial->baseColour.x)) {}
 				ImGui::TreePop();
 			}
 
 			if (ImGui::TreeNode("Specular Colour: ## 0")) {
-				if (ImGui::ColorPicker4("Ambient Light: ", &shapeTextureMaterial->specularColour.x)) {}
+				if (ImGui::ColorPicker4("Ambient Light: ", &shapeMaterial->specularColour.x)) {}
 				ImGui::TreePop();
 			}
-			if (ImGui::SliderFloat("Specular Power: ## 0", &shapeTextureMaterial->specularPower, 1.f, 1000.f)) {}
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Shape Albedo Material")) {
-			if (ImGui::TreeNode("Colour: ## 1")) {
-				if (ImGui::ColorPicker4("Base Colour: ## 0", &shapeAlbedoMaterial->baseColour.x)) {}
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Specular Colour: ## 1")) {
-				if (ImGui::ColorPicker4("Ambient Light: ", &shapeAlbedoMaterial->specularColour.x)) {}
-				ImGui::TreePop();
-			}
-			if (ImGui::SliderFloat("Specular Power: ## 1", &shapeAlbedoMaterial->specularPower, 1.f, 1000.f)) {}
+			if (ImGui::SliderFloat("Specular Power: ## 0", &shapeMaterial->specularPower, 1.f, 1000.f)) {}
 			ImGui::TreePop();
 		}
 	}

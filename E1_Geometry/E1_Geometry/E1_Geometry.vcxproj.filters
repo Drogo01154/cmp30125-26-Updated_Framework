@@ -43,6 +43,24 @@
     <Filter Include="Source Files\ShaderModules">
       <UniqueIdentifier>{14b53fd6-d159-498a-9f0e-b9d264a4dad1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders\TesxtureShaders">
+      <UniqueIdentifier>{c39674f0-330a-488a-9a3e-5a9914ec23e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\MeshShaders">
+      <UniqueIdentifier>{9565f764-d8ac-4458-8240-078fcfe773a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\MeshShaders\LightShaders">
+      <UniqueIdentifier>{8647b47a-9331-45b7-afe3-56e0fc7655fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\MeshShaders">
+      <UniqueIdentifier>{838c2f57-7985-4156-8030-e167c6c92d64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\MeshShaders\LightShaders">
+      <UniqueIdentifier>{baafc8f0-80eb-4dca-885a-41eed7c97df2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\TextureShaders">
+      <UniqueIdentifier>{fe88c998-6d8f-4dd5-b4c9-8b4ab2ae58ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -51,25 +69,7 @@
     <ClCompile Include="staticMeshComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="LightTextureShader.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="ColourShader.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="ColourShaderGradient.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="ManipulationShader.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="HeightMapShader.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureShader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="LightsDataModule.cpp">
@@ -78,37 +78,46 @@
     <ClCompile Include="MatrixDataModule.cpp">
       <Filter>Source Files\ShaderModules</Filter>
     </ClCompile>
-    <ClCompile Include="LightAlbedoShader.cpp">
-      <Filter>Source Files\Shaders</Filter>
+    <ClCompile Include="GreyScaleTextureShader.cpp">
+      <Filter>Source Files\Shaders\TesxtureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourShaderGradient.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbedoLightShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TexturedLightShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ManipulationShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniMapTextureShader.cpp">
+      <Filter>Source Files\Shaders\TesxtureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="GreyScaleTextureShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureShader.cpp">
+      <Filter>Source Files\Shaders\TesxtureShaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ColourShader.h">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="ColourShaderGradient.h">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="App1.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LightTextureShader.h">
-      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="ImGuiHelpers.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="ManipulationShader.h">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="..\DXFramework\Material.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeightMapShader.h">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureShader.h">
-      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="LightsDataModule.h">
       <Filter>Header Files\ShaderModules</Filter>
@@ -116,8 +125,29 @@
     <ClInclude Include="MatrixDataModule.h">
       <Filter>Header Files\ShaderModules</Filter>
     </ClInclude>
-    <ClInclude Include="LightAlbedoShader.h">
-      <Filter>Header Files\Shaders</Filter>
+    <ClInclude Include="TextureShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TexturedLightShader.h">
+      <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbedoLightShader.h">
+      <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniMapTextureShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourShaderGradient.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ManipulationShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -133,7 +163,7 @@
     <FxCompile Include="colourGradient_vs.hlsl">
       <Filter>Resource Files\Colour Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\lightTexture_ps.hlsl">
+    <FxCompile Include="shaders\texturedLight_ps.hlsl">
       <Filter>Resource Files\light shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\light_vs.hlsl">
@@ -157,8 +187,14 @@
     <FxCompile Include="shaders\texture_vs.hlsl">
       <Filter>Resource Files\Texture Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\lightAlbedo_ps.hlsl">
+    <FxCompile Include="shaders\albedoLight_ps.hlsl">
       <Filter>Resource Files\light shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\textureGreyscale_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

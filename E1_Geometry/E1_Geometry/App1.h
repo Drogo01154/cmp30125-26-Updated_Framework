@@ -4,9 +4,9 @@
 
 // Includes
 #include "../DXFramework/DXF.h"
-#include "LightTextureShader.h"
-#include "LightAlbedoShader.h"
+#include "TexturedLightShader.h"
 #include "TextureShader.h"
+#include "MiniMapTextureShader.h"
 
 class App1 : public BaseApplication
 {
@@ -22,39 +22,48 @@ protected:
 	bool render();
 	void firstPass();
 	void secondPass();
+	void thirdPass();
 	void finalPass();
 	void gui();
 
 private:
 
 	//Shaders
-	std::shared_ptr<LightTextureShader> lightTextureShader;
-	std::shared_ptr<LightAlbedoShader> lightAlbedoShader;
+	std::shared_ptr<TexturedLightShader> texturedLightShader;
 	std::shared_ptr<TextureShader> textureShader;
+	std::shared_ptr<MiniMapTextureShader> miniMapTextureShader;
 
 
 	//Objects
 	std::shared_ptr<CubeMesh> cubeMesh;
 	std::shared_ptr<SphereMesh> sphereMesh;
-	std::shared_ptr<OrthoMesh> orthoMeshTL;
-	std::shared_ptr<OrthoMesh> otherMeshTR;
+	std::shared_ptr<OrthoMesh> orthoMeshTR;
+	std::shared_ptr<OrthoMesh> orthoMeshMain;
 
 	//Lights
 	std::vector<std::shared_ptr<Light>> lights;
 	
 	//Materials
-	std::shared_ptr<Material> shapeTextureMaterial;
-	std::shared_ptr<Material> shapeAlbedoMaterial;
+	std::shared_ptr<Material> shapeMaterial;
 
 	//Textures
-	std::shared_ptr<RenderTexture> renderTextureTL;
 	std::shared_ptr<RenderTexture> renderTextureTR;
+	std::shared_ptr<RenderTexture> renderTextureMain;
 
 	//Cameras
-	std::shared_ptr<Camera> secondCamera;
+	std::shared_ptr<Camera> miniMapCamera;
 
 	XMFLOAT4 ambientLight;
 	uint32_t selectedLight;
+
+	float miniMapWidth;
+	float miniMapHeight;
+	float miniMapNearZ;
+	float miniMapFarZ;
+	XMFLOAT4 playerIconColour;
+	XMFLOAT3 greyScaleValues;
+	float playerIconRadius;
+	XMMATRIX orthographicProjectionMatrix;
 
 	std::string LightTypeStrings[3] =
 	{
@@ -62,6 +71,8 @@ private:
 		"point",
 		"spot"
 	};
+
+	std::string cameraScreenPos;
 };
 
 #endif

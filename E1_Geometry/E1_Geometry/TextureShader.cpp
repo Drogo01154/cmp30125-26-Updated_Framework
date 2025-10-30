@@ -65,5 +65,6 @@ void TextureShader::setShaderParameters(ID3D11DeviceContext* deviceContext, cons
 
 	// Set shader texture and sampler resource in the pixel shader.
 	deviceContext->PSSetShaderResources(0, 1, &texture);
-	deviceContext->PSSetSamplers(0, 1, &sampleState);
+	ID3D11SamplerState* sampler = sampleState.Get();
+	deviceContext->PSSetSamplers(0, 1, &sampler);
 }

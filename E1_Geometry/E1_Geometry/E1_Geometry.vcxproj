@@ -165,11 +165,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
+    <ClCompile Include="GreyScaleTextureShader.cpp" />
+    <ClCompile Include="GreyScaleTextureShader.h" />
     <ClCompile Include="HeightMapShader.cpp" />
-    <ClCompile Include="LightAlbedoShader.cpp" />
-    <ClCompile Include="LightTextureShader.cpp" />
+    <ClCompile Include="AlbedoLightShader.cpp" />
+    <ClCompile Include="TexturedLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
+    <ClCompile Include="MiniMapTextureShader.cpp" />
     <ClCompile Include="staticMeshComponent.h" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
@@ -198,10 +201,10 @@
       </ShaderModel>
       <FileType>Document</FileType>
     </None>
-    <FxCompile Include="shaders\lightAlbedo_ps.hlsl">
+    <FxCompile Include="shaders\albedoLight_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\lightTexture_ps.hlsl">
+    <FxCompile Include="shaders\texturedLight_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\light_vs.hlsl">
@@ -212,6 +215,12 @@
     </FxCompile>
     <FxCompile Include="shaders\manipulation_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\textureGreyscale_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\texture_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -227,10 +236,11 @@
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
-    <ClInclude Include="LightAlbedoShader.h" />
+    <ClInclude Include="AlbedoLightShader.h" />
     <ClInclude Include="LightsDataModule.h" />
-    <ClInclude Include="LightTextureShader.h" />
+    <ClInclude Include="TexturedLightShader.h" />
     <ClInclude Include="ManipulationShader.h" />
+    <ClInclude Include="MiniMapTextureShader.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="MatrixDataModule.h" />
   </ItemGroup>
