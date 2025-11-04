@@ -1,8 +1,23 @@
 #include "MiniMapTextureShader.h"
 
-MiniMapTextureShader::MiniMapTextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd)
+MiniMapTextureShader::MiniMapTextureShader(ID3D11Device* device, HWND hwnd, int screenWidth, int screenHeight) : 
+	BaseShader(device, hwnd), 
+	matrixDataModule(device, hwnd)
 {
+	screenSize = { float(screenWidth), float(screenHeight) };
 	initShader(L"texture_vs.cso", L"textureMiniMap_ps.cso");
+
+	miniMapWidth = 20.f;
+	miniMapHeight = 20.f;
+	miniMapNearZ = 0.1f;
+	miniMapFarZ = 100.f;
+
+	playerIconColour = XMFLOAT4(1.f, 0.0f, 0.0f, 1.0f);
+	playerIconRadius = 5.f;
+	greyScaleValues = { 0.299, 0.587, 0.114 };
+
+	//Calulcate the orthographic projection matrix
+	orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
 }
 
 
@@ -68,11 +83,43 @@ void MiniMapTextureShader::setShaderParameters(ID3D11DeviceContext* deviceContex
 	const XMMATRIX& viewMatrix,
 	const XMMATRIX& projectionMatrix,
 	ID3D11ShaderResourceView* texture,
-	const XMFLOAT3& cameraScreenPosition,
-	const XMFLOAT4& playerIconColour,
-	const XMFLOAT3& greyScaleValues,
-	float playerIconRadius)
+	Camera* camera,
+	Camera* miniMapCamera)
 {
+	XMFLOAT3 cameraPos = camera->getPosition();
+
+	XMVECTOR projectedPos = XMVector3Project(
+		XMLoadFloat3(&cameraPos),
+		0.0f, 0.0f,
+		screenSize.x,
+		screenSize.y,
+		0.0f,
+		1.0f,
+		orthographicProjectionMatrix,
+		miniMapCamera->getViewMatrix(),
+		XMMatrixIdentity()
+	);
+
+	XMFLOAT3 screenPos;
+	XMStoreFloat3(&screenPos, projectedPos);
+
+
+	//Calculate miniMap width and height
+	float miniMapWidth = screenSize.x / 4.f;
+	float miniMapHeight = screenSize.y / 4.f;
+
+	//Calculate offset to recentre minimmap
+	float xOffset = (screenSize.x - miniMapWidth) / 2.f;
+	float yOffset = (screenSize.y - miniMapHeight) / 2.f;
+
+	//Scale down target to minimap size and recentre
+	screenPos.x = screenPos.x / 4.f + xOffset;
+	screenPos.y = screenPos.y / 4.f + yOffset;
+
+	// Offset to top right of screen
+	screenPos.x += screenSize.x / 2.7f;
+	screenPos.y -= screenSize.y / 2.7f;
+
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	XMMATRIX tworld, tview, tproj;
@@ -90,7 +137,7 @@ void MiniMapTextureShader::setShaderParameters(ID3D11DeviceContext* deviceContex
 	miniMapPtr->playerIconColour = playerIconColour;
 	miniMapPtr->greyScaleValues = greyScaleValues;
 	miniMapPtr->playerIconRadius = playerIconRadius;
-	miniMapPtr->cameraPos = cameraScreenPosition;
+	miniMapPtr->cameraPos = screenPos;
 
 	deviceContext->Unmap(miniMapBuffer.Get(), 0);
 
@@ -101,4 +148,39 @@ void MiniMapTextureShader::setShaderParameters(ID3D11DeviceContext* deviceContex
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 	ID3D11SamplerState* sampleStatePtr = sampleState.Get();
 	deviceContext->PSSetSamplers(0, 1, &sampleStatePtr);
+}
+
+void MiniMapTextureShader::ImGuiMenu()
+{
+	if (ImGui::CollapsingHeader("MiniMapControl"))
+	{
+		if (ImGui::TreeNode("ProjectionMatrixSettings")) {
+			bool matrixUpdated = false;
+
+			if (ImGui::SliderFloat("orthoWidth: ", &miniMapWidth, 0.0f, 1000.f)) { matrixUpdated = true; }
+			if (ImGui::SliderFloat("orthoHeight: ", &miniMapHeight, 0.0f, 1000.f)) { matrixUpdated = true; }
+			if (ImGui::SliderFloat("orthoNearZ: ", &miniMapNearZ, 0.1f, 1000.f)) { matrixUpdated = true; }
+			if (ImGui::SliderFloat("orthoFarZ: ", &miniMapFarZ, 0.1f, 1000.f)) { matrixUpdated = true; }
+
+			if (matrixUpdated) {
+				//Calulcate the orthographic projection matrix
+				orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
+			}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Player Icon Control")) {
+			if (ImGui::TreeNode("Player Icon Colour")) {
+				if (ImGui::ColorPicker4("Icon Colour", &playerIconColour.x)) {}
+				ImGui::TreePop();
+			}
+			if (ImGui::SliderFloat("Icon Radius", &playerIconRadius, 1.f, 50.f)) {}
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("GreyScale Value")) {
+			if (ImGui::SliderFloat("Red Weight", &greyScaleValues.x, 0.0f, 1.0f)) {}
+			if (ImGui::SliderFloat("Green Weight", &greyScaleValues.y, 0.0f, 1.0f)) {}
+			if (ImGui::SliderFloat("Blue Weight", &greyScaleValues.z, 0.0f, 1.0f)) {}
+			ImGui::TreePop();
+		}
+	}
 }

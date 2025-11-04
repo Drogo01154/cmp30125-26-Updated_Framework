@@ -169,6 +169,7 @@
     <ClCompile Include="GreyScaleTextureShader.h" />
     <ClCompile Include="HeightMapShader.cpp" />
     <ClCompile Include="AlbedoLightShader.cpp" />
+    <ClCompile Include="KernelShader.cpp" />
     <ClCompile Include="TexturedLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
@@ -176,6 +177,9 @@
     <ClCompile Include="staticMeshComponent.h" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
+    <FxCompile Include="BoxBlur_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="colourGradient_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -188,6 +192,21 @@
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <FxCompile Include="Sharpen_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <None Include="kernel_ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <FxCompile Include="EdgeDetection_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Gaussian3X3_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Gaussian5X5_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\heightMap_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -237,6 +256,7 @@
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="AlbedoLightShader.h" />
+    <ClInclude Include="KernelShader.h" />
     <ClInclude Include="LightsDataModule.h" />
     <ClInclude Include="TexturedLightShader.h" />
     <ClInclude Include="ManipulationShader.h" />

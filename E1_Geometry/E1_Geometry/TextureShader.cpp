@@ -1,7 +1,5 @@
 #include "TextureShader.h"
 
-
-
 TextureShader::TextureShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd)
 {
 	initShader(L"texture_vs.cso", L"texture_ps.cso");

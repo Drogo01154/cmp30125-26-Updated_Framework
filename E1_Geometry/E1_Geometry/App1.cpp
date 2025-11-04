@@ -19,19 +19,6 @@ App1::App1()
 	selectedLight = -1;
 
 	miniMapCamera = nullptr;
-
-	miniMapWidth = 20.f;
-	miniMapHeight = 20.f;
-	miniMapNearZ = 0.1f;
-	miniMapFarZ = 100.f;
-
-	playerIconColour = XMFLOAT4(1.f, 0.0f, 0.0f, 1.0f);
-	playerIconRadius = 5.f;
-	greyScaleValues = { 0.299, 0.587, 0.114 };
-
-
-	//Calulcate the orthographic projection matrix
-	orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -53,7 +40,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Texture to output the result (we don't need to do lighting again, as it has already be calculated)
 	texturedLightShader = std::make_shared<TexturedLightShader>(renderer->getDevice(), textureMgr, hwnd);
 	textureShader = std::make_shared<TextureShader>(renderer->getDevice(), hwnd);
-	miniMapTextureShader = std::make_shared<MiniMapTextureShader>(renderer->getDevice(), hwnd);
+	miniMapTextureShader = std::make_shared<MiniMapTextureShader>(renderer->getDevice(), hwnd, screenWidth, screenHeight);
 
 
 	// Build RenderTexture, this will be our alternative render target.
@@ -140,7 +127,7 @@ void App1::firstPass()
 	// Get Matrices
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 	XMMATRIX viewMatrix = miniMapCamera->getViewMatrix();
-	XMMATRIX projectionMatrix = orthographicProjectionMatrix;
+	XMMATRIX projectionMatrix = miniMapTextureShader->getOrthographicMatrix();
 
 	// Render normal scene, with light shader set.
 	cubeMesh->sendData(renderer->getDeviceContext());
@@ -207,44 +194,8 @@ VOID App1::finalPass()
 	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureMain->getShaderResourceView());
 	textureShader->render(renderer->getDeviceContext(), orthoMeshMain->getIndexCount());
 
-	XMFLOAT3 cameraPos = camera->getPosition();
-
-	XMFLOAT2 screenSize = { float(sWidth), float(sHeight) };
-
-	XMVECTOR projectedPos = XMVector3Project(
-		XMLoadFloat3(&cameraPos),
-		0.0f, 0.0f,
-		screenSize.x,
-		screenSize.y,
-		0.0f,
-		1.0f,
-		orthographicProjectionMatrix,
-		miniMapCamera->getViewMatrix(),
-		XMMatrixIdentity()
-	);
-	XMFLOAT3 screenPos;
-	XMStoreFloat3(&screenPos, projectedPos);
-
-	//Calculate miniMap width and height
-	float miniMapWidth = screenSize.x / 4.f;
-	float miniMapHeight = screenSize.y / 4.f;
-
-	//Calculate offset to recentre minimmap
-	float xOffset = (screenSize.x - miniMapWidth) / 2.f;
-	float yOffset = (screenSize.y - miniMapHeight) / 2.f;
-
-	//Scale down target to minimap size and recentre
-	screenPos.x = screenPos.x / 4.f + xOffset;
-	screenPos.y = screenPos.y / 4.f + yOffset;
-
-	// Offset to top right of screen
-	screenPos.x += screenSize.x / 2.7f;
-	screenPos.y -= screenSize.y / 2.7f;
-
-	cameraScreenPos = "Screen Pos: X: " + std::to_string(screenPos.x) + " Y: " + std::to_string(screenPos.y) + " Z: " + std::to_string(screenPos.z);
-
 	orthoMeshTR->sendData(renderer->getDeviceContext());
-	miniMapTextureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTR->getShaderResourceView(), screenPos, playerIconColour, greyScaleValues, playerIconRadius);
+	miniMapTextureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTR->getShaderResourceView(), camera, miniMapCamera.get());
 	miniMapTextureShader->render(renderer->getDeviceContext(), orthoMeshTR->getIndexCount());
 
 	renderer->setZBuffer(true);
@@ -270,7 +221,6 @@ void App1::gui()
 	XMFLOAT3 camPos = camera->getPosition();
 	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
 	ImGui::Text(outputPos.c_str());
-	ImGui::Text(cameraScreenPos.c_str());
 
 	/*
 	if (ImGui::SliderInt("Resolution: ", &resolution, 2, 1000)) {
@@ -283,37 +233,7 @@ void App1::gui()
 
 	//Light ImGui
 
-	if (ImGui::CollapsingHeader("MiniMapControl"))
-	{
-		if (ImGui::TreeNode("ProjectionMatrixSettings")) {
-			bool matrixUpdated = false;
-
-			if (ImGui::SliderFloat("orthoWidth: ", &miniMapWidth, 0.0f, 1000.f)) { matrixUpdated = true; }
-			if (ImGui::SliderFloat("orthoHeight: ", &miniMapHeight, 0.0f, 1000.f)) { matrixUpdated = true; }
-			if (ImGui::SliderFloat("orthoNearZ: ", &miniMapNearZ, 0.1f, 1000.f)) { matrixUpdated = true; }
-			if (ImGui::SliderFloat("orthoFarZ: ", &miniMapFarZ, 0.1f, 1000.f)) { matrixUpdated = true; }
-
-			if(matrixUpdated) {
-				//Calulcate the orthographic projection matrix
-				orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
-			}
-			ImGui::TreePop();
-		}
-		if (ImGui::TreeNode("Player Icon Control")) {
-			if (ImGui::TreeNode("Player Icon Colour")) {
-				if (ImGui::ColorPicker4("Icon Colour", &playerIconColour.x)) {}
-				ImGui::TreePop();
-			}
-			if (ImGui::SliderFloat("Icon Radius", &playerIconRadius, 1.f, 50.f)) {}
-			ImGui::TreePop();
-		}
-		if (ImGui::TreeNode("GreyScale Value")) {
-			if (ImGui::SliderFloat("Red Weight", &greyScaleValues.x, 0.0f, 1.0f)) { }
-			if (ImGui::SliderFloat("Green Weight", &greyScaleValues.y, 0.0f, 1.0f)) { }
-			if (ImGui::SliderFloat("Blue Weight", &greyScaleValues.z, 0.0f, 1.0f)) { }
-			ImGui::TreePop();
-		}
-	}
+	miniMapTextureShader->ImGuiMenu();
 
 	if (ImGui::CollapsingHeader("Materials")) {
 

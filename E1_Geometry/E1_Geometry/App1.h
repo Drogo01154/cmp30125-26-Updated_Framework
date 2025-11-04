@@ -56,23 +56,12 @@ private:
 	XMFLOAT4 ambientLight;
 	uint32_t selectedLight;
 
-	float miniMapWidth;
-	float miniMapHeight;
-	float miniMapNearZ;
-	float miniMapFarZ;
-	XMFLOAT4 playerIconColour;
-	XMFLOAT3 greyScaleValues;
-	float playerIconRadius;
-	XMMATRIX orthographicProjectionMatrix;
-
 	std::string LightTypeStrings[3] =
 	{
 		"directional",
 		"point",
 		"spot"
 	};
-
-	std::string cameraScreenPos;
 };
 
 #endif

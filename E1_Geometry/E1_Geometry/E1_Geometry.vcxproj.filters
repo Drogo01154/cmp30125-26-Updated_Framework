@@ -43,9 +43,6 @@
     <Filter Include="Source Files\ShaderModules">
       <UniqueIdentifier>{14b53fd6-d159-498a-9f0e-b9d264a4dad1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Shaders\TesxtureShaders">
-      <UniqueIdentifier>{c39674f0-330a-488a-9a3e-5a9914ec23e7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Shaders\MeshShaders">
       <UniqueIdentifier>{9565f764-d8ac-4458-8240-078fcfe773a6}</UniqueIdentifier>
     </Filter>
@@ -60,6 +57,12 @@
     </Filter>
     <Filter Include="Header Files\Shaders\TextureShaders">
       <UniqueIdentifier>{fe88c998-6d8f-4dd5-b4c9-8b4ab2ae58ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Texture Shaders\KernelShaders">
+      <UniqueIdentifier>{941fd6ef-9a9b-4ae9-aa01-d3cf16f0055e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\TextureShaders">
+      <UniqueIdentifier>{c39674f0-330a-488a-9a3e-5a9914ec23e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -79,7 +82,7 @@
       <Filter>Source Files\ShaderModules</Filter>
     </ClCompile>
     <ClCompile Include="GreyScaleTextureShader.cpp">
-      <Filter>Source Files\Shaders\TesxtureShaders</Filter>
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
     <ClCompile Include="ColourShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders</Filter>
@@ -100,13 +103,16 @@
       <Filter>Source Files\Shaders\MeshShaders</Filter>
     </ClCompile>
     <ClCompile Include="MiniMapTextureShader.cpp">
-      <Filter>Source Files\Shaders\TesxtureShaders</Filter>
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
     <ClCompile Include="GreyScaleTextureShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClCompile>
     <ClCompile Include="TextureShader.cpp">
-      <Filter>Source Files\Shaders\TesxtureShaders</Filter>
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="KernelShader.cpp">
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="ManipulationShader.h">
       <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -196,10 +205,28 @@
     <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
       <Filter>Resource Files\Texture Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="BoxBlur_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Gaussian3X3_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Gaussian5X5_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="EdgeDetection_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Sharpen_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\lightCommon_ps.hlsl">
       <Filter>Resource Files\light shaders</Filter>
+    </None>
+    <None Include="kernel_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </None>
   </ItemGroup>
 </Project>
