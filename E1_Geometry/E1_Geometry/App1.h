@@ -33,7 +33,6 @@ private:
 	std::shared_ptr<TextureShader> textureShader;
 	std::shared_ptr<MiniMapTextureShader> miniMapTextureShader;
 
-
 	//Objects
 	std::shared_ptr<CubeMesh> cubeMesh;
 	std::shared_ptr<SphereMesh> sphereMesh;

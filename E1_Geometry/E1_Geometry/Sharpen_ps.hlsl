@@ -7,7 +7,6 @@ struct InputType
     float3 normal : NORMAL;
 };
 
-
 float4 main(InputType input) : SV_TARGET
 {
     static const float kernelWeights[9] =

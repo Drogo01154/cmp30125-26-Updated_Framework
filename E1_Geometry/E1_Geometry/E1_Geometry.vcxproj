@@ -253,16 +253,20 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
+    <ClInclude Include="GeometryManager.h" />
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="AlbedoLightShader.h" />
     <ClInclude Include="KernelShader.h" />
     <ClInclude Include="LightsDataModule.h" />
+    <ClInclude Include="RenderPass.h" />
+    <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="TexturedLightShader.h" />
     <ClInclude Include="ManipulationShader.h" />
     <ClInclude Include="MiniMapTextureShader.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="MatrixDataModule.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">
@@ -294,6 +298,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ProjectPlan.txt">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -64,6 +64,12 @@
     <Filter Include="Source Files\Shaders\TextureShaders">
       <UniqueIdentifier>{c39674f0-330a-488a-9a3e-5a9914ec23e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Managers">
+      <UniqueIdentifier>{d16629d1-0b23-4751-9648-5b4958ced940}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RendedPasses">
+      <UniqueIdentifier>{7a655bd7-3691-4ecc-9f6c-b884fa6e0589}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -158,6 +164,18 @@
     <ClInclude Include="KernelShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPassManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPass.h">
+      <Filter>Header Files\RendedPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">
@@ -228,5 +246,8 @@
     <None Include="kernel_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ProjectPlan.txt" />
   </ItemGroup>
 </Project>

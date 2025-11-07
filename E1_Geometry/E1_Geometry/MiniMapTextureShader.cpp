@@ -20,7 +20,6 @@ MiniMapTextureShader::MiniMapTextureShader(ID3D11Device* device, HWND hwnd, int 
 	orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
 }
 
-
 MiniMapTextureShader::~MiniMapTextureShader()
 {
 	// Release the layout.
@@ -131,15 +130,15 @@ void MiniMapTextureShader::setShaderParameters(ID3D11DeviceContext* deviceContex
 
 	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
 
-	miniMapDataType* miniMapPtr;
-	deviceContext->Map(miniMapBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	miniMapPtr = (miniMapDataType*)mappedResource.pData;
-	miniMapPtr->playerIconColour = playerIconColour;
-	miniMapPtr->greyScaleValues = greyScaleValues;
-	miniMapPtr->playerIconRadius = playerIconRadius;
-	miniMapPtr->cameraPos = screenPos;
+		miniMapDataType* miniMapPtr;
+		deviceContext->Map(miniMapBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		miniMapPtr = (miniMapDataType*)mappedResource.pData;
+		miniMapPtr->playerIconColour = playerIconColour;
+		miniMapPtr->greyScaleValues = greyScaleValues;
+		miniMapPtr->playerIconRadius = playerIconRadius;
+		miniMapPtr->cameraPos = screenPos;
 
-	deviceContext->Unmap(miniMapBuffer.Get(), 0);
+		deviceContext->Unmap(miniMapBuffer.Get(), 0);
 
 	ID3D11Buffer* miniMapBufferPtr = miniMapBuffer.Get();
 	deviceContext->PSSetConstantBuffers(0, 1, &miniMapBufferPtr);
