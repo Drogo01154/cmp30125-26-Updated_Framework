@@ -88,26 +88,6 @@ XMFLOAT3 QuaternionToEuler(const XMVECTOR& quat)
 	return angles;
 }
 
-XMVECTOR QuatLookAtLH(const XMVECTOR& forward, const XMVECTOR& up) {
-
-	XMVECTOR adjustedForward = XMVector3Normalize(forward);
-
-	if (XMVector3Equal(adjustedForward, up) || XMVector3Equal(adjustedForward, -up))
-		return XMQuaternionIdentity();
-
-	XMVECTOR right = XMVector3Normalize(XMVector3Cross(adjustedForward, up));
-	XMVECTOR adjustedUp = XMVector3Normalize(XMVector3Cross(adjustedForward, right));
-
-	XMMATRIX rotationMat = XMMATRIX(
-		right,			// x-axis
-		adjustedUp,		// y-axis
-		adjustedForward,		// z-axis
-		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f)
-	);
-
-	return XMQuaternionRotationMatrix(rotationMat);
-}
-
 
 #endif
 

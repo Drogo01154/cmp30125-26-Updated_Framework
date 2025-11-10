@@ -1,11 +1,9 @@
 #pragma once
 
 #include "DXF.h"
-#include <wrl/client.h>
 
 using namespace std;
 using namespace DirectX;
-using Microsoft::WRL::ComPtr;
 
 
 

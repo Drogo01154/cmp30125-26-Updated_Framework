@@ -195,12 +195,16 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="BaseMesh.h" />
     <ClInclude Include="BaseShader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Converters.h" />
     <ClInclude Include="CubeMesh.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="DXF.h" />
+    <ClInclude Include="FileHandler.h" />
     <ClInclude Include="FPCamera.h" />
+    <ClInclude Include="GeometryManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LRUCache.h" />
     <ClInclude Include="MathHelpers.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="OrthoMesh.h" />
@@ -235,6 +239,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="FPCamera.cpp" />
+    <ClCompile Include="GeometryManager.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Model.cpp" />

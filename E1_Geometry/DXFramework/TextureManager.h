@@ -7,6 +7,8 @@
 #define _TEXTUREMANAGER_H_
 
 #include <d3d11.h>
+#include "FileHandler.h"
+#include "LRUCache.h"
 //#include "../DirectXTK/Inc/DDSTextureLoader.h"
 //#include "../DirectXTK/Inc/WICTextureLoader.h"
 #include "DTK\include\DDSTextureLoader.h"
@@ -15,30 +17,37 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <wrl/client.h>
+
 //#include "Texture.h"
 
 using namespace DirectX;
+using Microsoft::WRL::ComPtr;
+
+struct TextureResource {
+	ComPtr<ID3D11ShaderResourceView> texture;
+	TextureResource(ComPtr<ID3D11ShaderResourceView> t) : texture(t) {}
+};
 
 class TextureManager
 {
 public:
 	TextureManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 	~TextureManager();
-
-	void loadTexture(const std::wstring& uid, const std::wstring& filename);
 	ID3D11ShaderResourceView* getTexture(const std::wstring& uid);
 
 private:
 	bool does_file_exist(const wchar_t *fileName);
-	void generateTexture(ID3D11Device* device);
+	//void generateTexture(ID3D11Device* device);
 	void addDefaultTexture();
+	std::shared_ptr<TextureResource> loadTexture(const std::wstring& uid, const std::wstring& filename);
 
-	ID3D11ShaderResourceView* texture;
+	void checkRemove(const std::wstring& uid); //Unloads texture if no more in scene
+	
 	ID3D11Device* device;
 	ID3D11DeviceContext* deviceContext;
-
-	std::map<std::wstring, ID3D11ShaderResourceView*> textureMap;
-	ID3D11Texture2D *pTexture;
+	LRUCache<std::wstring, std::shared_ptr<TextureResource>> textureLru;
+	std::map<std::wstring, std::shared_ptr<TextureResource>> textureMap;
 };
 
 #endif

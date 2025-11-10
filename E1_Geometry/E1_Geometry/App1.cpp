@@ -6,7 +6,6 @@
 
 App1::App1()
 {
-
 	cubeMesh = nullptr;
 	sphereMesh = nullptr;
 	sphereMesh = nullptr;
@@ -29,7 +28,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Create Mesh object and shader object
 	// Cube mesh is the geometry in the scene.
 	// Ortho mesh is the geometry we render the result to.
-	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
 	cubeMesh = make_shared<CubeMesh>(renderer->getDevice(), renderer->getDeviceContext());
 	sphereMesh = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
 	orthoMeshTR = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, screenWidth / 2.7f, screenHeight / 2.7f);
