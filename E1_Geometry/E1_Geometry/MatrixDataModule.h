@@ -3,11 +3,6 @@
 //Utilises buffer b0 for vertex shader
 
 #include "DXF.h"
-#include <wrl/client.h>
-
-using namespace std;
-using namespace DirectX;
-using Microsoft::WRL::ComPtr;
 
 //Common module for setting up vertex data buffer
 class MatrixDataModule : BaseShaderModule {

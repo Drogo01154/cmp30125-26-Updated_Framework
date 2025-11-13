@@ -2,13 +2,7 @@
 #pragma once
 
 #include "DXF.h"
-#include <wrl/client.h>
 #include "MatrixDataModule.h"
-
-using namespace std;
-using namespace DirectX;
-
-using Microsoft::WRL::ComPtr;
 
 class HeightMapShader : public BaseShader
 {

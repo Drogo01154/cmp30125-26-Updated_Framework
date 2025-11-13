@@ -91,17 +91,17 @@ std::shared_ptr<BaseMesh> GeometryManager::createAModel(const std::string& file)
 
 std::shared_ptr<BaseMesh> GeometryManager::createCubeMesh(int resolution) {
 	std::string uid = generateUID(MeshType::Cube, resolution);
-	return retrieveAdd(uid, [&]() { return std::make_shared<CubeMesh>(device); });
+	return retrieveAdd(uid, [&]() { return std::make_shared<CubeMesh>(device, deviceContext, resolution); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createModel(const std::string& file) {
 	std::string uid = generateUID(MeshType::Model, file);
-	return retrieveAdd(uid, [&]() { return std::make_shared<Model>(device, file.c_str()); });
+	return retrieveAdd(uid, [&]() { return std::make_shared<Model>(device, deviceContext, file.c_str()); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createOrthoMesh(int width, int height, int xPosition, int yPosition) {
 	std::string uid = generateUID(MeshType::Ortho, width, height, xPosition, yPosition);
-	return retrieveAdd(uid, [&]() { return std::make_shared<OrthoMesh>(device, deviceContext, width, height, xPosition, yPosition) });
+	return retrieveAdd(uid, [&]() { return std::make_shared<OrthoMesh>(device, deviceContext, width, height, xPosition, yPosition); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createPlaneMesh(int resolution) {
@@ -111,12 +111,12 @@ std::shared_ptr<BaseMesh> GeometryManager::createPlaneMesh(int resolution) {
 
 std::shared_ptr<BaseMesh> GeometryManager::createPointMesh() {
 	std::string uid = generateUID(MeshType::Point);
-	return retrieveAdd(uid, [&]() { return std::make_shared<PointMesh>(device); });
+	return retrieveAdd(uid, [&]() { return std::make_shared<PointMesh>(device, deviceContext); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createQuadMesh() {
 	std::string uid = generateUID(MeshType::Quad);
-	return retrieveAdd(uid, [&]() { return std::make_shared<QuadMesh>(device); });
+	return retrieveAdd(uid, [&]() { return std::make_shared<QuadMesh>(device, deviceContext); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createSphereMesh(int resolution) {
@@ -131,7 +131,7 @@ std::shared_ptr<BaseMesh> GeometryManager::createTesselationMesh() {
 
 std::shared_ptr<BaseMesh> GeometryManager::createTriangleMesh() {
 	std::string uid = generateUID(MeshType::Triangle);
-	return retrieveAdd(uid, [&]() { return std::make_shared<TriangleMesh>(device); });
+	return retrieveAdd(uid, [&]() { return std::make_shared<TriangleMesh>(device, deviceContext); });
 }
 
 void GeometryManager::checkRemove(const std::string& uid) {

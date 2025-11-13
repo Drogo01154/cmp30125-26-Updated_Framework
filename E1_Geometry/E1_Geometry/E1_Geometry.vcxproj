@@ -253,9 +253,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
-    <ClInclude Include="GeometryManager.h" />
     <ClInclude Include="HeightMapShader.h" />
-    <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="AlbedoLightShader.h" />
     <ClInclude Include="KernelShader.h" />
     <ClInclude Include="LightsDataModule.h" />
@@ -266,7 +264,6 @@
     <ClInclude Include="MiniMapTextureShader.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="MatrixDataModule.h" />
-    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">

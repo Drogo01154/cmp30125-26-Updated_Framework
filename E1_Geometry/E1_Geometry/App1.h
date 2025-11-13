@@ -61,6 +61,8 @@ private:
 		"point",
 		"spot"
 	};
+
+	Transform m_transform;
 };
 
 #endif

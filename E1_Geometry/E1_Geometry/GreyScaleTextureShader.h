@@ -3,9 +3,6 @@
 #include "BaseShader.h"
 #include "MatrixDataModule.h"
 
-using namespace std;
-using namespace DirectX;
-
 class GreyScaleTextureShader : public BaseShader
 {
 private:

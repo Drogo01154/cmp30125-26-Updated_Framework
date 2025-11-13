@@ -202,6 +202,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="FPCamera.h" />
     <ClInclude Include="GeometryManager.h" />
+    <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LRUCache.h" />
@@ -219,6 +220,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TokenStream.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="TriangleMesh.h" />
   </ItemGroup>
   <ItemGroup>

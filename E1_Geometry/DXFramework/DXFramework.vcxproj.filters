@@ -162,6 +162,12 @@
     <ClInclude Include="GeometryManager.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
+    <ClInclude Include="ImGuiHelpers.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseMesh.cpp">

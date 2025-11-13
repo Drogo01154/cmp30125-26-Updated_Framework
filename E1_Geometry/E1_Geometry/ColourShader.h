@@ -6,10 +6,6 @@
 #include "../DXFramework/BaseShader.h"
 #include "MatrixDataModule.h"
 
-using namespace std;
-using namespace DirectX;
-
-
 class ColourShader : public BaseShader
 {
 

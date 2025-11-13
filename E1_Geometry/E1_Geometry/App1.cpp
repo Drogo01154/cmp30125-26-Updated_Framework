@@ -1,8 +1,6 @@
 // Lab1.cpp
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
-#include "ImGuiHelpers.h"
-#include "MathHelpers.h"
 
 App1::App1()
 {
@@ -51,7 +49,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	shapeMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	shapeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	shapeMaterial->specularPower = 32.f;
-	shapeMaterial->texture = L"brick";
+	shapeMaterial->texture = L"brick1";
 
 	// Create light
 	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
@@ -64,7 +62,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	miniMapCamera->setRotation(90.0f, 0.0f, 0.0f);
 	miniMapCamera->setPosition(0.0f, 10.f, 0.0f);
 	miniMapCamera->update();
-
 
 	//camera->setPosition(35.f, 20.f, 0.f);
 }
@@ -132,7 +129,8 @@ void App1::firstPass()
 	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, miniMapCamera.get());
 	texturedLightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
 
-	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
+	//worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
+	worldMatrix = m_transform.AsMatrix();
 
 	sphereMesh->sendData(renderer->getDeviceContext());
 	Camera* c = miniMapCamera.get();
@@ -160,7 +158,7 @@ void App1::secondPass()
 	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
 	texturedLightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
 
-	worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
+	worldMatrix = m_transform.AsMatrix();
 
 	sphereMesh->sendData(renderer->getDeviceContext());
 	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
@@ -230,6 +228,8 @@ void App1::gui()
 	*/
 
 	//Light ImGui
+
+	TransformImGui("Object1 Transform", m_transform);
 
 	miniMapTextureShader->ImGuiMenu();
 

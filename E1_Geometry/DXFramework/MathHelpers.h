@@ -12,14 +12,14 @@ using namespace DirectX;
 
 
 
-XMFLOAT2 ToRadians(const XMFLOAT2& vec) {
+inline XMFLOAT2 ToRadians(const XMFLOAT2& vec) {
 	return {
 		XMConvertToRadians(vec.x),
 		XMConvertToRadians(vec.y)
 	};
 }
 
-XMFLOAT3 ToRadians(const XMFLOAT3& vec) {
+inline XMFLOAT3 ToRadians(const XMFLOAT3& vec) {
 	return {
 		XMConvertToRadians(vec.x),
 		XMConvertToRadians(vec.y),
@@ -27,7 +27,7 @@ XMFLOAT3 ToRadians(const XMFLOAT3& vec) {
 	};
 }
 
-XMFLOAT4 ToRadians(const XMFLOAT4& vec) {
+inline XMFLOAT4 ToRadians(const XMFLOAT4& vec) {
 	return {
 		XMConvertToRadians(vec.x),
 		XMConvertToRadians(vec.y),
@@ -36,14 +36,14 @@ XMFLOAT4 ToRadians(const XMFLOAT4& vec) {
 	};
 }
 
-XMFLOAT2 ToDegrees(const XMFLOAT2& vec) {
+inline XMFLOAT2 ToDegrees(const XMFLOAT2& vec) {
 	return {
 		XMConvertToRadians(vec.x),
 		XMConvertToRadians(vec.y)
 	};
 }
 
-XMFLOAT3 ToDegrees(const XMFLOAT3& vec) {
+inline XMFLOAT3 ToDegrees(const XMFLOAT3& vec) {
 	return {
 		XMConvertToDegrees(vec.x),
 		XMConvertToDegrees(vec.y),
@@ -51,7 +51,7 @@ XMFLOAT3 ToDegrees(const XMFLOAT3& vec) {
 	};
 }
 
-XMFLOAT4 ToDegrees(const XMFLOAT4& vec) {
+inline XMFLOAT4 ToDegrees(const XMFLOAT4& vec) {
 	return {
 		XMConvertToDegrees(vec.x),
 		XMConvertToDegrees(vec.y),
@@ -59,7 +59,7 @@ XMFLOAT4 ToDegrees(const XMFLOAT4& vec) {
 		XMConvertToDegrees(vec.w)
 	};
 }
-XMFLOAT3 QuaternionToEuler(const XMVECTOR& quat)
+inline XMFLOAT3 QuaternionToEuler(const XMVECTOR& quat)
 {
 	float x = XMVectorGetX(quat);
 	float y = XMVectorGetY(quat);
@@ -88,6 +88,23 @@ XMFLOAT3 QuaternionToEuler(const XMVECTOR& quat)
 	return angles;
 }
 
+inline XMVECTOR QuatLookAtLH(const XMVECTOR& forwardVector, const XMVECTOR& upVector) {
+	//Normalize forward
+	XMVECTOR forward = XMVector3Normalize(forwardVector);
+	// Compute right 
+	XMVECTOR right = XMVector3Normalize(XMVector3Cross(upVector, forward));
+	//Recompute orthogonal UP
+	XMVECTOR up = XMVector3Normalize(XMVector3Cross(forward, right));
+
+	//Build rotation matrix
+	XMMATRIX rotMat =  XMMATRIX(
+		right,
+		up,
+		forward,
+		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f));
+	//Convert and return as quaternion
+	return XMQuaternionRotationMatrix(rotMat);
+}
 
 #endif
 

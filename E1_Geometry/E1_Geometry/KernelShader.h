@@ -3,9 +3,6 @@
 #include "BaseShader.h"
 #include "MatrixDataModule.h"
 
-using namespace std;
-using namespace DirectX;
-
 enum KernelEffects {
 	BOX_BLUR,
 	EDGE_DETECTION,
