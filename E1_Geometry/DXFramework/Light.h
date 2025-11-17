@@ -15,7 +15,8 @@
 #define _LIGHT_H_
 
 // https://www.braynzarsoft.net/viewtutorial/q16390-21-spotlights
-#include <directxmath.h>
+#include "Transform.h"
+#include <span>
 
 using namespace DirectX;
 
@@ -24,12 +25,12 @@ enum lightTypes {
 	point,
 	spot
 };
-
+		
 class Light
 {
 
 public:
-	Light() = delete;
+	Light();
 	Light(lightTypes type);
 	
 	void* operator new(size_t i)
@@ -52,14 +53,6 @@ public:
 	void setAttenuation(const XMFLOAT4& attenuation);
 	void setDiffuseColour(float red, float green, float blue, float alpha);		///< Set diffuse colour RGBA
 	void setDiffuseColour(const XMFLOAT4& diffuseColour);						///< Set diffuse colour RGBA						
-	void setDirection(float x, float y, float z);								///< Set light direction (for directional and spot lights)
-	void setDirection(const XMFLOAT3& direction);								///< Set light direction (for directional and spot lights)
-	void setDirection(const XMVECTOR& direction);								///< Set light direction (for directional and spot lights)
-	void setDirectionEuler(float x, float y, float z);							///< Set light direction as euler angles (for directional and spot lights)
-	void setDirectionEuler(const XMFLOAT3& rotation);							///< Set light direction as euler angles (for directional and spot lights)
-	void setPosition(float x, float y, float z);								///< Set light position (for point and spot lights)
-	void setPosition(const XMFLOAT3& position);									///< Set light Position (for point and spot lights)
-	void setPosition(const XMVECTOR& position);									///< set light position (for point and spot lights)
 	void setLookAt(float x, float y, float z);									///< Set light lookAt (near deprecation)
 	void setLookAt(const XMFLOAT3& lookAt);										///< Set light lookAt (near deprecation)
 	void setInnerCone(float innerCone);											///< Set light inner cone (area lit up most)
@@ -68,33 +61,68 @@ public:
 	// Getters
 	const XMFLOAT4& getAttenuation() const;			///< Get attenuation, returns float4
 	const XMFLOAT4& getDiffuseColour() const;		///< Get diffuse colour, returns float4
-	XMFLOAT3 getDirection() const;					///< Get light direction, returns float3
-	XMVECTOR getDirectionVector() const;			///< Get light direction vector, returns XMVECTOR
-	XMFLOAT3 getDirectionNormalized() const;		///< Get light direction normalized, returns float3
-	XMFLOAT3 getDirectionEuler() const;				///< Get light direction as Euler angles, returns float3
-	XMFLOAT3 getPosition() const;					///< Get light position, returns XMVECTOR
-	XMVECTOR getPositionVector() const;				///< get light position, returns XMVECTOR
 	const XMMATRIX& getViewMatrix() const;			///< Get light view matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getProjectionMatrix() const;	///< Get light projection matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getOrthoMatrix() const;			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
+
+	void updateGlobals(bool updateTransform = true);	///> Set global values from transform and parent matrix
+	XMFLOAT3 getGlobalPosition() const;				///> Get lights global translation
+	XMFLOAT3 getGlobalDirection() const;			///> Get lights global rotation
+
 	float getInnerCone() const;						///< Get light Inner cone angle, returns float
 	float getOuterCone() const;						///< Get light Outer cone angle, returns float
 	lightTypes getType() const;						///< Get light type, returns enum
 
+	void ImGuiRender(size_t transformIncrement);
 
+	static std::span<const char* const> GetLightTypeStrings();
+
+	Transform m_transform;
 protected:
 	XMFLOAT4 attenuation; // Constant, Linear, Quadratic, Cutoff Distance
 	XMFLOAT4 diffuseColour;
-	XMVECTOR direction;
 	float innerCone;
-	XMVECTOR position;
 	XMMATRIX viewMatrix;
 	XMMATRIX projectionMatrix;
 	XMMATRIX orthoMatrix;
 	XMVECTOR lookAt;
+	XMVECTOR globalPosition;
+	XMVECTOR globalDirection;
 	
 	float outerCone;
 	lightTypes type;
 	float padding[2]; // pad to 16-byte boundary
+
+	inline static const char* LightTypeStrings[3] =
+	{
+		"directional",
+		"point",
+		"spot"
+	};
 };
+
+namespace nlohmann {
+	template<>
+	struct adl_serializer<Light> {
+		static void to_json(json& j, const Light& l) {
+			j["type"] = l.getType();
+			j["attenuation"] = l.getAttenuation();
+			j["diffuseColour"] = l.getDiffuseColour();
+			j["innerCone"] = l.getInnerCone();
+			j["outerCone"] = l.getOuterCone();
+			j["transform"] = l.m_transform;
+		}
+
+		static void from_json(const json& j, Light& l) {
+			l.setType(j.at("type").get<lightTypes>());
+			l.setAttenuation(j.at("attenuation").get<XMFLOAT4>());
+			l.setDiffuseColour(j.at("diffuseColour").get<XMFLOAT4>());
+			l.setInnerCone(j.at("innerCone").get<float>());
+			l.setOuterCone(j.at("outerCone").get<float>());
+			l.m_transform = j.at("transform").get<Transform>();
+		}
+	};
+}
+
+
 #endif

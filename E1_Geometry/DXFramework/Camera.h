@@ -12,7 +12,7 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-#include <directxmath.h>
+#include "transform.h"
 
 using namespace DirectX;
 
@@ -32,17 +32,24 @@ public:
 	Camera();	///< Initialised default camera object
 	~Camera();
 
-	void setPosition(float lx, float ly, float lz);		///< Set camera position directly
-	void setRotation(float lx, float ly, float lz);		///< Set camera rotation directly
+	XMFLOAT3 getGlobalPosition() const;		///< Get camera's current position
+	XMFLOAT3 getGlobalDirection() const;		///< Get camera's current rotation
 
-	XMFLOAT3 getPosition();		///< Get camera's current position
-	XMFLOAT3 getRotation();		///< Get camera's current rotation
+	void updateGlobals(bool updateTransform);
 
 	void update();				///< Update camera, recalculates view matrix based on rotation
 	XMMATRIX getViewMatrix();	///< Get current view matrix of camera
 	XMMATRIX getOrthoViewMatrix();	///< Get current orthographic view matrix for camera
 
 	void setFrameTime(float);
+	
+	float getSpeed() const;
+	float getLookSpeed() const;
+
+	void setSpeed(float speed);
+	void setLookSpeed(float speed);
+
+	void ImGuiRender(size_t transformIncrement);
 
 	void moveForward();			///< default function for moving forward
 	void moveBackward();		///< default function for moving backward
@@ -56,13 +63,32 @@ public:
 	void strafeLeft();			///< default function for moving left
 	void turn(int x, int y);	///< default function for turning in both x/y axis
 
+	Transform m_transform;
+
 private:
-	XMFLOAT3 position;		///< float3 for position
-	XMFLOAT3 rotation;		///< float3 for rotation (angles)
+	XMFLOAT3 globalPosition;		///< float3 for position
+	XMFLOAT3 globalDirection;		///< float3 for rotation (angles)
 	XMMATRIX viewMatrix;	///< matrix for current view
 	XMMATRIX orthoMatrix;	///< current orthographic matrix
 	float speed, frameTime;	///< movement speed and time variables
 	float lookSpeed;		///< rotation speed
 };
 
+
+namespace nlohmann {
+	template<>
+	struct adl_serializer<Camera> {
+		static void to_json(json& j, const Camera& c) {
+			j["transform"] = c.m_transform;
+			j["speed"] = c.getSpeed();
+			j["lookSpeed"] = c.getLookSpeed();
+		}
+
+		static void from_json(const json& j, Camera& c) {
+			c.m_transform = j.at("transform").get<Transform>();
+			c.setSpeed(j.at("speed").get<float>());
+			c.setLookSpeed(j.at("lookSpeed").get<float>());
+		}
+	};
+}
 #endif

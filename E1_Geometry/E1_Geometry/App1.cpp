@@ -55,6 +55,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
 	selectedLight = lights.size() - 1;
 	lights[0]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
+	lights[0]->m_transform.set
 	lights[0]->setDirection(0.7f, 0.0f, 0.7f);
 
 	//Create second camera
@@ -214,9 +215,8 @@ void App1::gui()
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 
-	XMFLOAT3 camPos = camera->getPosition();
-	std::string outputPos = "X: " + std::to_string(camPos.x) + " Y: " + std::to_string(camPos.y) + " Z: " + std::to_string(camPos.z);
-	ImGui::Text(outputPos.c_str());
+	XMFLOAT3 camPos = camera->getGlobalPosition();
+	
 
 	/*
 	if (ImGui::SliderInt("Resolution: ", &resolution, 2, 1000)) {
@@ -229,7 +229,7 @@ void App1::gui()
 
 	//Light ImGui
 
-	TransformImGui("Object1 Transform", m_transform);
+	m_transform.ImGuiRender("Object1 Transform");
 
 	miniMapTextureShader->ImGuiMenu();
 
@@ -277,72 +277,7 @@ void App1::gui()
 			if ((lights.size() > 1) && ArrowIterators("Selected_Light", selectedLight, (uint32_t)lights.size())) {}
 
 			if (selectedLight >= 0) {
-				std::shared_ptr<Light> light = lights[selectedLight];
-
-				//Light Settings
-				lightTypes type = light->getType();
-
-				ImGui::Text(("Light Type: " + LightTypeStrings[type]).c_str());
-
-				//Lights Diffuse Colour setting
-				XMFLOAT4 diffuse = light->getDiffuseColour();
-				if (ImGui::TreeNode("Light Diffuse Colour")) {
-					if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuse.x)) {
-						light->setDiffuseColour(diffuse);
-					}
-					ImGui::TreePop();
-				}
-
-				if (type != lightTypes::directional)
-				{
-					if (ImGui::TreeNode("Attenuation")) {
-						XMFLOAT4 attenuation = light->getAttenuation();
-						if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {
-							light->setAttenuation(attenuation);
-						}
-						if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) {
-							light->setAttenuation(attenuation);
-						}
-						if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {
-							light->setAttenuation(attenuation);
-						}
-						if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) {
-							light->setAttenuation(attenuation);
-						}
-						ImGui::TreePop();
-					}
-
-					//Lights Transform Settings
-					XMFLOAT3 position = light->getPosition();
-					if (ImGui::DragFloat3("Light Position: ", &position.x, 1.f)) {
-						light->setPosition(position);
-					}
-				}
-
-				if (type != lightTypes::point) {
-					XMFLOAT3 direction = ToDegrees(light->getDirectionEuler());
-					if (ImGui::DragFloat3("Light Direction Euler: ", &direction.x, 0.1f)) {
-						light->setDirectionEuler(ToRadians(direction));
-					}
-				}
-
-				if (type == lightTypes::spot) {
-					float test = light->getInnerCone();
-					float innerCone = light->getInnerCone();
-					if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {
-						light->setInnerCone(innerCone);
-					}
-					float outerCone = light->getOuterCone();
-					if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {
-						light->setOuterCone(outerCone);
-					}
-				}
-
-				if (ImGui::Button("Delete Light")) {
-					lights.erase(lights.begin() + selectedLight);
-					--selectedLight;
-					if (selectedLight < 0) { selectedLight = lights.size() - 1; }
-				}
+				
 			}
 			ImGui::TreePop();
 		}

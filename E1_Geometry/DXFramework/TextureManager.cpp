@@ -5,8 +5,8 @@
 #include "Converters.h"
 
 
- //Attempt to load texture. If load fails use default texture.
- //Based on extension, uses slightly different loading function for different image types .dds vs .png/.jpg.
+//Attempt to load texture. If load fails use default texture.
+//Based on extension, uses slightly different loading function for different image types .dds vs .png/.jpg.
 TextureManager::TextureManager(ID3D11Device* ldevice, ID3D11DeviceContext* ldeviceContext)
 {
 	device = ldevice;
@@ -78,7 +78,7 @@ std::shared_ptr<TextureResource> TextureManager::loadTexture(const std::wstring&
 TextureManager::~TextureManager() {}
 
 // Return texture as a shader resource.
-ID3D11ShaderResourceView* TextureManager::getTexture(const std::wstring& uid)
+std::shared_ptr<TextureResource> TextureManager::getTexture(const std::wstring& uid)
 {
 	//Attempt retrieval from LRU cache
 	std::shared_ptr<TextureResource> retrievedTexture = textureLru.get(uid);
@@ -105,7 +105,7 @@ ID3D11ShaderResourceView* TextureManager::getTexture(const std::wstring& uid)
 		}
 		textureLru.EmplaceReplace(uid, retrievedTexture); // Update LRU cache
 	}
-	return retrievedTexture->texture.Get();
+	return retrievedTexture;
 }
 
 bool TextureManager::does_file_exist(const wchar_t *fname)

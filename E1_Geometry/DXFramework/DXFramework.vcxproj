@@ -202,10 +202,13 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="FPCamera.h" />
     <ClInclude Include="GeometryManager.h" />
+    <ClInclude Include="IDMap.h" />
     <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="InstanceManager.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LRUCache.h" />
+    <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="MathHelpers.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="OrthoMesh.h" />
@@ -213,6 +216,9 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="QuadMesh.h" />
     <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="SceneGraph.h" />
+    <ClInclude Include="SerializationHelpers.h" />
+    <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="SphereMesh.h" />
     <ClInclude Include="System.h" />
@@ -243,6 +249,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClCompile Include="FPCamera.cpp" />
     <ClCompile Include="GeometryManager.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="InstanceManager.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoMesh.cpp" />

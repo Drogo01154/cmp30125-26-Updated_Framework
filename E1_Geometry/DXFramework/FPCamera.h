@@ -31,3 +31,20 @@ private:
 	POINT cursor;			///< Used for converting mouse coordinates for client to screen space
 	HWND wnd;				///< handle to the window
 };
+
+namespace nlohmann {
+	template<>
+	struct adl_serializer<FPCamera> {
+		static void to_json(json& j, const FPCamera& c) {
+			j["transform"] = c.m_transform;
+			j["speed"] = c.getSpeed();
+			j["lookSpeed"] = c.getLookSpeed();
+		}
+
+		static void from_json(const json& j, FPCamera& c) {
+			c.m_transform = j.at("transform").get<Transform>();
+			c.setSpeed(j.at("speed").get<float>());
+			c.setLookSpeed(j.at("lookSpeed").get<float>());
+		}
+	};
+}

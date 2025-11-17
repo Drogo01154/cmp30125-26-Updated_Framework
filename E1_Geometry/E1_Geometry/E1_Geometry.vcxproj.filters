@@ -161,10 +161,10 @@
     <ClInclude Include="KernelShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
-    <ClInclude Include="RenderPassManager.h">
-      <Filter>Header Files\Managers</Filter>
-    </ClInclude>
     <ClInclude Include="RenderPass.h">
+      <Filter>Header Files\RendedPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassManager.h">
       <Filter>Header Files\RendedPasses</Filter>
     </ClInclude>
   </ItemGroup>

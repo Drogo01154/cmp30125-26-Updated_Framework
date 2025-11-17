@@ -4,20 +4,29 @@
 
 //Constructor
 
+Light::Light() : Light(lightTypes::directional) {
+
+}
+
 Light::Light(lightTypes type) : 
 	attenuation(0.05f, 0.01f, 0.001f, 100.f),
 	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
-	direction(XMVectorSet(0.0f, -1.f, 0.0f, 1.0f)),
 	innerCone(XMConvertToRadians(20.f)),
-	position(XMVectorSet(35.0f, 30.0f, 25.0f, 1.0f)),
 	outerCone(XMConvertToRadians(40.f)),
-	type(type) {}
+	type(type) 
+{
+	m_transform.setPosition(35.f, 30.f, 25.f);
+
+	// create a target point by adding a downward direction to the position
+	XMVECTOR directionDown = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+	XMVECTOR target = XMVectorAdd(m_transform.GetTranslationVector(), directionDown);
+	m_transform.lookAt(target);
+}
 
 // create view matrix, based on light position and lookat. Used for shadow mapping.
 void Light::generateViewMatrix()
 {
-	XMFLOAT3 directionFloat = XMFLOAT3(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
-
+	XMFLOAT3 directionFloat = getGlobalDirection();
 	// default up vector
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	if (directionFloat.y == 1 || (directionFloat.x == 0 && directionFloat.z == 0))
@@ -33,7 +42,7 @@ void Light::generateViewMatrix()
 	XMVECTOR right = XMVector3Cross(dir, up);
 	up = XMVector3Cross(right, dir);
 	// Create the view matrix from the three vectors.
-	viewMatrix = XMMatrixLookAtLH(position, position + dir, up);
+	viewMatrix = XMMatrixLookAtLH(globalPosition, globalPosition + dir, up);
 }
 
 // Create a projection matrix for the (point) light source. Used in shadow mapping.
@@ -80,53 +89,6 @@ void Light::setDiffuseColour(const XMFLOAT4& diffuseColour)
 	this->diffuseColour = diffuseColour;
 }
 
-void Light::setDirection(float x, float y, float z)
-{
-	direction = XMVectorSet(x, y, z, 1.0f);
-}
-
-void Light::setDirection(const XMVECTOR& direction)
-{
-	this->direction = direction;
-}
-
-void Light::setDirection(const XMFLOAT3& direction)
-{
-	this->direction = XMVectorSet(direction.x, direction.y, direction.z, 1.0f);
-}
-
-void Light::setDirectionEuler(float x, float y, float z)
-{
-	float dirX = sinf(y) * cosf(x);
-	float dirY = -sinf(x);
-	float dirZ = cosf(y) * cosf(x);
-
-	direction = XMVectorSet(dirX, dirY, dirZ, 1.0f);
-}
-void Light::setDirectionEuler(const XMFLOAT3& rotation)
-{
-	float x = sinf(rotation.y) * cosf(rotation.x);
-	float y = -sinf(rotation.x);
-	float z = cosf(rotation.y) * cosf(rotation.x);
-
-	direction =  XMVectorSet(x, y, z, 1.0f);
-}
-
-void Light::setPosition(float x, float y, float z)
-{
-	position = XMVectorSet(x, y, z, 1.0f);
-}
-
-void Light::setPosition(const XMFLOAT3& position)
-{
-	this->position = XMVectorSet(position.x, position.y, position.z, 1.0f);
-}
-
-void Light::setPosition(const XMVECTOR& position)
-{
-	this->position = position;
-}
-
 void Light::setInnerCone(float innerCone)
 {
 	this->innerCone = innerCone;
@@ -146,8 +108,6 @@ void Light::setLookAt(const XMFLOAT3& lookAt)
 	this->lookAt = XMVectorSet(lookAt.x, lookAt.y, lookAt.z, 1.0f);
 }
 
-
-
 const XMFLOAT4& Light::getAttenuation() const
 {
 	return attenuation;
@@ -156,45 +116,6 @@ const XMFLOAT4& Light::getAttenuation() const
 const XMFLOAT4& Light::getDiffuseColour() const
 {
 	return diffuseColour;
-}
-
-
-XMFLOAT3 Light::getDirection() const
-{
-	return XMFLOAT3(XMVectorGetX(direction), XMVectorGetY(direction), XMVectorGetZ(direction));
-}
-
-XMVECTOR Light::getDirectionVector() const
-{
-	return direction;
-}
-
-XMFLOAT3 Light::getDirectionNormalized() const
-{
-	XMVECTOR normalizedDirection = XMVector3Normalize(direction);
-	return XMFLOAT3(XMVectorGetX(normalizedDirection), XMVectorGetY(normalizedDirection), XMVectorGetZ(normalizedDirection));
-}
-
-XMFLOAT3 Light::getDirectionEuler() const
-{
-	XMFLOAT3 angles;
-	XMFLOAT3 directionFloat = getDirection();
-	angles.y = atan2f(directionFloat.x, directionFloat.z); // Yaw
-	angles.x = asinf(-directionFloat.y);				   // Pitch
-	angles.z = 0.0f;									   // Roll - none for direction
-
-	return angles;
-}
-
-
-XMFLOAT3 Light::getPosition() const
-{
-	return XMFLOAT3(XMVectorGetX(position), XMVectorGetY(position), XMVectorGetZ(position));
-}
-
-XMVECTOR Light::getPositionVector() const
-{
-	return position;
 }
 
 float Light::getInnerCone() const
@@ -227,3 +148,54 @@ const XMMATRIX& Light::getOrthoMatrix() const
 	return orthoMatrix;
 }
 
+void Light::updateGlobals(bool updateTransform)
+{
+	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
+	XMMATRIX globalMatrix = m_transform.getGlobalMatrix();
+	XMVECTOR outTranslation, outRotation, outScale;
+	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
+
+	globalPosition = outTranslation;
+	globalDirection = m_transform.GetWorldForward();
+}
+XMFLOAT3 Light::getGlobalPosition() const 
+{
+	return XMFLOAT3(XMVectorGetX(globalPosition), XMVectorGetY(globalPosition), XMVectorGetZ(globalPosition));
+}
+XMFLOAT3 Light::getGlobalDirection() const
+{
+	return XMFLOAT3(XMVectorGetX(globalDirection), XMVectorGetY(globalDirection), XMVectorGetZ(globalDirection));
+}
+
+std::span<const char* const> Light::GetLightTypeStrings() {
+	return LightTypeStrings;
+}
+
+void Light::ImGuiRender(size_t transformIncrement) {
+
+	ImGui::Text(("Light Type: " + std::string(LightTypeStrings[type])).c_str());
+
+	//Lights Diffuse Colour setting
+	if (ImGui::TreeNode("Light Diffuse Colour")) {
+		if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuseColour.x)) {}
+		ImGui::TreePop();
+	}
+
+	m_transform.ImGuiRender("Light Transform: ", transformIncrement, type != lightTypes::directional, type != lightTypes::point, false);
+
+	if (type != lightTypes::directional)
+	{
+		if (ImGui::TreeNode("Attenuation")) {
+			if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {}
+			if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) {}
+			if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {}
+			if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) {}
+			ImGui::TreePop();
+		}
+	}
+
+	if (type == lightTypes::spot) {
+		if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {}
+		if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {}
+	}
+}

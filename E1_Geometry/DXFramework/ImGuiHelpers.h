@@ -6,9 +6,10 @@
 #pragma once
 
 #include "imgui/imgui.h"
+#include "MathHelpers.h"
 #include <vector>
 #include <string>
-#include "Transform.h"
+#include <unordered_map>
 
 using namespace DirectX;
 
@@ -253,14 +254,6 @@ inline bool ImGuiQuatEulerSlider3Radians(const char* label,
 		quat = newQuat;
 	}
 	return updated;
-}
-
-inline bool TransformImGui(const std::string& label, Transform& transform, bool editScale = true, int menuNum = 0) {
-	bool transformUpdated = false;
-	if (ImGuiDragXMVECTOR3(("Translation: ## " + std::to_string(menuNum)).c_str(), transform.translation)) { transformUpdated = true; }
-	if (ImGuiQuatEulerSlider3Degrees(("Rotation: ## " + std::to_string(menuNum)).c_str(), transform.rotation)) { transformUpdated = true; }
-	if (editScale && ImGuiDragXMVECTOR3(("Scale: ## " + std::to_string(menuNum)).c_str(), transform.scale)) { transformUpdated = true; }
-	return transformUpdated;
 }
 
 #endif

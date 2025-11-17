@@ -9,6 +9,7 @@
 #include <sstream>
 #include "assimp\Importer.hpp"      // C++ importer interface
 #include "Converters.h"
+#include <vector>
 
 namespace fs = std::filesystem;
 class FileHandler {
@@ -16,6 +17,9 @@ class FileHandler {
 
 	std::unordered_map<std::string, std::wstring> models;
 	std::unordered_map<std::wstring, std::wstring> images;
+
+	std::vector<const char*> imageList;
+	std::vector<const char*> modelList;
 	//inline static std::unordered_map<std::string, bool> scenes;
 
 	FileHandler() {
@@ -97,6 +101,7 @@ class FileHandler {
 							std::filesystem::path relativePath = fs::relative(entry.path(), _DirectoryPath).parent_path();
 							std::wstring inputPath = std::wstring(_DirectoryPath) + relativePath.wstring() + L"/";
 							models.emplace(stringName, inputPath);
+							modelList.push_back(stringName.c_str());
 						}
 						found = true;
 						break;
@@ -113,6 +118,7 @@ class FileHandler {
 							std::wstring inputPath = std::wstring(_DirectoryPath) + relativePath.wstring() + L"/";
 							inputPath = entry.path().wstring();
 							images.emplace(wstringName, inputPath);
+							imageList.push_back(stringName.c_str());
 						}
 						break;
 					}
@@ -133,6 +139,10 @@ public:
 	FileHandler& operator=(const FileHandler&) = delete;
 	FileHandler& operator=(FileHandler&&) = delete;
 
+	const std::vector<const char*>* getImageList() const { return &imageList; }
+	const std::vector<const char*>* getModelList() const { return &modelList; }
+
+
 	inline std::wstring* locateModel(const std::string& name) {
 		auto model = models.find(name);
 		if (model != models.end()) {
@@ -147,23 +157,6 @@ public:
 			return &image->second;
 		}
 		return nullptr;
-	}
-
-	inline void BuildModelList(std::vector<const char*>& vec) {
-		vec.clear();
-		vec.reserve(models.size());
-		for (const auto& model : models) {
-			vec.push_back(model.first.c_str());
-		}
-	}
-
-	inline void BuildImageList(std::vector<const char*>& vec) {
-		vec.clear();
-		vec.reserve(images.size());
-		for (const auto& image : images) {
-			
-			vec.push_back(Converters::convert_from_wstring(image.first).c_str());
-		}
 	}
 };
 

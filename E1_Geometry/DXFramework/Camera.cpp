@@ -5,9 +5,6 @@
 // Configure defaul camera (including positions, rotation and ortho matrix)
 Camera::Camera()
 {
-	position = XMFLOAT3(0.f, 0.f, 0.f);
-	rotation = XMFLOAT3(0.f, 0.f, 0.f);
-
 	lookSpeed = 4.0f;
 
 	// Generate ortho matrix
@@ -18,8 +15,35 @@ Camera::Camera()
 	orthoMatrix = XMMatrixLookAtLH(position, lookAt, up);
 }
 
-Camera::~Camera()
-{
+float Camera::getSpeed() const { return speed; }
+float Camera::getLookSpeed() const { return lookSpeed; }
+
+void Camera::setSpeed(float speed) { this->speed = speed; }
+void Camera::setLookSpeed(float speed) { this->lookSpeed = speed; }
+
+XMFLOAT3 Camera::getGlobalPosition() const {
+	return globalPosition;
+}
+XMFLOAT3 Camera::getGlobalDirection() const {
+	return globalDirection;
+}
+
+void Camera::ImGuiRender(size_t transformIterator) {
+
+	std::string outputPos = "X: " + std::to_string(globalPosition.x) + " Y: " + std::to_string(globalPosition.y) + " Z: " + std::to_string(globalPosition.z);
+	ImGui::Text(outputPos.c_str());
+
+	switch (type) {
+	case CameraTypes::BASIC:
+		if (m_transform.ImGuiRender("Camera Transform", transformIterator, true, true, false)) {
+			updateGlobals(true);
+		}
+		break;
+	case CameraTypes::FPCAMERA:
+		if(ImGui::SliderFloat("Speed", &speed, 0.1f, 100.f)) {}
+		if(ImGui::SliderFloat("Look Speed", &lookSpeed, 0.1f, 100.f)) {}
+		break;
+	}
 }
 
 // Store frame/delta time.
@@ -28,28 +52,15 @@ void Camera::setFrameTime(float t)
 	frameTime = t;
 }
 
-void Camera::setPosition(float lx, float ly, float lz)
-{
-	position.x = lx;
-	position.y = ly;
-	position.z = lz;
-}
+CameraTypes Camera::getCameraType() const { return type; }
 
-void Camera::setRotation(float lx, float ly, float lz)
-{
-	rotation.x = lx;
-	rotation.y = ly;
-	rotation.z = lz;
-}
-
-XMFLOAT3 Camera::getPosition()
-{
-	return position;
-}
-
-XMFLOAT3 Camera::getRotation()
-{
-	return rotation;
+void Camera::updateGlobals(bool updateTransform) {
+	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
+	XMMATRIX globalMatrix = m_transform.getGlobalMatrix();
+	XMVECTOR outTranslation, outRotation, outScale;
+	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
+	XMStoreFloat3(&globalPosition, outTranslation);
+	XMStoreFloat3(&globalDirection, m_transform.GetWorldForward());
 }
 
 // Re-calucation view Matrix.
@@ -61,13 +72,13 @@ void Camera::update()
 	
 	// Setup the vectors
 	up = XMVectorSet(0.0f, 1.0, 0.0, 1.0f);
-	positionv = XMLoadFloat3(&position);
+	positionv = XMLoadFloat3(&globalPosition);
 	lookAt = XMVectorSet(0.0, 0.0, 1.0f, 1.0f);
 	
 	// Set the yaw (Y axis), pitch (X axis), and roll (Z axis) rotations in radians.
-	pitch = rotation.x * 0.0174532f;
-	yaw = rotation.y * 0.0174532f;
-	roll = rotation.z * 0.0174532f;
+	pitch = globalDirection.x * 0.0174532f;
+	yaw = globalDirection.y * 0.0174532f;
+	roll = globalDirection.z * 0.0174532f;
 
 	// Create the rotation matrix from the yaw, pitch, and roll values.
 	rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
@@ -96,53 +107,62 @@ XMMATRIX Camera::getOrthoViewMatrix()
 
 void Camera::moveForward()
 {
-	float radians;
+	float speed = frameTime * 5.0f;
 
-	// Update the forward movement based on the frame time
-	speed = frameTime * 5.f;
-	
-	// Convert degrees to radians.
-	radians = rotation.y * 0.0174532f;
+	// Get forward vector from local transform
+	XMVECTOR forward = m_transform.GetWorldForward(); // Z axis
+	forward = XMVector3Normalize(forward);
 
-	// Update the position.
-	position.x += sinf(radians) * speed;
-	position.z += cosf(radians) * speed;
+	// Scale by speed
+	XMVECTOR delta = forward * speed;
+
+	// Apply translation
+	m_transform.translate(delta);
 }
 
 
 void Camera::moveBackward()
 {
-	float radians;
+	float speed = frameTime * 5.0f;
 
-	// Update the backward movement based on the frame time
-	speed = frameTime * 5.f;// *0.5f;
+	// Get forward vector from local transform
+	XMVECTOR forward = m_transform.GetWorldForward(); // Z axis
 
-	// Convert degrees to radians.
-	radians = rotation.y * 0.0174532f;
+	// Scale by speed
+	XMVECTOR delta = -forward * speed;
 
-	// Update the position.
-	position.x-= sinf(radians) * speed;
-	position.z -= cosf(radians) * speed;
+	// Apply translation
+	m_transform.translate(delta);
 }
 
 
 void Camera::moveUpward()
 {
-	// Update the upward movement based on the frame time
-	speed = frameTime * 5.f;// *0.5f;
-	
-	// Update the height position.
-	position.y += speed;
+	float speed = frameTime * 5.0f;
+
+	// Get up vector from local transform
+	XMVECTOR up = m_transform.GetWorldUp(); // Y axis
+
+	// Scale by speed
+	XMVECTOR delta = up * speed;
+
+	// Apply translation
+	m_transform.translate(delta);
 }
 
 
 void Camera::moveDownward()
 {
-	// Update the downward movement based on the frame time
-	speed = frameTime * 5.f;// *0.5f;
+	float speed = frameTime * 5.0f;
 
-	// Update the height position.
-	position.y -= speed;
+	// Get up vector from local transform
+	XMVECTOR up = m_transform.GetWorldUp(); // Y axis
+
+	// Scale by speed
+	XMVECTOR delta = -up * speed;
+
+	// Apply translation
+	m_transform.translate(delta);
 }
 
 
@@ -151,101 +171,66 @@ void Camera::turnLeft()
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
 	
-	// Update the rotation.
-	rotation.y -= speed;
-
-	// Keep the rotation in the 0 to 360 range.
-	if (rotation.y < 0.0f)
-	{
-		rotation.y += 360.0f;
-	}
+	m_transform.Rotate(XMFLOAT3(0.0f, -speed, 0.0f));
 }
 
 
 void Camera::turnRight()
 {
-	// Update the right turn movement based on the frame time
+	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
-	
-	// Update the rotation.
-	rotation.y += speed;
 
-	// Keep the rotation in the 0 to 360 range.
-	if (rotation.y > 360.0f)
-	{
-		rotation.y -= 360.0f;
-	}
-
+	m_transform.Rotate(XMFLOAT3(0.0f, speed, 0.0f));
 }
 
 
 void Camera::turnUp()
 {
-	// Update the upward rotation movement based on the frame time
+	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
-	
-	// Update the rotation.
-	rotation.x -= speed;
 
-	// Keep the rotation maximum 90 degrees.
-	if (rotation.x > 90.0f)
-	{
-		rotation.x = 90.0f;
-	}
+	m_transform.Rotate(XMFLOAT3(speed, 0.0f, 0.0f));
 }
 
 
 void Camera::turnDown()
 {
-	// Update the downward rotation movement based on the frame time
+	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
 
-	// Update the rotation.
-	rotation.x += speed;
-
-	// Keep the rotation maximum 90 degrees.
-	if (rotation.x < -90.0f)
-	{
-		rotation.x = -90.0f;
-	}
+	m_transform.Rotate(XMFLOAT3(-speed, 0.0f, 0.0f));
 }
 
 
 void Camera::turn(int x, int y)
 {
-	// Update the rotation.
-	rotation.y += (float)x/lookSpeed;// m_speed * x;
-
-	rotation.x += (float)y/lookSpeed;// m_speed * y;
+	m_transform.Rotate(XMFLOAT3((float)x / lookSpeed, (float)y / lookSpeed, 0.0f));
 }
 
 void Camera::strafeRight()
 {
-	float radians;
+	float speed = frameTime * 5.0f;
 
-	// Update the forward movement based on the frame time
-	speed = frameTime * 5.f;
+	// Get up vector from local transform
+	XMVECTOR right = m_transform.GetWorldRight(); // Y axis
 
-	// Convert degrees to radians.
-	radians = rotation.y * 0.0174532f;
+	// Scale by speed
+	XMVECTOR delta = right * speed;
 
-	// Update the position.
-	position.z -= sinf(radians) * speed;
-	position.x += cosf(radians) * speed;
-
+	// Apply translation
+	m_transform.translate(delta);
 }
 
 void Camera::strafeLeft()
 {
-	float radians;
+	float speed = frameTime * 5.0f;
 
-	// Update the forward movement based on the frame time
-	speed = frameTime * 5.f;
+	// Get up vector from local transform
+	XMVECTOR right = m_transform.GetWorldRight(); // Y axis
 
-	// Convert degrees to radians.
-	radians = rotation.y * 0.0174532f;
+	// Scale by speed
+	XMVECTOR delta = -right * speed;
 
-	// Update the position.
-	position.z += sinf(radians) * speed;
-	position.x -= cosf(radians) * speed;
+	// Apply translation
+	m_transform.translate(delta);
 }

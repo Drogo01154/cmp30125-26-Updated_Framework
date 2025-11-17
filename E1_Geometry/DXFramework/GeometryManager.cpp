@@ -35,40 +35,44 @@ std::shared_ptr<BaseMesh> GeometryManager::getMesh(const std::string& uid) {
 }
 
 std::string GeometryManager::generateUID(MeshType type) {
-	if (type == MeshType::Point || type == MeshType::Quad || type == MeshType::Tesselation || type == MeshType::Triangle) {
+	// For now, just return the mesh type string as UID for no-parameter meshes
+	switch (type) {
+	case MeshType::POINT:
+	case MeshType::QUAD:
+	case MeshType::TESSELATION:
+	case MeshType::TRIANGLE:
 		return std::string(meshTypeStrings[static_cast<int>(type)]);
-	}
-	else {
-		throw std::runtime_error("Error, type must be Point, Quad, Tesselation or Trinagle mesh!");
-		return "";
+	default:
+		throw std::runtime_error("Error, type must be Point, Quad, Tesselation or Triangle mesh!");
 	}
 }
 
 std::string GeometryManager::generateUID(MeshType type, const std::string& file) {
-	
-	if (type == MeshType::AModel || type == MeshType::Model) {
+	// For now, just return the mesh type string as UID for no-parameter meshes
+	switch (type) {
+	case MeshType::AMODEL:
+	case MeshType::MODEL:
 		return std::string(meshTypeStrings[static_cast<int>(type)]) + ": " + file;
-	}
-	else {
-		throw std::runtime_error("Error, type must be Point, Quad, Tesselation or Trinagle mesh!");
-		return "";
+	default:
+		throw std::runtime_error("Error, type must be AModel or Model mesh!");
 	}
 }
 
 std::string GeometryManager::generateUID(MeshType type, int resolution) {
-	if (type == MeshType::Cube || type == MeshType::Plane || type == MeshType::Sphere)
-	{
+	// For now, just return the mesh type string as UID for no-parameter meshes
+	switch (type) {
+	case MeshType::CUBE:
+	case MeshType::PLANE:
+	case MeshType::SPHERE:
 		return std::string(meshTypeStrings[static_cast<int>(type)]) + ": " + std::to_string(resolution);
-	}
-	else {
+	default:
 		throw std::runtime_error("Error, type must be Cube, Plane or Sphere mesh!");
-		return "";
 	}
 }
 std::string GeometryManager::generateUID(MeshType type, int width, int height, int xPosition, int yPosition) {
-	if (type != MeshType::Ortho) 
+	if (type != MeshType::ORTHO) 
 	{
-		throw std::runtime_error("Error, type must be ortho mesh!");
+		throw std::runtime_error("Error, type must be Ortho mesh!");
 		return ""; 
 	}
 	return std::string(meshTypeStrings[static_cast<int>(type)]) + ": " + std::to_string(width) + "_" + std::to_string(height) + "_" + std::to_string(xPosition) + "_" + std::to_string(yPosition);
@@ -85,53 +89,57 @@ std::shared_ptr<BaseMesh> GeometryManager::retrieveAdd(const std::string& uid, s
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createAModel(const std::string& file) {
-	std::string uid = generateUID(MeshType::AModel, file);
+	std::string uid = generateUID(MeshType::AMODEL, file);
 	return retrieveAdd(uid, [&]() { return std::make_shared<AModel>(device, file); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createCubeMesh(int resolution) {
-	std::string uid = generateUID(MeshType::Cube, resolution);
+	std::string uid = generateUID(MeshType::CUBE, resolution);
 	return retrieveAdd(uid, [&]() { return std::make_shared<CubeMesh>(device, deviceContext, resolution); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createModel(const std::string& file) {
-	std::string uid = generateUID(MeshType::Model, file);
+	std::string uid = generateUID(MeshType::MODEL, file);
 	return retrieveAdd(uid, [&]() { return std::make_shared<Model>(device, deviceContext, file.c_str()); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createOrthoMesh(int width, int height, int xPosition, int yPosition) {
-	std::string uid = generateUID(MeshType::Ortho, width, height, xPosition, yPosition);
+	std::string uid = generateUID(MeshType::ORTHO, width, height, xPosition, yPosition);
 	return retrieveAdd(uid, [&]() { return std::make_shared<OrthoMesh>(device, deviceContext, width, height, xPosition, yPosition); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createPlaneMesh(int resolution) {
-	std::string uid = generateUID(MeshType::Plane, resolution);
+	std::string uid = generateUID(MeshType::PLANE, resolution);
 	return retrieveAdd(uid, [&]() { return std::make_shared<PlaneMesh>(device, deviceContext, resolution); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createPointMesh() {
-	std::string uid = generateUID(MeshType::Point);
+	std::string uid = generateUID(MeshType::POINT);
 	return retrieveAdd(uid, [&]() { return std::make_shared<PointMesh>(device, deviceContext); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createQuadMesh() {
-	std::string uid = generateUID(MeshType::Quad);
+	std::string uid = generateUID(MeshType::QUAD);
 	return retrieveAdd(uid, [&]() { return std::make_shared<QuadMesh>(device, deviceContext); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createSphereMesh(int resolution) {
-	std::string uid = generateUID(MeshType::Sphere, resolution);
+	std::string uid = generateUID(MeshType::SPHERE, resolution);
 	return retrieveAdd(uid, [&]() { return std::make_shared<SphereMesh>(device, deviceContext, resolution); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createTesselationMesh() {
-	std::string uid = generateUID(MeshType::Tesselation);
+	std::string uid = generateUID(MeshType::TESSELATION);
 	return retrieveAdd(uid, [&]() { return  std::make_shared<TessellationMesh>(device, deviceContext); });
 }
 
 std::shared_ptr<BaseMesh> GeometryManager::createTriangleMesh() {
-	std::string uid = generateUID(MeshType::Triangle);
+	std::string uid = generateUID(MeshType::TRIANGLE);
 	return retrieveAdd(uid, [&]() { return std::make_shared<TriangleMesh>(device, deviceContext); });
+}
+
+std::span<const char* const> GeometryManager::GetMeshTypeStrings() {
+	return meshTypeStrings;
 }
 
 void GeometryManager::checkRemove(const std::string& uid) {

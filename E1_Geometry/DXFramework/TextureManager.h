@@ -34,15 +34,15 @@ class TextureManager
 public:
 	TextureManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 	~TextureManager();
-	ID3D11ShaderResourceView* getTexture(const std::wstring& uid);
-
+	std::shared_ptr<TextureResource> getTexture(const std::wstring& uid);
+	void checkRemove(const std::wstring& uid); //Unloads texture if no more in scene
 private:
 	bool does_file_exist(const wchar_t *fileName);
 	//void generateTexture(ID3D11Device* device);
 	void addDefaultTexture();
 	std::shared_ptr<TextureResource> loadTexture(const std::wstring& uid, const std::wstring& filename);
 
-	void checkRemove(const std::wstring& uid); //Unloads texture if no more in scene
+	
 	
 	ID3D11Device* device;
 	ID3D11DeviceContext* deviceContext;

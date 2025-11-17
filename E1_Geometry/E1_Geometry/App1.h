@@ -55,13 +55,6 @@ private:
 	XMFLOAT4 ambientLight;
 	uint32_t selectedLight;
 
-	std::string LightTypeStrings[3] =
-	{
-		"directional",
-		"point",
-		"spot"
-	};
-
 	Transform m_transform;
 };
 
