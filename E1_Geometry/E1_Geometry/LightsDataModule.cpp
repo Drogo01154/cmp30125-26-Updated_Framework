@@ -1,9 +1,8 @@
 #include "LightsDataModule.h"
 
-LightsDataModule::LightsDataModule(ID3D11Device* device, HWND hwnd) : BaseShaderModule(device, hwnd) {
+LightsDataModule::LightsDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager) : BaseShaderModule(device, hwnd), instanceManager(instanceManager) {
 	lightBufferSRV = nullptr;
 	lightsBuffer = nullptr;
-	sceneDataBuffer = nullptr;
 	maxLights = 10;
 }
 
@@ -41,23 +40,13 @@ void LightsDataModule::setLightsBuffer() {
 }
 
 void LightsDataModule::initModule() {
-	D3D11_BUFFER_DESC sceneDataBufferDesc;
-
-	// Setup the description of the dynamic world data constant buffer that is used in the pixel shader. 
-	sceneDataBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	sceneDataBufferDesc.ByteWidth = sizeof(SceneBufferType);
-	sceneDataBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	sceneDataBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	sceneDataBufferDesc.MiscFlags = 0;
-	sceneDataBufferDesc.StructureByteStride = 0;
-	renderer->CreateBuffer(&sceneDataBufferDesc, NULL, sceneDataBuffer.GetAddressOf());
 	setLightsBuffer();
 }
 
-void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, std::shared_ptr<Material> material, std::vector<std::shared_ptr<Light>>& lights, const XMFLOAT4& ambient) {
+void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
 	
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	int numLights = lights.size();
+	int numLights = instanceManager->getNumberOfLights();
 
 	if (numLights > maxLights * expandThreshold) {
 		maxLights *= 2;
@@ -68,46 +57,28 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, s
 		setLightsBuffer();
 	}
 
-	// Send world data to pixel shader
-	SceneBufferType* scenePtr;
-	deviceContext->Map(sceneDataBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	scenePtr = (SceneBufferType*)mappedResource.pData;
-	scenePtr->baseColour = material->baseColour;
-	scenePtr->ambientLight = ambient;
-	scenePtr->numberOfLights = numLights;
-	scenePtr->specular = material->specularColour;
-	scenePtr->specularPower = material->specularPower;
-
-	deviceContext->Unmap(sceneDataBuffer.Get(), 0);
-	ID3D11Buffer* sceneDataBufferPtr = sceneDataBuffer.Get();
-	deviceContext->PSSetConstantBuffers(0, 1, &sceneDataBufferPtr);
-
 	// Send light data to pixel shader
 	LightBufferType* lightPtr;
 	deviceContext->Map(lightsBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
 	lightPtr = (LightBufferType*)mappedResource.pData;
 
-	for (int i = 0; i < maxLights; i++)
-	{
-		if (i < lights.size())
-		{
-			lightPtr[i].attenuation = lights[i]->getAttenuation();
-			lightPtr[i].position = lights[i]->getPosition();
-			lightPtr[i].direction = lights[i]->getDirectionNormalized();
-			lightPtr[i].innerCone = cos(lights[i]->getInnerCone());
-			lightPtr[i].outerCone = cos(lights[i]->getOuterCone());
-			lightPtr[i].diffuse = lights[i]->getDiffuseColour();
-			lightPtr[i].type = static_cast<int>(lights[i]->getType());
-		}
-		else {
-			// Zero out the remaining lights
-			lightPtr[i] = {};
-		}
-	}
+	int i = 0;
+	instanceManager->forEachLight([&](size_t id, std::shared_ptr<Light>& light) {
+		lightPtr[i].attenuation = light->getAttenuation();
+		lightPtr[i].position = light->getGlobalPosition();
+		lightPtr[i].direction = light->getGlobalDirection();
+		lightPtr[i].innerCone = cos(light->getInnerCone());
+		lightPtr[i].outerCone = cos(light->getOuterCone());
+		lightPtr[i].diffuse = light->getDiffuseColour();
+		lightPtr[i].type = static_cast<int>(light->getType());
+		i++;
+		});
 
 	deviceContext->Unmap(lightsBuffer.Get(), 0);
+}
+
+void LightsDataModule::setResources(ID3D11DeviceContext* deviceContext) {
 	ID3D11ShaderResourceView* lightBufferSRVPtr = lightBufferSRV.Get();
 	deviceContext->PSSetShaderResources(0, 1, &lightBufferSRVPtr);
-
 }

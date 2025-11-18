@@ -73,7 +73,7 @@ public:
 	float getOuterCone() const;						///< Get light Outer cone angle, returns float
 	lightTypes getType() const;						///< Get light type, returns enum
 
-	void ImGuiRender(size_t transformIncrement);
+	void imGuiRender(size_t transformIncrement);
 
 	static std::span<const char* const> GetLightTypeStrings();
 

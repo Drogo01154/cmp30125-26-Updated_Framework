@@ -27,6 +27,8 @@ const float SCREEN_NEAR = 0.1f;		//0.1f
 #include "imGUI/imgui_impl_dx11.h"
 #include "imGUI/imgui_impl_win32.h"
 #include "TextureManager.h"
+#include "SceneGraph.h"
+#include "ShaderManager.h"
 
 
 class BaseApplication
@@ -73,7 +75,12 @@ protected:
 	D3D* renderer;			///< Pointer to renderer
 	FPCamera* camera;			///< Pointer to camera object
 	Timer* timer;			///< Pointer to timer object (for delta time and FPS)
-	TextureManager* textureMgr;	///< Pointer to texture manager (handles loading and storing of textures)
+	std::unique_ptr<ShaderManager> shaderMgr;
+	std::unique_ptr<TextureManager> textureMgr;
+	std::unique_ptr<MaterialManager> materialMgr;
+	std::unique_ptr<GeometryManager> geometryMgr;
+	std::unique_ptr<InstanceManager> instanceMgr;
+	std::unique_ptr<SceneGraph> sceneGraph;
 	bool wireframeToggle;	///< Boolean tracking if wireframe is de/activated
 };
 

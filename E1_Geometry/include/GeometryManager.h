@@ -11,19 +11,21 @@
 #include <array>
 #include <string>
 #include <functional>
+#include <span>
+#include <unordered_set>
 
-enum class MeshType
+enum class MeshType : uint8_t
 {
-	AModel,
-	Cube,
-	Model,
-	Ortho,
-	Plane,
-	Point,
-	Quad,
-	Sphere,
-	Tesselation,
-	Triangle
+	AMODEL,				// String Paramater
+	MODEL,				// String Paramater
+	POINT,			// No Paramater
+	QUAD,			// No Paramater
+	TESSELATION,	// No Paramater
+	TRIANGLE,			// No Paramater
+	CUBE,				// int Paramater
+	PLANE,				// int paramater
+	SPHERE,				// int paramater
+	ORTHO				// four int paramater
 };
 
 struct MeshData {
@@ -34,6 +36,11 @@ struct MeshData {
 class GeometryManager {
 public:
 	GeometryManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+
+	std::string generateUID(MeshType type);
+	std::string generateUID(MeshType type, const std::string& file);
+	std::string generateUID(MeshType type, int resolution);
+	std::string generateUID(MeshType type, int width, int height, int xPosition, int yPosition);
 
 	std::shared_ptr<BaseMesh> getMesh(const std::string& uid);
 
@@ -48,29 +55,25 @@ public:
 	std::shared_ptr<BaseMesh> createTesselationMesh();
 	std::shared_ptr<BaseMesh> createTriangleMesh();
 
-	void checkRemove(const std::string& uid); //Unloads esh if no more in scene
+	void checkRemove(const std::string& uid); //Unloads mesh if no more in scene
+	 
+	std::span<const char* const> GetMeshTypeStrings();
 
 private:
-
-	std::string generateUID(MeshType type);
-	std::string generateUID(MeshType type, const std::string& file);
-	std::string generateUID(MeshType type, int resolution);
-	std::string generateUID(MeshType type, int width, int height, int xPosition, int yPosition);
-
 	std::shared_ptr<BaseMesh> retrieveAdd(const std::string& uid, std::function<std::shared_ptr<BaseMesh>()> createFunc);
 	std::shared_ptr<BaseMesh> addMesh(std::shared_ptr<BaseMesh>, std::string uid);
 
 	inline static const char* meshTypeStrings[10] = {
 		"AModel",
-		"Cube",
 		"Model",
-		"Ortho",
-		"Plane",
 		"Point",
 		"Quad",
-		"Sphere",
 		"Tesselation",
-		"Triangle"
+		"Triangle",
+		"Cube",
+		"Plane",
+		"Sphere",
+		"Ortho"
 	};
 
 	ID3D11Device* device;

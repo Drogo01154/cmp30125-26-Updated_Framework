@@ -19,7 +19,7 @@ Light::Light(lightTypes type) :
 
 	// create a target point by adding a downward direction to the position
 	XMVECTOR directionDown = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-	XMVECTOR target = XMVectorAdd(m_transform.GetTranslationVector(), directionDown);
+	XMVECTOR target = XMVectorAdd(m_transform.getTranslationVector(), directionDown);
 	m_transform.lookAt(target);
 }
 
@@ -156,7 +156,7 @@ void Light::updateGlobals(bool updateTransform)
 	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
 
 	globalPosition = outTranslation;
-	globalDirection = m_transform.GetWorldForward();
+	globalDirection = m_transform.getWorldForward();
 }
 XMFLOAT3 Light::getGlobalPosition() const 
 {
@@ -171,7 +171,7 @@ std::span<const char* const> Light::GetLightTypeStrings() {
 	return LightTypeStrings;
 }
 
-void Light::ImGuiRender(size_t transformIncrement) {
+void Light::imGuiRender(size_t transformIncrement) {
 
 	ImGui::Text(("Light Type: " + std::string(LightTypeStrings[type])).c_str());
 
@@ -181,7 +181,10 @@ void Light::ImGuiRender(size_t transformIncrement) {
 		ImGui::TreePop();
 	}
 
-	m_transform.ImGuiRender("Light Transform: ", transformIncrement, type != lightTypes::directional, type != lightTypes::point, false);
+	if (m_transform.imGuiRender("Light Transform: ", transformIncrement, type != lightTypes::directional, type != lightTypes::point, false))
+	{
+		updateGlobals(true);
+	}
 
 	if (type != lightTypes::directional)
 	{

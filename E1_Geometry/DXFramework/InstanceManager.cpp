@@ -8,7 +8,6 @@ InstanceManager::InstanceManager(GeometryManager* geometryManager, MaterialManag
 	screenWidth(screenWidth),
 	screenHeight(screenHeight)
 {
-	
 }
 
 std::weak_ptr<GeometryInstance> InstanceManager::getGeometryInstance(size_t ID) {
@@ -17,8 +16,8 @@ std::weak_ptr<GeometryInstance> InstanceManager::getGeometryInstance(size_t ID) 
 std::weak_ptr<Light> InstanceManager::getLightInstance(size_t ID) {
 	return lightInstances.getID(ID);
 }
-std::weak_ptr<Camera> InstanceManager::getCameraInstance(size_t ID) {
-	return cameraInstances.getID(ID)->camera;
+std::weak_ptr<CameraInstance> InstanceManager::getCameraInstance(size_t ID) {
+	return cameraInstances.getID(ID);
 }
 
 std::string InstanceManager::buildMeshUID(std::weak_ptr<GeometryInstance> instance) {
@@ -70,13 +69,16 @@ void InstanceManager::removeCameraInstance(size_t ID) {
 	cameraInstances.eraseID(ID);
 }
 
+size_t InstanceManager::getNumberOfLights() { return lightInstances.size(); }
+size_t InstanceManager::getNumberOfMeshes() { return geometryInstances.size(); }
+size_t InstanceManager::getNumberOfCameras() { return cameraInstances.size(); }
+
 void InstanceManager::clearGeometry() {
 	geometryInstances.forEach([&](size_t id, std::shared_ptr<GeometryInstance>& val) {
 		val->mat = nullptr;
 		val->mesh = nullptr;
 		materialManager->removeMaterialReference(val->materialID);
 		geometryManager->checkRemove(buildMeshUID(val));
-
 		});
 	geometryInstances.clear();
 }
@@ -108,7 +110,7 @@ std::weak_ptr<GeometryInstance> InstanceManager::createAModelInstance(size_t& in
 	newInstance->params.emplace("ModelFile", file);
 	return newInstance;
 }
-std::weak_ptr<GeometryInstance> InstanceManager::createCubeMeshInstance(size_t& instanceID, int resolution = 20) {
+std::weak_ptr<GeometryInstance> InstanceManager::createCubeMeshInstance(size_t& instanceID, int resolution) {
 	std::shared_ptr<GeometryInstance> newInstance = createGeometryInstance(instanceID, MeshType::CUBE, geometryManager->createCubeMesh(resolution));
 	newInstance->params.emplace("Resolution", resolution);
 	return newInstance;
@@ -118,7 +120,7 @@ std::weak_ptr<GeometryInstance> InstanceManager::createModelInstance(size_t& ins
 	newInstance->params.emplace("ModelFile", file);
 	return newInstance;
 }
-std::weak_ptr<GeometryInstance> InstanceManager::createOrthoMeshInstance(size_t& instanceID, int width, int height, int xPosition = 0, int yPosition = 0) {
+std::weak_ptr<GeometryInstance> InstanceManager::createOrthoMeshInstance(size_t& instanceID, int width, int height, int xPosition, int yPosition) {
 	std::shared_ptr<GeometryInstance> newInstance = createGeometryInstance(instanceID, MeshType::CUBE, geometryManager->createOrthoMesh(width, height, xPosition, yPosition));
 	newInstance->params.emplace("Width", width);
 	newInstance->params.emplace("Height", height);
@@ -126,7 +128,7 @@ std::weak_ptr<GeometryInstance> InstanceManager::createOrthoMeshInstance(size_t&
 	newInstance->params.emplace("YPosition", yPosition);
 	return newInstance;
 }
-std::weak_ptr<GeometryInstance> InstanceManager::createPlaneMeshInstance(size_t& instanceID, int resolution = 20) {
+std::weak_ptr<GeometryInstance> InstanceManager::createPlaneMeshInstance(size_t& instanceID, int resolution) {
 	std::shared_ptr<GeometryInstance> newInstance = createGeometryInstance(instanceID, MeshType::PLANE, geometryManager->createPlaneMesh(resolution));
 	newInstance->params.emplace("Resolution", resolution);
 	return newInstance;
@@ -139,7 +141,7 @@ std::weak_ptr<GeometryInstance> InstanceManager::createQuadMeshInstance(size_t& 
 	std::shared_ptr<GeometryInstance> newInstance = createGeometryInstance(instanceID, MeshType::QUAD, geometryManager->createQuadMesh());
 	return newInstance;
 }
-std::weak_ptr<GeometryInstance> InstanceManager::createSphereMeshInstance(size_t& instanceID, int resolution = 20) {
+std::weak_ptr<GeometryInstance> InstanceManager::createSphereMeshInstance(size_t& instanceID, int resolution) {
 	std::shared_ptr<GeometryInstance> newInstance = createGeometryInstance(instanceID, MeshType::SPHERE, geometryManager->createSphereMesh(resolution));
 	newInstance->params.emplace("Resolution", resolution);
 	return newInstance;
@@ -171,6 +173,21 @@ std::pair<size_t, std::shared_ptr<CameraInstance>> InstanceManager::createFPCame
 	newInstance.second->camera = std::make_shared<Camera>(FPCamera(input, screenWidth, screenHeight, hwnd));
 	return newInstance;
 }
+
+std::shared_ptr<CameraInstance> InstanceManager::getActiveCamera() {
+	return activeCamera;
+}
+void InstanceManager::setActiveCamera(size_t ID) {
+	if (auto camera = cameraInstances.getID(ID))
+	{
+		activeCamera = camera;
+		activeCameraID = ID;
+	}
+	else {
+		throw std::runtime_error("Error: Camera does not exist at ID: " + std::to_string(ID));
+	}
+}
+
 
 void InstanceManager::to_json(nlohmann::json& j) {
 	//Set j as object

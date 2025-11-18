@@ -1,6 +1,13 @@
 #include "albedoLightShader.h"
-AlbedoLightShader::AlbedoLightShader(ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd), lightsDataModule(device, hwnd)
+AlbedoLightShader::AlbedoLightShader(ShaderManager* shaderManager, InstanceManager* instanceManager, ID3D11Device* device, HWND hwnd) :
+	BaseShader(device, hwnd),
+	shaderManager(shaderManager),
+	instanceManager(instanceManager)
+
 {
+	size_t matrixModuleID = shaderManager->getShaderModuleID("MatrixDataModule");
+	matrixDataModule = std::dynamic_pointer_cast<MatrixDataModule>(shaderManager->getShaderModule(matrixModuleID));
+	shaderManager->addShaderModuleInstanceReference(matrixModuleID);
 	initShader(L"light_vs.cso", L"albedoLight_ps.cso");
 }
 
@@ -28,9 +35,6 @@ void AlbedoLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psF
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
 
-	matrixDataModule.initModule();
-
-
 	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
 	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
@@ -43,8 +47,6 @@ void AlbedoLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psF
 	{
 		assert(false);
 	}
-
-	lightsDataModule.initModule();
 }
 
 void AlbedoLightShader::setShaderParamaters(
@@ -57,6 +59,7 @@ void AlbedoLightShader::setShaderParamaters(
 	const XMFLOAT4& ambient,
 	Camera* camera)
 {
+	matrixDataModule->
 	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
 	lightsDataModule.setModuleParamaters(deviceContext, material, lights, ambient);
 
@@ -67,7 +70,7 @@ void AlbedoLightShader::setShaderParamaters(
 	CameraBufferType* cameraPtr;
 	deviceContext->Map(cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	cameraPtr = (CameraBufferType*)mappedResource.pData;
-	cameraPtr->cameraPosition = camera->getPosition();
+	cameraPtr->cameraPosition = camera->getGlobalPosition();
 	deviceContext->Unmap(cameraBuffer.Get(), 0);
 	ID3D11Buffer* cameraBufferPtr = cameraBuffer.Get();
 	deviceContext->VSSetConstantBuffers(1, 1, &cameraBufferPtr);

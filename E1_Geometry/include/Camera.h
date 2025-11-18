@@ -12,9 +12,15 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
-#include <directxmath.h>
+#include "transform.h"
+#include <span>
 
 using namespace DirectX;
+
+enum CameraTypes : int {
+	BASIC,
+	FPCAMERA
+};
 
 class Camera
 {
@@ -32,17 +38,24 @@ public:
 	Camera();	///< Initialised default camera object
 	~Camera();
 
-	void setPosition(float lx, float ly, float lz);		///< Set camera position directly
-	void setRotation(float lx, float ly, float lz);		///< Set camera rotation directly
+	XMFLOAT3 getGlobalPosition() const;		///< Get camera's current position
+	XMFLOAT3 getGlobalDirection() const;		///< Get camera's current rotation
 
-	XMFLOAT3 getPosition();		///< Get camera's current position
-	XMFLOAT3 getRotation();		///< Get camera's current rotation
+	void updateGlobals(bool updateTransform);
 
 	void update();				///< Update camera, recalculates view matrix based on rotation
 	XMMATRIX getViewMatrix();	///< Get current view matrix of camera
 	XMMATRIX getOrthoViewMatrix();	///< Get current orthographic view matrix for camera
 
 	void setFrameTime(float);
+	
+	float getSpeed() const;
+	float getLookSpeed() const;
+
+	void setSpeed(float speed);
+	void setLookSpeed(float speed);
+
+	void imGuiRender(size_t transformIterator, CameraTypes type);
 
 	void moveForward();			///< default function for moving forward
 	void moveBackward();		///< default function for moving backward
@@ -56,13 +69,22 @@ public:
 	void strafeLeft();			///< default function for moving left
 	void turn(int x, int y);	///< default function for turning in both x/y axis
 
+	static std::span<const char* const> GetCameraTypeStrings();
+
+	Transform m_transform;
+
 private:
-	XMFLOAT3 position;		///< float3 for position
-	XMFLOAT3 rotation;		///< float3 for rotation (angles)
+	XMFLOAT3 globalPosition;		///< float3 for position
+	XMFLOAT3 globalDirection;		///< float3 for rotation (angles)
 	XMMATRIX viewMatrix;	///< matrix for current view
 	XMMATRIX orthoMatrix;	///< current orthographic matrix
 	float speed, frameTime;	///< movement speed and time variables
 	float lookSpeed;		///< rotation speed
-};
 
+	inline static const char* CameraTypeStrings[3] =
+	{
+		"Basic",
+		"First Person",
+	};
+};
 #endif

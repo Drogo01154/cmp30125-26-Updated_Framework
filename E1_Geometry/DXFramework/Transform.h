@@ -32,9 +32,9 @@ public:
 	const XMMATRIX& getLocalMatrix() { return localMatrix; }
 	const XMMATRIX& getGlobalMatrix() { return globalMatrix; }
 
-	inline const XMVECTOR& GetRotationQuat() const { return rotation; }
-	inline const XMVECTOR& GetTranslationVector() const { return translation; }
-	inline const XMVECTOR& GetScaleVector() const { return scale; }
+	inline const XMVECTOR& getRotationQuat() const { return rotation; }
+	inline const XMVECTOR& getTranslationVector() const { return translation; }
+	inline const XMVECTOR& getScaleVector() const { return scale; }
 
 	inline void computeLocalMatrix() {
 		localMatrix = XMMatrixScalingFromVector(scale)* XMMatrixRotationQuaternion(rotation)* XMMatrixTranslationFromVector(translation);
@@ -54,25 +54,23 @@ public:
 		return *this;
 	}
 
-	inline const XMMATRIX& getGlobalMatrix() { return globalMatrix; }
-
-	inline XMFLOAT3 GetLocalTranslation() const {
+	inline XMFLOAT3 getLocalTranslation() const {
 		XMFLOAT3 translationVec;
 		XMStoreFloat3(&translationVec, translation);
 		return translationVec;
 	}
 
-	inline XMFLOAT3 GetLocalScale() const {
+	inline XMFLOAT3 getLocalScale() const {
 		XMFLOAT3 scaleVec;
 		XMStoreFloat3(&scaleVec, scale);
 		return scaleVec;
 	}
 
-	inline float GetEulerX() const { return QuaternionToEuler(rotation).x; }
-	inline float GetEulerY() const { return QuaternionToEuler(rotation).y; }
-	inline float GetEulerZ() const { return QuaternionToEuler(rotation).z; }
+	inline float getEulerX() const { return QuaternionToEuler(rotation).x; }
+	inline float getEulerY() const { return QuaternionToEuler(rotation).y; }
+	inline float getEulerZ() const { return QuaternionToEuler(rotation).z; }
 
-	inline const XMFLOAT3 GetEuler() const { return QuaternionToEuler(rotation); }
+	inline const XMFLOAT3 getEuler() const { return QuaternionToEuler(rotation); }
 
 	inline void translate(float x, float y, float z) {
 		translation = XMVectorAdd(translation, XMVectorSet(x, y, z, 0.0f));
@@ -100,23 +98,23 @@ public:
 		computeGlobalMatrix(true);
 	}
 
-	inline void SetPosition(const XMFLOAT3& pos) 
+	inline void setPosition(const XMFLOAT3& pos) 
 	{ 
 		translation = XMLoadFloat3(&pos); 
 		computeGlobalMatrix(true);
 	}
-	inline void SetScale(const XMFLOAT3& s) 
+	inline void setScale(const XMFLOAT3& s) 
 	{ 
 		scale = XMLoadFloat3(&s); 
 		computeGlobalMatrix(true);
 	}
 
-	inline void SetPositionVector(const XMVECTOR& position) 
+	inline void setPositionVector(const XMVECTOR& position) 
 	{ 
 		translation = position; 
 		computeGlobalMatrix(true);
 	}
-	inline void SetScaleVector(const XMVECTOR& scale) 
+	inline void setScaleVector(const XMVECTOR& scale) 
 	{ 
 		this->scale = scale; 
 		computeGlobalMatrix(true);
@@ -127,64 +125,64 @@ public:
 		computeGlobalMatrix(true);
 	}
 
-	inline void SetEulerAngles(float x, float y, float z) 
+	inline void setEulerAngles(float x, float y, float z) 
 	{ 
 		rotation = XMQuaternionRotationRollPitchYaw(x, y, z); 
 		computeGlobalMatrix(true);
 	}
 
-	inline void SetEulerAngles(const XMVECTOR& vec) 
+	inline void setEulerAngles(const XMVECTOR& vec) 
 	{ 
 		rotation = XMQuaternionRotationRollPitchYawFromVector(vec); 
 		computeGlobalMatrix(true);
 	}
 
-	inline void SetEulerX(float x) {
+	inline void setEulerX(float x) {
 		XMFLOAT3 eulerAngles = QuaternionToEuler(rotation);
-		SetEulerAngles(x, eulerAngles.y, eulerAngles.z);
+		setEulerAngles(x, eulerAngles.y, eulerAngles.z);
 		computeGlobalMatrix(true);
 	}
 
 	inline void SetEulerY(float y) {
 		XMFLOAT3 eulerAngles = QuaternionToEuler(rotation);
-		SetEulerAngles(eulerAngles.x, y, eulerAngles.z);
+		setEulerAngles(eulerAngles.x, y, eulerAngles.z);
 		computeGlobalMatrix(true);
 	}
 
-	inline void SetEulerZ(float z) {
+	inline void setEulerZ(float z) {
 		XMFLOAT3 eulerAngles = QuaternionToEuler(rotation);
-		SetEulerAngles(eulerAngles.x, eulerAngles.y, z);
+		setEulerAngles(eulerAngles.x, eulerAngles.y, z);
 		computeGlobalMatrix(true);
 	}
 
 	// Add a rotation quat to current transform rotation
-	inline void Rotate(const XMVECTOR& deltaRot)
+	inline void rotate(const XMVECTOR& deltaRot)
 	{
 		rotation = XMQuaternionMultiply(deltaRot, rotation);
 		computeGlobalMatrix(true);
 	};
 	// Add a rotation from x,y,z to current transform rotation
-	inline void Rotate(const XMFLOAT3& eulerDeltaRot)
+	inline void rotate(const XMFLOAT3& eulerDeltaRot)
 	{
-		Rotate(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&eulerDeltaRot)));
+		rotate(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&eulerDeltaRot)));
 		computeGlobalMatrix(true);
 	};
 
-	inline XMVECTOR GetLocalForwardVector() const {
+	inline XMVECTOR getLocalForwardVector() const {
 		return XMVector3Normalize(XMVector3Rotate(XMVectorSet(0.f, 0.f, 1.f, 0.f), rotation));
 	}
 
-	inline XMVECTOR GetLocalRightVector() const {
+	inline XMVECTOR getLocalRightVector() const {
 		return XMVector3Normalize(XMVector3Rotate(XMVectorSet(1.f, 0.f, 0.f, 0.f), rotation));
 	}
 
-	inline XMVECTOR GetLocalUpVector() const {
+	inline XMVECTOR getLocalUpVector() const {
 		return XMVector3Normalize(XMVector3Rotate(XMVectorSet(0.f, 1.f, 0.f, 0.f), rotation));
 	}
 
-	XMVECTOR GetWorldForward() const { return XMVector3Normalize(XMVector3TransformNormal({ 0,0,1,0 }, globalMatrix)); }
-	XMVECTOR GetWorldRight()   const { return XMVector3Normalize(XMVector3TransformNormal({ 1,0,0,0 }, globalMatrix)); }
-	XMVECTOR GetWorldUp()      const { return XMVector3Normalize(XMVector3TransformNormal({ 0,1,0,0 }, globalMatrix)); }
+	XMVECTOR getWorldForward() const { return XMVector3Normalize(XMVector3TransformNormal({ 0,0,1,0 }, globalMatrix)); }
+	XMVECTOR getWorldRight()   const { return XMVector3Normalize(XMVector3TransformNormal({ 1,0,0,0 }, globalMatrix)); }
+	XMVECTOR getWorldUp()      const { return XMVector3Normalize(XMVector3TransformNormal({ 0,1,0,0 }, globalMatrix)); }
 
 	inline void lookAt(XMVECTOR target) {
 		XMVECTOR worldPos = XMVector3TransformCoord(translation, parentTransform ? parentTransform->globalMatrix : XMMatrixIdentity());
@@ -194,14 +192,14 @@ public:
 		XMVECTOR worldRot = QuatLookAtLH(forward, up);
 
 		if (parentTransform)
-			rotation = XMQuaternionMultiply(worldRot, XMQuaternionInverse(parentTransform->GetRotationQuat()));
+			rotation = XMQuaternionMultiply(worldRot, XMQuaternionInverse(parentTransform->getRotationQuat()));
 		else
 			rotation = worldRot;
 
 		computeGlobalMatrix(true);
 	}
 
-	inline bool ImGuiRender(const std::string& label, int menuNum = 0, bool editTranslation = true, bool editRotation = true, bool editScale = true) {
+	inline bool imGuiRender(const std::string& label, int menuNum = 0, bool editTranslation = true, bool editRotation = true, bool editScale = true) {
 		bool transformUpdated = false;
 		if (editTranslation && ImGuiDragXMVECTOR3((label + " Translation: ## " + std::to_string(menuNum)).c_str(), translation)) { transformUpdated = true; }
 		if (editRotation && ImGuiQuatEulerSlider3Degrees((label + " Rotation: ## " + std::to_string(menuNum)).c_str(), rotation)) { transformUpdated = true; }
@@ -213,15 +211,15 @@ namespace nlohmann {
 	template<>
 	struct adl_serializer<Transform> {
 		static void to_json(json& j, const Transform& t) {
-			j["translation"] = t.GetTranslationVector();
-			j["rotation"] = t.GetRotationQuat();
-			j["scale"] = t.GetScaleVector();       // XMVECTOR serializer used
+			j["translation"] = t.getTranslationVector();
+			j["rotation"] = t.getRotationQuat();
+			j["scale"] = t.getScaleVector();       // XMVECTOR serializer used
 		}
 
 		static void from_json(const json& j, Transform& t) {
-			t.SetPositionVector(j.at("translation").get<XMVECTOR>());
+			t.setPositionVector(j.at("translation").get<XMVECTOR>());
 			t.setRotationQuat(j.at("rotation").get<XMVECTOR>());
-			t.SetScaleVector(j.at("scale").get<XMVECTOR>());
+			t.setScaleVector(j.at("scale").get<XMVECTOR>());
 		}
 	};
 }

@@ -168,9 +168,6 @@
     <ClInclude Include="SerializationHelpers.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="SceneGraph.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="IDMap.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
@@ -184,6 +181,9 @@
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="ShaderManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneGraph.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
   </ItemGroup>

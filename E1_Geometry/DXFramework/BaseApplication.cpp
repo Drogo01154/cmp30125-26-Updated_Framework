@@ -28,12 +28,6 @@ BaseApplication::~BaseApplication()
 		delete renderer;
 		renderer = 0;
 	}
-
-	if (textureMgr)
-	{
-		delete textureMgr;
-		textureMgr = 0;
-	}
 }
 
 // Default application initialisation. Create renderer, camera, timer and imGUI objects.
@@ -43,7 +37,6 @@ void BaseApplication::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int 
 	wnd = hwnd;
 	sWidth = screenWidth;
 	sHeight = screenHeight;
-
 	// Create the Direct3D renderer.
 	renderer = new D3D(screenWidth, screenHeight, VSYNC, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!renderer)
@@ -51,18 +44,28 @@ void BaseApplication::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int 
 		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
 		exit(EXIT_FAILURE);
 	}
+	//shaderMgr = std::make_unique<ShaderManager>();
+	shaderMgr = std::make_unique<ShaderManager>();
+	textureMgr = std::make_unique<TextureManager>(renderer->getDevice(), renderer->getDeviceContext());
+	materialMgr = std::make_unique<MaterialManager>(shaderMgr.get(), textureMgr.get());
+	geometryMgr = std::make_unique<GeometryManager>(renderer->getDevice(), renderer->getDeviceContext());
+	instanceMgr = std::make_unique<InstanceManager>(geometryMgr.get(), materialMgr.get(), input, wnd, sWidth, sHeight);
+	sceneGraph = std::make_unique<SceneGraph>(instanceMgr.get(), geometryMgr.get());
 
+	//textureMgr->loadTexture(L"default", L"res/DefaultDiffuse.png");
+
+
+	/*
 	// Create the camera object and set to default position.
 	camera = new FPCamera(input, sWidth, sHeight, wnd);
 	camera->setPosition(0.0f, 0.0f, -10.0f);
 	camera->update();
+	*/
 
 	// Create the timer object (for delta time and FPS calculation.
 	timer = new Timer();
 
 	// Initialise texture manager
-	textureMgr = new TextureManager(renderer->getDevice(), renderer->getDeviceContext());
-	//textureMgr->loadTexture(L"default", L"res/DefaultDiffuse.png");
 
 	//Initialise ImGUI
 	ImGui::CreateContext();

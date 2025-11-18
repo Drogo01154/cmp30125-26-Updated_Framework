@@ -157,7 +157,7 @@ public:
 		}
 	}
 
-	void AddGeometryShaderInstanceReference(size_t ID) {
+	void addGeometryShaderInstanceReference(size_t ID) {
 		auto record = GeometryShaders.getID(ID);
 		if (!record) {
 			throw std::runtime_error("Error: Shader ID not found: " + std::to_string(ID));
@@ -172,7 +172,7 @@ public:
 	}
 		
 
-	void AddPassShaderInstanceReference(size_t ID) {
+	void addPassShaderInstanceReference(size_t ID) {
 		auto record = PassShaders.getID(ID);
 		if (!record) {
 			throw std::runtime_error("Error: Shader ID not found: " + std::to_string(ID));
@@ -186,7 +186,7 @@ public:
 		record->references++;
 	}
 
-	std::shared_ptr<BaseShaderModule> AddShaderModuleInstanceReference(size_t ID) {
+	std::shared_ptr<BaseShaderModule> addShaderModuleInstanceReference(size_t ID) {
 		auto record = ShaderModules.getID(ID);
 
 		if (!record) {
@@ -201,7 +201,7 @@ public:
 		record->references++;
 	}
 
-	size_t GetGeometryShaderID(const std::string& name) {
+	size_t getGeometryShaderID(const std::string& name) {
 		auto recordID = geometryNameToIDs.find(name);
 		if (recordID != geometryNameToIDs.end()) {
 			return recordID->second;
@@ -213,7 +213,7 @@ public:
 
 	}
 
-	size_t GetPassShaderID(const std::string& name) {
+	size_t getPassShaderID(const std::string& name) {
 		auto recordID = passNameToIDs.find(name);
 		if (recordID != passNameToIDs.end()) {
 			return recordID->second;
@@ -235,7 +235,7 @@ public:
 		}
 	}
 
-	std::shared_ptr<BaseShader> GetGeometryShader(size_t ID) {
+	std::shared_ptr<BaseShader> getGeometryShader(size_t ID) {
 		auto record = GeometryShaders.getID(ID);
 		if (record) {
 			if (record->loaded && record->shader) {
@@ -251,7 +251,7 @@ public:
 		return {};
 	}
 
-	std::shared_ptr<BaseShader> GetPassShader(size_t ID) {
+	std::shared_ptr<BaseShader> getPassShader(size_t ID) {
 		auto record = PassShaders.getID(ID);
 		if (record) {
 			if (record->loaded && record->shader) {
@@ -283,7 +283,7 @@ public:
 		return {};
 	}
 
-	void DeReferenceGeometryShader(size_t ID) {
+	void deReferenceGeometryShader(size_t ID) {
 		auto record = GeometryShaders.getID(ID);
 		if (!record) {
 			throw std::runtime_error("Error: Shader ID not found: " + std::to_string(ID));
@@ -295,7 +295,7 @@ public:
 		}
 	}
 
-	void DeReferencePassShader(size_t ID) {
+	void deReferencePassShader(size_t ID) {
 		auto record = PassShaders.getID(ID);
 		if (!record) {
 			throw std::runtime_error("Error: Shader ID not found: " + std::to_string(ID));
@@ -307,7 +307,7 @@ public:
 		}
 	}
 
-	void DeReferenceShaderModule(size_t ID) {
+	void deReferenceShaderModule(size_t ID) {
 		auto record = ShaderModules.getID(ID);
 
 		if (!record) {
@@ -335,11 +335,11 @@ public:
 		return defaultGeometryShader; 
 	}
 
-	void SelectGeometryShaderImGui(std::shared_ptr<Material> mat) {
+	void selectGeometryShaderImGui(std::shared_ptr<Material> mat) {
 		if (ImGui::Combo("Select Geometry Shader: ", &selectedGeometryShader, geometryShaderNames.data(), geometryShaderNames.size())) {
-			DeReferenceGeometryShader(mat->ShaderID);
+			deReferenceGeometryShader(mat->ShaderID);
 			mat->ShaderID = geometryNameToIDs[std::string(geometryShaderNames[selectedGeometryShader])];
-			AddGeometryShaderInstanceReference(mat->ShaderID);
+			addGeometryShaderInstanceReference(mat->ShaderID);
 		}
 	}
 };

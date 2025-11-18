@@ -28,14 +28,14 @@ XMFLOAT3 Camera::getGlobalDirection() const {
 	return globalDirection;
 }
 
-void Camera::ImGuiRender(size_t transformIterator) {
+void Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
 
 	std::string outputPos = "X: " + std::to_string(globalPosition.x) + " Y: " + std::to_string(globalPosition.y) + " Z: " + std::to_string(globalPosition.z);
 	ImGui::Text(outputPos.c_str());
 
 	switch (type) {
 	case CameraTypes::BASIC:
-		if (m_transform.ImGuiRender("Camera Transform", transformIterator, true, true, false)) {
+		if (m_transform.imGuiRender("Camera Transform", transformIterator, true, true, false)) {
 			updateGlobals(true);
 		}
 		break;
@@ -52,15 +52,13 @@ void Camera::setFrameTime(float t)
 	frameTime = t;
 }
 
-CameraTypes Camera::getCameraType() const { return type; }
-
 void Camera::updateGlobals(bool updateTransform) {
 	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
 	XMMATRIX globalMatrix = m_transform.getGlobalMatrix();
 	XMVECTOR outTranslation, outRotation, outScale;
 	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
 	XMStoreFloat3(&globalPosition, outTranslation);
-	XMStoreFloat3(&globalDirection, m_transform.GetWorldForward());
+	XMStoreFloat3(&globalDirection, m_transform.getWorldForward());
 }
 
 // Re-calucation view Matrix.
@@ -110,7 +108,7 @@ void Camera::moveForward()
 	float speed = frameTime * 5.0f;
 
 	// Get forward vector from local transform
-	XMVECTOR forward = m_transform.GetWorldForward(); // Z axis
+	XMVECTOR forward = m_transform.getWorldForward(); // Z axis
 	forward = XMVector3Normalize(forward);
 
 	// Scale by speed
@@ -126,7 +124,7 @@ void Camera::moveBackward()
 	float speed = frameTime * 5.0f;
 
 	// Get forward vector from local transform
-	XMVECTOR forward = m_transform.GetWorldForward(); // Z axis
+	XMVECTOR forward = m_transform.getWorldForward(); // Z axis
 
 	// Scale by speed
 	XMVECTOR delta = -forward * speed;
@@ -141,7 +139,7 @@ void Camera::moveUpward()
 	float speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR up = m_transform.GetWorldUp(); // Y axis
+	XMVECTOR up = m_transform.getWorldUp(); // Y axis
 
 	// Scale by speed
 	XMVECTOR delta = up * speed;
@@ -156,7 +154,7 @@ void Camera::moveDownward()
 	float speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR up = m_transform.GetWorldUp(); // Y axis
+	XMVECTOR up = m_transform.getWorldUp(); // Y axis
 
 	// Scale by speed
 	XMVECTOR delta = -up * speed;
@@ -171,7 +169,7 @@ void Camera::turnLeft()
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
 	
-	m_transform.Rotate(XMFLOAT3(0.0f, -speed, 0.0f));
+	m_transform.rotate(XMFLOAT3(0.0f, -speed, 0.0f));
 }
 
 
@@ -180,7 +178,7 @@ void Camera::turnRight()
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
 
-	m_transform.Rotate(XMFLOAT3(0.0f, speed, 0.0f));
+	m_transform.rotate(XMFLOAT3(0.0f, speed, 0.0f));
 }
 
 
@@ -189,7 +187,7 @@ void Camera::turnUp()
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
 
-	m_transform.Rotate(XMFLOAT3(speed, 0.0f, 0.0f));
+	m_transform.rotate(XMFLOAT3(speed, 0.0f, 0.0f));
 }
 
 
@@ -198,13 +196,13 @@ void Camera::turnDown()
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f;
 
-	m_transform.Rotate(XMFLOAT3(-speed, 0.0f, 0.0f));
+	m_transform.rotate(XMFLOAT3(-speed, 0.0f, 0.0f));
 }
 
 
 void Camera::turn(int x, int y)
 {
-	m_transform.Rotate(XMFLOAT3((float)x / lookSpeed, (float)y / lookSpeed, 0.0f));
+	m_transform.rotate(XMFLOAT3((float)x / lookSpeed, (float)y / lookSpeed, 0.0f));
 }
 
 void Camera::strafeRight()
@@ -212,7 +210,7 @@ void Camera::strafeRight()
 	float speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR right = m_transform.GetWorldRight(); // Y axis
+	XMVECTOR right = m_transform.getWorldRight(); // Y axis
 
 	// Scale by speed
 	XMVECTOR delta = right * speed;
@@ -226,11 +224,14 @@ void Camera::strafeLeft()
 	float speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR right = m_transform.GetWorldRight(); // Y axis
+	XMVECTOR right = m_transform.getWorldRight(); // Y axis
 
 	// Scale by speed
 	XMVECTOR delta = -right * speed;
 
 	// Apply translation
 	m_transform.translate(delta);
+}
+std::span<const char* const> Camera::GetCameraTypeStrings() {
+	return CameraTypeStrings;
 }

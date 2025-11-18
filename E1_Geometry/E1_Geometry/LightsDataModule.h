@@ -9,16 +9,6 @@ using namespace DirectX;
 
 class LightsDataModule : BaseShaderModule {
 private:
-	struct SceneBufferType
-	{
-		XMFLOAT4 baseColour;   // 16
-		XMFLOAT4 ambientLight; // 16
-		XMFLOAT4 specular;     // 16
-		float specularPower;   // 4
-		int numberOfLights;    // 4
-		XMFLOAT2 padding;      // 8
-	};
-
 	struct LightBufferType
 	{
 		XMFLOAT4 attenuation;	// 16
@@ -34,21 +24,20 @@ private:
 	};
 
 public:
-	LightsDataModule(ID3D11Device* device, HWND hwnd);
+	LightsDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager);
 	~LightsDataModule();
 
-	void setModuleParamaters(ID3D11DeviceContext* deviceContext, 
-		std::shared_ptr<Material> material, 
-		std::vector<std::shared_ptr<Light>>& lights, 
-		const XMFLOAT4& ambient);
+	void setModuleParamaters(ID3D11DeviceContext* deviceContext);
+
+	void setResources(ID3D11DeviceContext* deviceContext);
 
 	void initModule();
 
 	void setLightsBuffer();
 private:
 	ComPtr<ID3D11Buffer> lightsBuffer;
-	ComPtr<ID3D11Buffer> sceneDataBuffer;
 	ComPtr<ID3D11ShaderResourceView> lightBufferSRV;
+	InstanceManager* instanceManager;
 
 	int numLights;
 	int maxLights;

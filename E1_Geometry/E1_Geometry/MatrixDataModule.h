@@ -25,6 +25,8 @@ public:
 		const XMMATRIX& world,
 		const XMMATRIX& view,
 		const XMMATRIX& projection);
+
+	void setResources(ID3D11DeviceContext* deviceContext);
 private: 
 	ComPtr<ID3D11Buffer> matrixBuffer;
 };

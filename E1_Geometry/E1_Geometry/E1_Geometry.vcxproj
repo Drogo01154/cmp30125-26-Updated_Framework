@@ -170,11 +170,11 @@
     <ClCompile Include="HeightMapShader.cpp" />
     <ClCompile Include="AlbedoLightShader.cpp" />
     <ClCompile Include="KernelShader.cpp" />
+    <ClCompile Include="MaterialDataModule.cpp" />
     <ClCompile Include="TexturedLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
     <ClCompile Include="MiniMapTextureShader.cpp" />
-    <ClCompile Include="staticMeshComponent.h" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
     <FxCompile Include="BoxBlur_ps.hlsl">
@@ -257,6 +257,7 @@
     <ClInclude Include="AlbedoLightShader.h" />
     <ClInclude Include="KernelShader.h" />
     <ClInclude Include="LightsDataModule.h" />
+    <ClInclude Include="MaterialDataModule.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="TexturedLightShader.h" />

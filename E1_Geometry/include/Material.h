@@ -4,8 +4,8 @@
 
 //#include <memory>
 #include <directxmath.h>
-#include <string>
 #include <memory>
+#include "TextureManager.h"
 
 using namespace DirectX;
 
@@ -18,11 +18,14 @@ class BaseShader;
 
 struct Material
 {
-	XMFLOAT4 baseColour;				///< Colour value of texture;
-	XMFLOAT4 specularColour;			///< Specular colour value
-	float specularPower;				///< Specular power exponent
-	std::wstring texture;				///< String for materials texture
-	std::weak_ptr<BaseShader> shader;   ///< Pointer to shader used by material
+	size_t liveUsers = 0;						///< numnber of current geometryInstances which use this material
+	std::string MaterialName;					///< name of material
+	XMFLOAT4 baseColour;						///< Colour value of texture;
+	XMFLOAT4 specularColour;					///< Specular colour value
+	float specularPower;						///< Specular power exponent
+	size_t ShaderID;							///< Materials utilised materialID;
+	std::wstring textureString;					///< String for materials texture
+	std::shared_ptr<TextureResource> texture;	///< Pointer to materials texture
 };
 
 #endif

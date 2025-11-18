@@ -13,8 +13,14 @@
 #define _CAMERA_H_
 
 #include "transform.h"
+#include <span>
 
 using namespace DirectX;
+
+enum CameraTypes : int {
+	BASIC,
+	FPCAMERA
+};
 
 class Camera
 {
@@ -49,7 +55,7 @@ public:
 	void setSpeed(float speed);
 	void setLookSpeed(float speed);
 
-	void ImGuiRender(size_t transformIncrement);
+	void imGuiRender(size_t transformIterator, CameraTypes type);
 
 	void moveForward();			///< default function for moving forward
 	void moveBackward();		///< default function for moving backward
@@ -63,6 +69,8 @@ public:
 	void strafeLeft();			///< default function for moving left
 	void turn(int x, int y);	///< default function for turning in both x/y axis
 
+	static std::span<const char* const> GetCameraTypeStrings();
+
 	Transform m_transform;
 
 private:
@@ -72,23 +80,11 @@ private:
 	XMMATRIX orthoMatrix;	///< current orthographic matrix
 	float speed, frameTime;	///< movement speed and time variables
 	float lookSpeed;		///< rotation speed
-};
 
-
-namespace nlohmann {
-	template<>
-	struct adl_serializer<Camera> {
-		static void to_json(json& j, const Camera& c) {
-			j["transform"] = c.m_transform;
-			j["speed"] = c.getSpeed();
-			j["lookSpeed"] = c.getLookSpeed();
-		}
-
-		static void from_json(const json& j, Camera& c) {
-			c.m_transform = j.at("transform").get<Transform>();
-			c.setSpeed(j.at("speed").get<float>());
-			c.setLookSpeed(j.at("lookSpeed").get<float>());
-		}
+	inline static const char* CameraTypeStrings[3] =
+	{
+		"Basic",
+		"First Person",
 	};
-}
+};
 #endif

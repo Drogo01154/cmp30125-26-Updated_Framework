@@ -1,21 +1,12 @@
 // Lab1.cpp
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
+#include "MaterialDataModule.h"
 
 App1::App1()
 {
-	cubeMesh = nullptr;
-	sphereMesh = nullptr;
-	sphereMesh = nullptr;
-	texturedLightShader = nullptr;
-	textureShader = nullptr;
-	shapeMaterial = nullptr;
 	UIConstants::InitialiseSystem();
-
-	ambientLight = { 0.0f, 0.0f, 0.0f, 1.f };
 	selectedLight = -1;
-
-	miniMapCamera = nullptr;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -23,6 +14,11 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
+	shaderMgr->addShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
+	shaderMgr->addShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr);
+	shaderMgr->addShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd, instanceMgr, sceneGraph);
+
+	/*
 	// Create Mesh object and shader object
 	// Cube mesh is the geometry in the scene.
 	// Ortho mesh is the geometry we render the result to.
@@ -37,8 +33,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	texturedLightShader = std::make_shared<TexturedLightShader>(renderer->getDevice(), textureMgr, hwnd);
 	textureShader = std::make_shared<TextureShader>(renderer->getDevice(), hwnd);
 	miniMapTextureShader = std::make_shared<MiniMapTextureShader>(renderer->getDevice(), hwnd, screenWidth, screenHeight);
+	*/
 
-
+	/*
 	// Build RenderTexture, this will be our alternative render target.
 	renderTextureTR = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
 	renderTextureMain = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
@@ -65,6 +62,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	miniMapCamera->update();
 
 	//camera->setPosition(35.f, 20.f, 0.f);
+	*/
 }
 
 
@@ -116,6 +114,7 @@ bool App1::render()
 
 void App1::firstPass()
 {
+	/*
 	// Set the render target to be the render to terxture and clear it
 	renderTextureTR->setRenderTarget(renderer->getDeviceContext());
 	renderTextureTR->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
@@ -141,11 +140,12 @@ void App1::firstPass()
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
+	*/
 }
 
 void App1::secondPass()
 {
-
+	/*
 	// Set the render target to be the render to terxture and clear it
 	renderTextureMain->setRenderTarget(renderer->getDeviceContext());
 	renderTextureMain->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
@@ -167,12 +167,15 @@ void App1::secondPass()
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
+	*/
 }
  
 VOID App1::finalPass()
 {
 	// Clear the scene. (default blue colour)
 	renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
+	/*
+	
 
 	// Get matrices
 	camera->update();
@@ -202,6 +205,7 @@ VOID App1::finalPass()
 
 	// Present the rendered scene to the screen.
 	renderer->endScene();
+	*/
 }
 
 void App1::gui()
@@ -226,62 +230,6 @@ void App1::gui()
 		plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), resolution);
 	}
 	*/
-
-	//Light ImGui
-
-	m_transform.ImGuiRender("Object1 Transform");
-
-	miniMapTextureShader->ImGuiMenu();
-
-	if (ImGui::CollapsingHeader("Materials")) {
-
-		if (ImGui::TreeNode("Shape Material")) {
-			if (ImGui::TreeNode("Colour: ## 0")) {
-				if(ImGui::ColorPicker4("Base Colour: ## 0", &shapeMaterial->baseColour.x)) {}
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Specular Colour: ## 0")) {
-				if (ImGui::ColorPicker4("Ambient Light: ", &shapeMaterial->specularColour.x)) {}
-				ImGui::TreePop();
-			}
-			if (ImGui::SliderFloat("Specular Power: ## 0", &shapeMaterial->specularPower, 1.f, 1000.f)) {}
-			ImGui::TreePop();
-		}
-	}
-
-
-	//Light Data
-	if (ImGui::CollapsingHeader("Lighting")) {
-
-		//Ambient Light Settings
-		if (ImGui::TreeNode("Ambient Light")) {
-			if (ImGui::ColorPicker4("Ambient Light: ", &ambientLight.x)) {}
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Spawn Lights")) {
-			for (int i = 0; i < 3; i++) {
-				if (ImGui::Button(LightTypeStrings[i].c_str()))
-				{
-					lights.emplace_back(make_shared<Light>(Light(static_cast<lightTypes>(i))));
-					selectedLight = lights.size() - 1;
-				}
-				if (i < 2) { ImGui::SameLine(); }
-			}
-			ImGui::TreePop();
-		}
-
-		if ((lights.size() > 0) && ImGui::TreeNode("Existing Lights: ")) {
-
-			if ((lights.size() > 1) && ArrowIterators("Selected_Light", selectedLight, (uint32_t)lights.size())) {}
-
-			if (selectedLight >= 0) {
-				
-			}
-			ImGui::TreePop();
-		}
-	}
 
 	// Render UI
 	ImGui::Render();

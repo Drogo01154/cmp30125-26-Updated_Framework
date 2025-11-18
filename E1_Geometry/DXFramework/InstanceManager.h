@@ -25,11 +25,6 @@ struct GeometryInstance {
 	size_t materialID;										// Material ID for serializaton
 };
 
-enum CameraTypes : int {
-	BASIC,
-	FPCAMERA
-};
-
 struct CameraInstance {
 	std::shared_ptr<Camera> camera;
 	CameraTypes type;
@@ -42,13 +37,17 @@ public:
 	InstanceManager(GeometryManager* geometryManager, MaterialManager* materialManager, Input* input, HWND hwnd, int screenWidth, int screenHeight);
 	std::weak_ptr<GeometryInstance> getGeometryInstance(size_t ID);
 	std::weak_ptr<Light> getLightInstance(size_t ID);
-	std::weak_ptr<Camera> getCameraInstance(size_t ID);
+	std::weak_ptr<CameraInstance> getCameraInstance(size_t ID);
 
 	std::string buildMeshUID(std::weak_ptr<GeometryInstance> instance);
 
 	void removeGeometryInstance(size_t ID);
 	void removeLightInstance(size_t ID);
 	void removeCameraInstance(size_t ID);
+
+	size_t getNumberOfLights();
+	size_t getNumberOfMeshes();
+	size_t getNumberOfCameras();
 
 	void clearGeometry();
 	void clearLights();
@@ -74,11 +73,29 @@ public:
 	std::pair<size_t, std::shared_ptr<CameraInstance>>  createCamera();
 	std::pair<size_t, std::shared_ptr<CameraInstance>>  createFPCamera();
 
+	std::shared_ptr<CameraInstance> getActiveCamera();
+	void setActiveCamera(size_t ID);
+
 	void to_json(nlohmann::json& j);
 	void from_json(const nlohmann::json& j,
 		std::unordered_map<size_t, size_t>* newCameraIDMap,
 		std::unordered_map<size_t, size_t>* newMeshIDMap,
 		std::unordered_map<size_t, size_t>* newLightIDMap);
+
+	template<typename Func>
+	inline void forEachMesh(Func&& func) const {
+		geometryInstances.forEach(std::forward<Func>(func));
+	}
+
+	template<typename Func>
+	inline void forEachLight(Func&& func) const {
+		lightInstances.forEach(std::forward<Func>(func));
+	}
+
+	template<typename Func>
+	inline void forEachCamera(Func&& func) const {
+		cameraInstances.forEach(std::forward<Func>(func));
+	}
 
 private:
 	std::shared_ptr<GeometryInstance> createGeometryInstance(size_t& instanceID, MeshType type, std::shared_ptr<BaseMesh> newMesh);
@@ -87,6 +104,9 @@ private:
 	HWND hwnd; 
 	int screenWidth; 
 	int screenHeight;
+
+	size_t activeCameraID;
+	std::shared_ptr<CameraInstance> activeCamera;
 
 	GeometryManager* geometryManager;
 	MaterialManager* materialManager;

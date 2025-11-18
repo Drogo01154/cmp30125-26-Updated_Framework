@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Components">
-      <UniqueIdentifier>{89f81120-59be-451c-838e-51953e8afd84}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{1c05ad22-aff5-4bac-a5ba-f3a05366e03e}</UniqueIdentifier>
     </Filter>
@@ -75,9 +72,6 @@
     <ClCompile Include="App1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="staticMeshComponent.h">
-      <Filter>Header Files\Components</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
@@ -120,6 +114,9 @@
     <ClCompile Include="KernelShader.cpp">
       <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
+    <ClCompile Include="MaterialDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -161,11 +158,14 @@
     <ClInclude Include="KernelShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPassManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
     <ClInclude Include="RenderPass.h">
       <Filter>Header Files\RendedPasses</Filter>
     </ClInclude>
-    <ClInclude Include="RenderPassManager.h">
-      <Filter>Header Files\RendedPasses</Filter>
+    <ClInclude Include="MaterialDataModule.h">
+      <Filter>Header Files\ShaderModules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

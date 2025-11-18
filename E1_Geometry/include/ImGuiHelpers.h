@@ -6,9 +6,10 @@
 #pragma once
 
 #include "imgui/imgui.h"
+#include "MathHelpers.h"
 #include <vector>
 #include <string>
-#include "Transform.h"
+#include <unordered_map>
 
 using namespace DirectX;
 
@@ -177,13 +178,39 @@ inline bool ImGuiQuatEulerSlider3Degrees(const char* label,
 	const char* format = "%.3f",
 	ImGuiSliderFlags flags = 0)
 {
+	std::string labelString = std::string(label);
+	
+	struct cachedRotation {
+		XMFLOAT3 eulerDeg;
+		XMVECTOR quat;
+	};
+
+	static std::unordered_map<std::string, cachedRotation> cache;
+
 	//Convert quaternion -> Euler (degrees)
 	XMFLOAT3 rotation = ToDegrees(QuaternionToEuler(quat));
-	bool updated = ImGuiXMFloat3Slider(label, rotation, v_min, v_max, format, flags);
+
+	auto& entry = cache[labelString];
+
+	// Initialize cache if first time or external quat changed significantly
+	if (!XMVector3Equal(entry.quat, quat)) {
+		entry.quat = quat;
+		entry.eulerDeg = ToDegrees(QuaternionToEuler(quat));
+	}
+
+	bool updated = ImGuiXMFloat3Slider(label, entry.eulerDeg, v_min, v_max, format, flags);
+
 	if (updated) {
-		// Convert degrees-> radians and rebuild quaternion
-		rotation = ToRadians(WrapDegrees(rotation));
-		quat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rotation));
+		XMFLOAT3 wrapped = WrapDegrees(entry.eulerDeg);
+		XMFLOAT3 radians = ToRadians(wrapped);
+		XMVECTOR newQuat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&radians));
+
+		// Continuity: ensure closest quaternion
+		if (XMVectorGetX(XMQuaternionDot(newQuat, entry.quat)) < 0.0f)
+			newQuat = XMVectorNegate(newQuat);
+
+		entry.quat = newQuat;
+		quat = newQuat;
 	}
 	return updated;
 }
@@ -193,24 +220,40 @@ inline bool ImGuiQuatEulerSlider3Radians(const char* label,
 	float v_min = -XM_PI, float v_max = XM_PI,
 	const char* format = "%.3f",
 	ImGuiSliderFlags flags = 0) {
-	// Convert quaternion -> Euler (radians)
+	std::string labelString = std::string(label);
+
+	struct cachedRotation {
+		XMFLOAT3 eulerRad;
+		XMVECTOR quat;
+	};
+
+	static std::unordered_map<std::string, cachedRotation> cache;
+
+	//Convert quaternion -> Euler (radians)
 	XMFLOAT3 rotation = QuaternionToEuler(quat);
-	
-	bool updated = ImGuiXMFloat3Slider(label, rotation, v_min, v_max, format, flags);
+
+	auto& entry = cache[labelString];
+
+	// Initialize cache if first time or external quat changed significantly
+	if (!XMVector3Equal(entry.quat, quat)) {
+		entry.quat = quat;
+		entry.eulerRad = QuaternionToEuler(quat);
+	}
+
+	bool updated = ImGuiXMFloat3Slider(label, entry.eulerRad, v_min, v_max, format, flags);
+
 	if (updated) {
-		//Rebuild quaternion from radians
-		rotation = WrapRadians(rotation);
-		quat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rotation));
+		XMFLOAT3 wrapped = WrapRadians(entry.eulerRad);
+		XMVECTOR newQuat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&wrapped));
+
+		// Continuity: ensure closest quaternion
+		if (XMVectorGetX(XMQuaternionDot(newQuat, entry.quat)) < 0.0f)
+			newQuat = XMVectorNegate(newQuat);
+
+		entry.quat = newQuat;
+		quat = newQuat;
 	}
 	return updated;
-}
-
-inline bool TransformImGui(const std::string& label, Transform& transform, bool editScale = true, int menuNum = 0) {
-	bool transformUpdated = false;
-	if (ImGuiDragXMVECTOR3(("Translation: ## " + std::to_string(menuNum)).c_str(), transform.translation)) { transformUpdated = true; }
-	if (ImGuiQuatEulerSlider3Degrees(("Rotation: ## " + std::to_string(menuNum)).c_str(), transform.rotation)) { transformUpdated = true; }
-	if (editScale && ImGuiDragXMVECTOR3(("Scale: ## " + std::to_string(menuNum)).c_str(), transform.scale)) { transformUpdated = true; }
-	return transformUpdated;
 }
 
 #endif

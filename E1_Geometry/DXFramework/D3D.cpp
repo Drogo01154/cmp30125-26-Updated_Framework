@@ -31,7 +31,6 @@ D3D::D3D(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscre
 	createDefaultRasterState();
 	createDepthlDisableState();
 	createBlendState();
-
 }
 
 // Create a Direct3D11 rendering device. Chooses the best gfx card available.

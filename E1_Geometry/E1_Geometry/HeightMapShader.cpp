@@ -120,7 +120,7 @@ void HeightMapShader::setShaderParameters(ID3D11DeviceContext* deviceContext, co
 	deviceContext->Map(lightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	lightPtr = (LightBufferType*)mappedResource.pData;
 	lightPtr->diffuse = light->getDiffuseColour();
-	lightPtr->direction = light->getDirection();
+	lightPtr->direction = light->getGlobalDirection();
 	lightPtr->padding = 0.0f;
 	deviceContext->Unmap(lightBuffer.Get(), 0);
 	ID3D11Buffer* bufferPtr[] = { lightBuffer.Get(), mapDataBuffer.Get() };

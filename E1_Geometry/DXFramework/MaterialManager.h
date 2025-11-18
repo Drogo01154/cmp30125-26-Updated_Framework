@@ -7,6 +7,7 @@
 #include "IDMap.h"
 #include "ShaderManager.h"
 #include "Converters.h"
+#include "SerializationHelpers.h"
 
 class MaterialManager {
 public:
@@ -52,7 +53,7 @@ public:
 		if (mat) { // if material in map
 			if (mat->liveUsers == 0) { // if no users yet load data
 				mat->texture = textureManager->getTexture(mat->textureString);
-				shaderManager->AddGeometryShaderInstanceReference(mat->ShaderID); // Tracks that this shader is going to be used so instantiates it if not already
+				shaderManager->addGeometryShaderInstanceReference(mat->ShaderID); // Tracks that this shader is going to be used so instantiates it if not already
 			}
 		}
 		else {
@@ -75,7 +76,7 @@ public:
 		mat->liveUsers--;
 		if (mat->liveUsers == 0) { // If material only refernced in this class and not used anywhere else
 			mat->texture = nullptr;
-			shaderManager->DeReferenceGeometryShader(mat->ShaderID); // Tell shader manager geometry shader no longer in use
+			shaderManager->deReferenceGeometryShader(mat->ShaderID); // Tell shader manager geometry shader no longer in use
 			textureManager->checkRemove(mat->textureString); // Tell texture manager texture no longer being used here
 		}
 	}
@@ -118,7 +119,7 @@ public:
 	}
 
 	//Updates what material is selected
-	void UpdateSelectedMaterial() {
+	void updateSelectedMaterial() {
 		if (selectedMaterial >= 0) {
 			//Get ID of newly selected material
 			size_t ID = materialNamesToIDs[std::string(materialNames[selectedMaterial])];
@@ -130,7 +131,7 @@ public:
 			const std::string& matName = newMat->MaterialName;
 
 			//Update input buffer to current name
-			strncpy(nameInput, matName.c_str(), sizeof(nameInput));
+			strncpy_s(nameInput, matName.c_str(), sizeof(nameInput));
 
 			//Get vector image strings from file handler
 			const std::vector<const char*>* imageList = FileHandler::get().getImageList();
@@ -179,7 +180,7 @@ public:
 					textureManager->checkRemove(mat->textureString);
 				}
 
-				shaderManager->DeReferenceGeometryShader(mat->ShaderID);
+				shaderManager->deReferenceGeometryShader(mat->ShaderID);
 			}
 		
 
@@ -213,7 +214,7 @@ public:
 					textureManager->checkRemove(mat->textureString);
 				}
 
-				shaderManager->DeReferenceGeometryShader(mat->ShaderID);
+				shaderManager->deReferenceGeometryShader(mat->ShaderID);
 			}
 
 			if (nameSelected) {
@@ -244,7 +245,7 @@ public:
 					textureManager->checkRemove(mat->textureString);
 				}
 
-				shaderManager->DeReferenceGeometryShader(mat->ShaderID);
+				shaderManager->deReferenceGeometryShader(mat->ShaderID);
 				}
 			});
 		materialNamesToIDs.clear();
@@ -256,10 +257,10 @@ public:
 		selectedTexture = -1;
 	}
 
-	inline void ImGuiRender() {
+	inline void imGuiRender() {
 
 		if (ImGui::Combo("Select Material", &selectedMaterial, materialNames.data(), materialNames.size())) {
-			UpdateSelectedMaterial();
+			updateSelectedMaterial();
 		}
 
 		if (selectedMaterial >= 0) {
@@ -287,7 +288,7 @@ public:
 				ImGui::SliderFloat("Specular Power: ## 0", &mat->specularPower, 1.f, 1000.f);
 				ImGui::TreePop();
 			}
-			shaderManager->SelectGeometryShaderImGui(mat);
+			shaderManager->selectGeometryShaderImGui(mat);
 			const std::vector<const char*>* imageList = FileHandler::get().getImageList();
 			if (ImGui::Combo("Select Material Texture: ", &selectedTexture, imageList->data(), imageList->size())) {
 				bool inUse = (mat->liveUsers > 0);
