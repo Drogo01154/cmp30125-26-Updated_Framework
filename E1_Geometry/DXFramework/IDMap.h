@@ -54,6 +54,12 @@ public:
 	}
 
 	inline size_t size() { return map.size(); }
+
+	inline void clear() {
+		map.clear();
+		freeIDs.clear();
+		currentID = 0;
+	}
 private:
 	std::unordered_map<size_t, std::shared_ptr<value>> map;
 	std::vector<size_t> freeIDs;

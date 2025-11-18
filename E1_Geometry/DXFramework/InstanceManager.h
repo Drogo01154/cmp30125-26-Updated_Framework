@@ -44,17 +44,16 @@ public:
 	std::weak_ptr<Light> getLightInstance(size_t ID);
 	std::weak_ptr<Camera> getCameraInstance(size_t ID);
 
-
-
 	std::string buildMeshUID(std::weak_ptr<GeometryInstance> instance);
-
-	void reinstantiateInstances();
 
 	void removeGeometryInstance(size_t ID);
 	void removeLightInstance(size_t ID);
 	void removeCameraInstance(size_t ID);
 
-	
+	void clearGeometry();
+	void clearLights();
+	void clearCameras();
+	void clearAll();
 
 	//Create Geometry
 	std::weak_ptr<GeometryInstance> createAModelInstance(size_t& instanceID, const std::string& file);

@@ -5,6 +5,7 @@
 
 #include "InstanceManager.h"
 #include "FileHandler.h"
+#include <queue>
 
 
 struct sceneNode {
@@ -18,7 +19,7 @@ struct sceneNode {
 	std::weak_ptr<Light> light;
 
 	std::vector<std::shared_ptr<sceneNode>> children;
-	std::vector<std::shared_ptr<sceneNode>> parent;
+	std::shared_ptr<sceneNode> parent;
 };
 
 class SceneGraph {
@@ -37,6 +38,7 @@ class SceneGraph {
 	inline void createChild(const std::string& name = "Unamed", std::shared_ptr<sceneNode> parent) {
 		std::shared_ptr<sceneNode> newNode = std::make_shared<sceneNode>();
 		newNode->m_transform.setParent(&parent->m_transform);
+		newNode->parent = parent;
 		newNode->name = name;
 		newNode->m_transform.computeGlobalMatrix();
 		parent->children.push_back(newNode);
@@ -99,7 +101,7 @@ class SceneGraph {
 			//If imported Model Type
 			if (selectedCreateMesh < 2)
 			{
-				const std::vector<const char*>* modelList = &FileHandler::get().getModelList();
+				const std::vector<const char*>* modelList = FileHandler::get().getModelList();
 				if (ImGui::Combo(
 					"Imported Model: ",
 					&selectedCreateModel,
@@ -108,7 +110,7 @@ class SceneGraph {
 
 				)) {}
 				if (selectedCreateModel > 0 && ImGui::Button("Attach Model")) {
-					if (createType == MeshType::AModel) {
+					if (createType == MeshType::AMODEL) {
 						node->meshInstance = instanceManager->createAModelInstance(node->meshID, std::string((*modelList)[selectedCreateModel]));
 					}
 					else {
@@ -117,22 +119,22 @@ class SceneGraph {
 				}
 			} else if (selectedCreateMesh < 6) { //If no paramaters
 				switch (createType) {
-				case MeshType::Point:
+				case MeshType::POINT:
 					if (ImGui::Button("Attach Point Mesh")) {
 						node->meshInstance = instanceManager->createPointMeshInstance(node->meshID);
 					}
 					break;
-				case MeshType::Quad:
+				case MeshType::QUAD:
 					if (ImGui::Button("Attach Quad Mesh")) {
 						node->meshInstance = instanceManager->createQuadMeshInstance(node->meshID);
 					}
 					break;
-				case MeshType::Tesselation:
+				case MeshType::TESSELATION:
 					if (ImGui::Button("Attach Tesselation Mesh")) {
 						node->meshInstance = instanceManager->createTesselationMeshInstance(node->meshID);
 					}
 					break;
-				case MeshType::Triangle:
+				case MeshType::TRIANGLE:
 					if (ImGui::Button("Attach Triangle Mesh")) {
 						node->meshInstance = instanceManager->createTriangleMeshInstance(node->meshID);
 					}
@@ -142,17 +144,17 @@ class SceneGraph {
 				if (ImGui::InputInt("Integer Value", &inputResolution)) {}
 				if (inputResolution > 1) {
 					switch (createType) {
-					case MeshType::Cube:
+					case MeshType::CUBE:
 						if (ImGui::Button("Attach Cube Mesh")) {
 							node->meshInstance = instanceManager->createCubeMeshInstance(node->meshID, inputResolution);
 						}
 						break;
-					case MeshType::Plane:
+					case MeshType::PLANE:
 						if (ImGui::Button("Attach Plane Mesh")) {
 							node->meshInstance = instanceManager->createPlaneMeshInstance(node->meshID, inputResolution);
 						}
 						break;
-					case MeshType::Sphere:
+					case MeshType::SPHERE:
 						if (ImGui::Button("Attach Sphere Mesh")) {
 							node->meshInstance = instanceManager->createSphereMeshInstance(node->meshID, inputResolution);
 						}
@@ -199,6 +201,114 @@ class SceneGraph {
 		graphImGui(root);
 		if (selectedNode != nullptr) {
 			nodeImGui(selectedNode);
+		}
+	}
+
+	inline void to_json(nlohmann::json& j) {
+
+		instanceManager->to_json(j["Instances"]);
+
+		std::queue<std::pair <nlohmann::json*, std::shared_ptr<sceneNode>>> nodeQueue;
+		nodeQueue.push(std::make_pair(&j["Nodes"], root));
+		while(nodeQueue.size() > 0) {
+			auto [nodeJsonPtr, nodePtr] = nodeQueue.front();
+			nodeQueue.pop();
+			(*nodeJsonPtr) = nlohmann::json::object();
+
+			(*nodeJsonPtr)["NodeName"] = nodePtr->name;
+			(*nodeJsonPtr)["Transform"] = nodePtr->m_transform;
+
+			if (!nodePtr->camera.expired()) {
+				(*nodeJsonPtr)["CameraID"] = static_cast<int64_t>(nodePtr->cameraID);
+			}
+			if (!nodePtr->light.expired()) {
+				(*nodeJsonPtr)["LightID"] = static_cast<int64_t>(nodePtr->lightID);
+			}
+			if (!nodePtr->meshInstance.expired()) {
+				(*nodeJsonPtr)["MeshID"] = static_cast<int64_t>(nodePtr->meshID);
+			}
+
+			if (nodePtr->children.size() > 0) {
+				auto& childrenJson = (*nodeJsonPtr)["Children"];
+				childrenJson = nlohmann::json::array();
+				for (auto child : nodePtr->children) {
+					childrenJson.push_back(nlohmann::json());
+					nodeQueue.push(std::make_pair(&childrenJson.back(), child));
+				}
+			}
+		}
+	}
+
+	inline void from_json(const nlohmann::json& j) {
+		std::unordered_map<size_t, size_t> newCameraIDMap;
+		std::unordered_map<size_t, size_t> newLightIDMap;
+		std::unordered_map<size_t, size_t> newMeshIDMap;
+		instanceManager->from_json(j, &newCameraIDMap, &newMeshIDMap, &newLightIDMap);
+
+		struct nodeData {
+			nodeData(const nlohmann::json* nodeJson,
+			std::shared_ptr<sceneNode> node,
+			std::shared_ptr<sceneNode> parent) :
+				nodeJson(nodeJson),
+				node(node),
+				parent(parent) { }
+			const nlohmann::json* nodeJson;
+			std::shared_ptr<sceneNode> node;
+			std::shared_ptr<sceneNode> parent;
+		};
+
+		std::queue<nodeData> nodeQueue;
+		root = std::make_shared<sceneNode>();
+		nodeQueue.push(nodeData(&j["Nodes"], root, nullptr));
+
+		while (nodeQueue.size() > 0) {
+			nodeData data = nodeQueue.front();
+			nodeQueue.pop();
+			data.node->name = data.nodeJson->at("NodeName").get<std::string>();
+
+			data.node->parent = data.parent;
+
+			data.node->m_transform = data.nodeJson->at("Transform").get<Transform>();
+			if (data.parent != nullptr) {
+				data.node->m_transform.setParent(&data.parent->m_transform);
+			}
+			data.node->m_transform.computeGlobalMatrix(true);
+
+			if (data.nodeJson->contains("CameraID")) {
+				data.node->cameraID = newCameraIDMap[static_cast<size_t>(data.nodeJson->at("CameraID").get<uint64_t>())];
+				data.node->camera = instanceManager->getCameraInstance(data.node->cameraID);
+				if (auto camera = data.node->camera.lock()) {
+					camera->m_transform.setParent(&data.node->m_transform);
+					camera->updateGlobals(true);
+				}
+			}
+
+			if (data.nodeJson->contains("LightID")) {
+				data.node->lightID = newLightIDMap[static_cast<size_t>(data.nodeJson->at("LightID").get<uint64_t>())];
+				data.node->light = instanceManager->getLightInstance(data.node->lightID);
+				if (auto light = data.node->light.lock()) {
+					light->m_transform.setParent(&data.node->m_transform);
+					light->updateGlobals(true);
+				}
+			}
+
+			if (data.nodeJson->contains("MeshID")) {
+				data.node->meshID = newMeshIDMap[static_cast<size_t>(data.nodeJson->at("MeshID").get<uint64_t>())];
+				data.node->meshInstance = instanceManager->getGeometryInstance(data.node->meshID);
+				if (auto mesh = data.node->meshInstance.lock()) {
+					mesh->m_transform.setParent(&data.node->m_transform);
+					mesh->m_transform.computeGlobalMatrix(true);
+				}
+			}
+			
+			
+			if (data.nodeJson->contains("Children"))
+			{
+				for (auto& jsonChild : (*data.nodeJson)["Children"]) {
+					data.node->children.push_back(std::make_shared<sceneNode>());
+					nodeQueue.push(nodeData(&jsonChild, data.node->children.back(), data.node));
+				}
+			}
 		}
 	}
 

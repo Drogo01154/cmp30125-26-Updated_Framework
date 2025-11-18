@@ -17,6 +17,7 @@ public:
 		createMaterial("Default");
 	};
 
+	//Gets material ID from name
 	size_t getMaterialID(const std::string& name) {
 		auto it = materialNamesToIDs.find(name);
 		if (it != materialNamesToIDs.end()) {
@@ -25,6 +26,7 @@ public:
 		throw std::runtime_error("Error: material does not exist at: " + name);
 	}
 
+	//Renames a given material
 	void renameMaterial(const std::string& oldName, const std::string& newName, bool selectedMaterial = false) {
 		if (oldName == "Default") { return; }
 		//Check if new name already in use
@@ -151,6 +153,109 @@ public:
 		}
 	}
 
+	inline bool deleteMaterial(const std::string& name) {
+		bool hasUsers = false;
+		auto it = materialNamesToIDs.find(name);	// Find material
+		if (it != materialNamesToIDs.end()) { // Material exists!
+			
+			std::string selectedName = "";
+			bool nameSelected = selectedMaterial >= 0;
+
+			if (nameSelected) {
+				selectedName = std::string(materialNames[selectedMaterial]);
+				if (selectedName == name) {
+					selectedMaterial = -1;
+					nameSelected = false;
+				}
+			}
+			size_t ID = materialNamesToIDs[name];
+
+
+			auto mat = materialMap.getID(ID);
+			hasUsers = mat->liveUsers > 0;
+			if (hasUsers) {
+				if (mat->textureString != L"") {
+					mat->texture = nullptr;
+					textureManager->checkRemove(mat->textureString);
+				}
+
+				shaderManager->DeReferenceGeometryShader(mat->ShaderID);
+			}
+		
+
+			materialNamesToIDs.erase(name);
+			materialMap.eraseID(ID);
+
+			resizeMaterialNames(nameSelected, selectedName);
+		}
+		else {
+			throw std::runtime_error("Error: material does not exist at: " + name);
+		}
+		return hasUsers;
+	}
+
+	inline bool deleteMaterial(size_t ID) {
+		bool hasUsers = false;
+		if (selectedMaterial >= 0) {
+			std::string selectedName = std::string(materialNames[selectedMaterial]);
+		}
+		;
+		if (auto mat = materialMap.getID(ID)) { // Find material
+			
+			std::string selectedName = "";
+			bool nameSelected = selectedMaterial >= 0;
+
+			hasUsers = mat->liveUsers > 0;
+
+			if (hasUsers) {
+				if (mat->textureString != L"") {
+					mat->texture = nullptr;
+					textureManager->checkRemove(mat->textureString);
+				}
+
+				shaderManager->DeReferenceGeometryShader(mat->ShaderID);
+			}
+
+			if (nameSelected) {
+				selectedName = std::string(materialNames[selectedMaterial]);
+				if (selectedName == mat->MaterialName) {
+					selectedMaterial = -1;
+					nameSelected = false;
+				}
+			}
+		
+			materialNamesToIDs.erase(mat->MaterialName);
+			materialMap.eraseID(ID);
+
+			resizeMaterialNames(nameSelected, selectedName);
+
+		}
+		else {
+			throw std::runtime_error("Error: material does not exist at ID: " + std::to_string(ID));
+		}
+		return hasUsers;
+	}
+
+	inline void deleteAllMaterials() {
+		materialMap.forEach([&](size_t ID, std::shared_ptr<Material> mat) {
+			if (mat->liveUsers > 0) {
+				if (mat->textureString != L"") {
+					mat->texture = nullptr;
+					textureManager->checkRemove(mat->textureString);
+				}
+
+				shaderManager->DeReferenceGeometryShader(mat->ShaderID);
+				}
+			});
+		materialNamesToIDs.clear();
+		materialMap.clear();
+		materialNames.clear();
+		selectedMaterial = -1;
+		// Clear buffer
+		nameInput[0] = '\0';
+		selectedTexture = -1;
+	}
+
 	inline void ImGuiRender() {
 
 		if (ImGui::Combo("Select Material", &selectedMaterial, materialNames.data(), materialNames.size())) {
@@ -202,6 +307,39 @@ public:
 			}
 		}
 	}
+
+	void to_json(nlohmann::json& j) {
+		j = nlohmann::json::array();
+		materialMap.forEach([&](size_t ID, std::shared_ptr<Material> mat) {
+			nlohmann::json matJson;
+			matJson["OldID"] = static_cast<uint64_t>(ID);
+			matJson["BaseColour"] = mat->baseColour;
+			matJson["MaterialName"] = mat->MaterialName;
+			matJson["Texture"] = Converters::convert_from_wstring(mat->textureString);
+			matJson["ShaderID"] = static_cast<uint64_t>(mat->ShaderID);
+			matJson["SpecularColour"] = mat->specularColour;
+			matJson["SpecularPower"] = mat->specularPower;
+			j.push_back(matJson);
+			});
+		
+	}
+	void from_json(const nlohmann::json& j, std::unordered_map<size_t, size_t>* newMaterialIDMap) {
+		deleteAllMaterials();
+		for (auto matJson : j) {
+			auto newMat = materialMap.emplaceID(Material());
+			size_t oldID = static_cast<size_t>(matJson.at("OldID").get<uint64_t>());
+			newMaterialIDMap->emplace(oldID, newMat.first);
+			newMat.second->baseColour = matJson.at("BaseColour").get<XMFLOAT4>();
+			newMat.second->MaterialName = matJson.at("MaterialName").get<std::string>();
+			newMat.second->textureString = Converters::convert_to_wstring(matJson.at("Texture").get<std::string>());
+			newMat.second->ShaderID = static_cast<size_t>(matJson.at("ShaderID").get<uint64_t>());
+			newMat.second->specularColour = matJson.at("SpecularColour").get<XMFLOAT4>();
+			newMat.second->specularPower = matJson.at("SpecularPower").get<float>();
+			materialNamesToIDs.emplace(newMat.second->MaterialName, newMat.first);
+		}
+		resizeMaterialNames(false, "");
+	}
+
 private:
 	ShaderManager* shaderManager;
 	TextureManager* textureManager;
