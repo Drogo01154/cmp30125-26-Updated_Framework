@@ -267,7 +267,7 @@ public:
 		return {};
 	}
 
-	std::shared_ptr<BaseShaderModule> getShaderModule(size_t ID) {
+	std::shared_ptr<BaseShaderModule> getShaderModuleID(size_t ID) {
 		auto record = ShaderModules.getID(ID);
 		if (record) {
 			if (record->loaded && record->module) {
@@ -281,18 +281,6 @@ public:
 			throw std::runtime_error("Error: Shader Module ID not found: " + std::to_string(ID));
 		}
 		return {};
-	}
-
-	std::shared_ptr<BaseShaderModule> getShaderModule(size_t ID) {
-
-	}
-
-	std::shared_ptr<BaseShader> getPassShader(size_t ID) {
-
-	}
-
-	std::shared_ptr<BaseShader> getGeometryShader(size_t ID) {
-
 	}
 
 	void deReferenceGeometryShader(size_t ID) {

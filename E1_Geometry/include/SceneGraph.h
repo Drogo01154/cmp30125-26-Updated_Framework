@@ -36,6 +36,7 @@ public:
 		selectedModel = -1;
 		selectedCreateModel = -1;
 		inputResolution = 100;
+		ambientLight = { 0.0f, 0.0f, 0.0f, 1.f };
 
 		createBaseScene();
 	}

@@ -8,7 +8,7 @@
 
 #include <d3d11.h>
 #include "FileHandler.h"
-#include "LRUCache.h"
+#include "InstanceCache.h"
 //#include "../DirectXTK/Inc/DDSTextureLoader.h"
 //#include "../DirectXTK/Inc/WICTextureLoader.h"
 #include "DTK\include\DDSTextureLoader.h"
@@ -25,6 +25,7 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 struct TextureResource {
+	std::wstring uid;
 	ComPtr<ID3D11ShaderResourceView> texture;
 	TextureResource(ComPtr<ID3D11ShaderResourceView> t) : texture(t) {}
 };
@@ -34,7 +35,7 @@ class TextureManager
 public:
 	TextureManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 	~TextureManager();
-	std::shared_ptr<TextureResource> getTexture(const std::wstring& uid);
+	Instance<TextureResource> getTexture(const std::wstring& uid);
 	void checkRemove(const std::wstring& uid); //Unloads texture if no more in scene
 private:
 	bool does_file_exist(const wchar_t *fileName);
@@ -46,8 +47,8 @@ private:
 	
 	ID3D11Device* device;
 	ID3D11DeviceContext* deviceContext;
-	LRUCache<std::wstring, std::shared_ptr<TextureResource>> textureLru;
-	std::map<std::wstring, std::shared_ptr<TextureResource>> textureMap;
+	InstanceCache<TextureResource> textureCache;
+	std::unordered_map<std::wstring, size_t> UIDsToID;
 };
 
 #endif

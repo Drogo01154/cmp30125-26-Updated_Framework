@@ -89,6 +89,11 @@ public:
             cache.erase(it);
         }
     }
+
+    inline void clear() {
+        cache.clear();
+        order.clear();
+    }
 };
 
 #endif

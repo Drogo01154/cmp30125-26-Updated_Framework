@@ -11,6 +11,11 @@ TextureManager::TextureManager(ID3D11Device* ldevice, ID3D11DeviceContext* ldevi
 {
 	device = ldevice;
 	deviceContext = ldeviceContext;
+
+	textureCache.addTypeDestructor([this](std::shared_ptr<TextureResource> texture) {
+		UIDsToID.erase(texture->uid); // Remove lookup from map;
+		});
+
 	addDefaultTexture();
 }
 
