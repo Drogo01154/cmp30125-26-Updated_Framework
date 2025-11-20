@@ -63,6 +63,10 @@ public:
         return &it->second->second;
     }
 
+    inline bool contains(const Key& key) const {
+        return cache.find(key) != cache.end();
+    }
+
     template<typename K, typename V>
     inline void EmplaceReplace(K&& _Key, V&& _Value) {
         auto it = cache.find(_Key); // Check cache for key
@@ -80,6 +84,20 @@ public:
             order.emplace_front(std::forward<K>(_Key), std::forward<V>(_Value));
             cache[order.front().first] = order.begin();
         }
+    }
+
+    template<typename K>
+    inline bool RenameKey(K&& _oldKey, K&& _newKey) {
+        auto it = cache.find(_oldKey);
+        if (it == cache.end()) return false;
+        if (cache.find(_newKey) != cache.end()) return false;
+
+        auto listIt = it->second;
+        listIt->first = std::forward<K>(_newKey);
+        cache[std::forward<K>(_newKey)] = listIt;
+        cache.erase(it);
+
+        return true;
     }
 
     inline void Remove(const Key& key) {

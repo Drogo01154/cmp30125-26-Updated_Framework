@@ -1,123 +1,265 @@
 #pragma once
 
-#pragma once
-
-#ifndef _INSTANCEMAP_H_
-#define _INSTANCEMAP_H_
+#ifndef _INSTANCECACHE_H_
+#define _INSTANCECACHE_H_
 
 #include "LRUCache.h"
+#include <type_traits>
+#include <unordered_map>
+#include <list>
+#include <memory>
+#include <string>
 #include <functional>
+#include <stdexcept>
+#include "Converters.h"
 
-template<typename Value>
+template<typename IDType, typename Value>
 class InstanceCache;
 
-//Instance class used for instance map
-template<typename Value>
+//Instance class used for instance owningCache
+template<typename IDType, typename Value>
 class Instance {
 public:
 
-	Instance() {
-		map = nullptr;
-		valuePtr = nullptr;
-		ID = SIZE_MAX;
-	}
+	template<typename IDType, typename Value>
+	friend class InstanceCache;
 
-	Instance(InstanceCache<Value>* map, size_t id, std::shared_ptr<Value> valuePtr)
+	//Constructor
+	Instance() : owningCache(nullptr), valuePtr(nullptr), ID() {}
+
+	//Copy Constructor
+	Instance(const Instance& other)
+		: 
+		owningCache(other.valuePtr ? other.owningCache : nullptr), 
+		ID(other.ID), 
+		valuePtr(other.valuePtr)
 	{
-		map->IncrementID(ID);
+		if (owningCache) owningCache->IncrementID(ID);
 	}
 
-	Instance(const Instance& other) {
-		map = other.map;
-		ID = other.ID;
-		valuePtr = other.valuePtr;
-		map->IncrementID(ID);
+	//Move Constructor
+	Instance(Instance&& other) noexcept
+		: owningCache(other.valuePtr ? other.owningCache : nullptr), 
+		ID(std::move(other.ID)), 
+		valuePtr(std::move(other.valuePtr)) {
+		other.owningCache = nullptr;
 	}
 
+	//Equal = operator
 	Instance& operator=(const Instance& other) {
-		map = other.map;
-		ID = other.ID;
-		valuePtr = other.valuePtr;
-		map->IncrementID(ID);
+		if (this != &other) {
+			if (owningCache) owningCache->DeincrementID(ID);
+			owningCache = other.valuePtr ? other.owningCache : nullptr;
+			ID = other.ID;
+			valuePtr = other.valuePtr;
+			if (owningCache) owningCache->IncrementID(ID);
+		}
 		return *this;
 	}
 
-	~Instance() {
-		map->DeincrementID(ID);
+	//Eqaul Move operator
+	Instance& operator=(Instance&& other) noexcept {
+		if (this != &other) {
+			if (owningCache) owningCache->DeincrementID(ID);
+			owningCache = other.valuePtr ? other.owningCache : nullptr;
+			ID = std::move(other.ID);
+			valuePtr = std::move(other.valuePtr);
+			other.owningCache = nullptr;
+		}
+		return *this;
 	}
 
-	Value& operator*() {
+	//Returns if valid instance
+	bool IsValid() const {
+		return valuePtr != nullptr;
+	}
+
+	//Destructor
+	~Instance() {
+		if (valuePtr && owningCache) owningCache->DeincrementID(ID);
+	}
+
+	//De reference overload
+	Value& operator*() const {
+		if (!valuePtr)
+			throw std::runtime_error("Attempted to dereference null Instance");
 		return *valuePtr;
 	}
 
-	Value* operator->() {
-		if (!valuePtr) {
-			throw std::runtime_error("Null pointer access via operator->");
-		}
-		return valuePtr.get();
+	//Ptr return overload
+	Value* operator->() { return valuePtr ? valuePtr.get() : nullptr; }
+
+	//Get functon
+	Value* Get() { return valuePtr ? valuePtr.get() : nullptr; }
+
+	//get shared_ptr overload
+	operator std::shared_ptr<Value>() const { return valuePtr; }
+private:
+
+	//Cache instance constructor
+	Instance(InstanceCache<IDType, Value>* owningCache, IDType id, std::shared_ptr<Value> valuePtr)
+		: owningCache(owningCache), ID(id), valuePtr(std::move(valuePtr))
+	{
+		if (owningCache) owningCache->IncrementID(ID);
 	}
 
-	operator std::shared_ptr<Value>() {
-		if (!valuePtr) {
-			throw std::runtime_error("Null pointer access via operator->");
-		}
-		return valuePtr;
-	}
-private:
-	InstanceCache<Value>* map;
-	size_t ID;
-	std::shared_ptr<Value> valuePtr;
+	InstanceCache<IDType, Value>* owningCache; // owning cache 
+	IDType ID;	// Key for cache - numeric or string type
+	std::shared_ptr<Value> valuePtr; //Shared ptr to instance value
 };
 
-template<typename Value>
+template<typename IDType, typename Value>
 class InstanceCache {
 public:
-	friend class Instance<Value>;
 
-	InstanceCache() : currentID(0), valueDestructor(nullptr) {}
+	using  InstanceData = std::pair<size_t, std::shared_ptr<Value>>;
+	friend class Instance<IDType, Value>;
 
-	inline Instance<Value> emplaceID(size_t& ID, Value val) {
-		if (!freeIDs.empty()) {
-			ID = freeIDs.back();
-			freeIDs.pop_back();
+	//Constructor
+	InstanceCache(uint64_t LRUSize = 10, bool RemoveOnZeroInstances = true) :
+		entryCache(LRUSize),
+		charVectorDirty(false),
+		RemoveOnZeroInstances(RemoveOnZeroInstances),
+		valueHandler(nullptr),
+		valueInitialiser(nullptr)
+	{
+		//Assert that can only be numeric or string type
+		static_assert(
+			std::is_integral<IDType>::value ||
+			std::is_same<IDType, std::string>::value ||
+			std::is_same<IDType, std::wstring>::value,
+			"InstanceCache can only be instantiated with integral or string ID types"
+			);
+		if constexpr (std::is_integral<IDType>::value) {	// Only compile this block if IDType is numeric
+			//Set current ID index to start
+			currentID = 0;
 		}
-		else {
-			ID = currentID++;
-		}
-		auto it = entries.emplace(ID, std::make_pair(0, std::make_shared<Value>(std::move(val))));
-		entryCache.EmplaceReplace(ID, &it.first->second);
-		return Instance<Value>(this, ID, it.first->second.second);
+
+
 	}
-
-	inline Instance<Value> getID(size_t ID) {
-		//Check LRU cache
-		std::pair<size_t, std::shared_ptr<Value>>* LRUvalue = entryCache.get(ID);
-		if (LRUvalue) {
-			return Instance<Value>(this, ID, LRUvalue->second);
-		}
-		else {
-			auto mapValue = entries.find(ID);
-			if (mapValue != entries.end()) {
-				entryCache.EmplaceReplace(ID, &mapValue->second);
-				return Instance<Value>(this, ID, mapValue->second.second);
+	/*
+		Const ID emplace function - only works on string types
+		Tries string as key
+		bool determines if should return instance and instantiate value (run its construction function)
+	*/
+	inline Instance<IDType, Value> emplaceID(const IDType& ID, Value val, bool InstantiateInstance = true)
+	{
+		//Make sure only run on string types
+		static_assert(!std::is_integral<IDType>::value, "Only string types allowed");
+		//If already in map throw exception 
+		if (entries.find(ID) != entries.end()) {
+			if constexpr (std::is_same<IDType, std::wstring>::value) { // If wstring
+				throw std::runtime_error("ID already exists: " + Converters::convert_from_wstring(ID));
+			}
+			else {
+				throw std::runtime_error("ID already exists: " + ID);
 			}
 		}
-		throw std::runtime_error("Error: ID: " + std::to_string(ID) +
-			" cannot be accessed as it does not exist!");
+		
+		auto dataPtr = std::make_shared<InstanceData>(0, std::make_shared<Value>(std::move(val)));
+		entries[ID] = dataPtr;
+		entryCache.EmplaceReplace(ID, dataPtr);
+		charVectorDirty = true;
+		if (InstantiateInstance) {	// return valued instance
+			return Instance<IDType, Value>(this, ID, dataPtr->second);
+		}
+		else { // return empty instance
+			return Instance<IDType, Value>();
+		}
+
+	}
+
+	/*
+		emplace function
+		If numeric type determines ID and uses as key, if string type tries string as key
+		bool determines if should return instance and instantiate value (run its construction function)
+	*/
+	inline Instance<IDType, Value> emplaceID(IDType& ID, Value val) {
+		if constexpr (std::is_integral<IDType>::value) {	// If numeric type value
+			//Deterine ID value
+			if (!freeIDs.empty()) {
+				ID = freeIDs.back();
+				freeIDs.pop_back();
+			} else { 
+				ID = currentID++; 
+			} 
+		} else {
+			if (ID.empty()) {
+				throw std::runtime_error("String ID must be provided");
+			}
+			else if (entries.find(ID) != entries.end()) {
+				return Instance<IDType, Value>();
+			}
+		}
+		auto dataPtr = std::make_shared<InstanceData>(0, std::make_shared<Value>(std::move(val)));
+		entries[ID] = dataPtr;
+		entryCache.EmplaceReplace(ID, dataPtr);
+		return Instance<IDType, Value>(this, ID, dataPtr->second);
+	}
+
+	inline Instance<IDType, Value> tryGetInstance(IDType ID) const{
+		std::shared_ptr<Value> inst = findValue(ID, false);
+		return inst ? Instance<IDType, Value>(this, ID, inst) : Instance<IDType, Value>();
+	}
+
+	inline std::shared_ptr<Value> tryGetValue(IDType ID) const {
+		return findValue(ID, false);
+	}
+
+	inline Value& getValue(IDType ID) const {
+		return *findValue(ID, true)
+	}
+
+	inline Instance<IDType, Value> getInstance(IDType ID) const {
+		return Instance<IDType, Value>(this, ID, findValue(ID, true));
+	}
+
+	inline bool removeID(IDType ID) {
+		auto it = entries.find(ID);
+		if (it != entries.end()) {
+			if (valueHandler != nullptr) {
+				(*valueHandler)(it->second->second);
+			}
+			it->second.reset();
+			entryCache.Remove(ID);
+			entries.erase(it);
+			if constexpr (std::is_integral<IDType>::value) {
+				freeIDs.push_back(ID);
+			}
+			charVectorDirty = true;
+			return true;
+		}
+		return false;
+	}
+
+	inline bool hasID(IDType ID) {
+		return entryCache.contains(ID) || entries.find(ID) != entries.end();
 	}
 
 	inline size_t size() { return entries.size(); }
 
 	inline void clear() {
+		for (auto& it : entries) {
+			if (valueHandler != nullptr) {
+				(*valueHandler)(it.second);
+			}
+			it.second.reset();
+		}
 		entryCache.clear();
 		entries.clear();
 		freeIDs.clear();
 		currentID = 0;
+		charVectorDirty = true;
 	}
 
 	template<typename Func>
-	inline void addTypeDestructor(Func func) {
-		valueDestructor = std::make_unique<std::function<void(std::shared_ptr<Value>)>>(func);
+	inline void addTypeEndHandler(Func func) {
+		valueHandler = std::make_unique<std::function<void(std::shared_ptr<Value>)>>(func);
+	}
+
+	template<typename Func>
+	inline void addTypeInitialiser(Func func) {
+		valueInitialiser = std::make_unique<std::function<void(std::shared_ptr<Value>)>>(func);
 	}
 
 	template<typename Func>
@@ -127,32 +269,120 @@ public:
 		}
 	}
 
-private:
-	void IncrementID(size_t ID) {
-		entries[ID].first++;
+	inline const std::vector<std::string>& getCachedStringVec(bool forceUpdate = false) {
+		updateCharVector(forceUpdate);
+		return stringStorage;
 	}
 
-	void DeincrementID(size_t ID) {
+
+	inline const std::vector<const char*>& getCharVec(bool forceUpdate = false) {
+		updateCharVector(forceUpdate);
+		return charVec;
+	}
+
+	inline const std::string& getCachedName(size_t IT) {
+		return stringStorage[IT];
+	}
+
+	inline bool changeID(const IDType& oldID, const IDType& newID) {
+		static_assert(!std::is_integral<IDType>::value, "ChangeID is only allowed for string IDs");
+
+		auto it = entries.find(oldID);
+		if (it == entries.end()) { return false; }						// Old ID not found
+		if (entries.find(newID) != entries.end()) { return false; }		// New ID found
+
+		entries[newID] = it->second;
+		entries.erase(it);
+		entryCache.RenameKey(oldID, newID);
+		charVectorDirty = true;
+		return true;
+	}
+
+private:
+
+	inline std::shared_ptr<Value> findValue(IDType ID, bool throwIfMissing = false) const {
+		auto LRUvalue = entryCache.get(ID);
+		std::shared_ptr<Value> val = nullptr;
+
+		if (LRUvalue) val = LRUvalue->second;
+		else {
+			auto it = entries.find(ID);
+			if (it != entries.end()) {
+				entryCache.EmplaceReplace(ID, it->second);
+				val = it->second->second;
+			}
+
+		}
+
+		if (!val && throwIfMissing) {
+			if constexpr (std::is_integral<IDType>::value)
+				throw std::runtime_error("Error: ID: " + std::to_string(ID) + " cannot be accessed!");
+			else if constexpr (std::is_same<IDType, std::wstring>::value)
+				throw std::runtime_error("Error: ID: " + Converters::convert_from_wstring(ID) + " cannot be accessed!");
+			else
+				throw std::runtime_error("Error: ID: " + ID + " cannot be accessed!");
+		}
+
+		return val;
+	}
+
+	void updateCharVector(bool forceUpdate = false) {
+		if (!forceUpdate && !charVectorDirty) {
+			return charVec;
+		}
+
+		stringStorage.clear();
+		charVec.clear();
+		for (auto& [id, val] : entries) {
+			if constexpr (std::is_integral<IDType>::value) {
+				stringStorage.push_back(std::to_string(id));
+			}
+			else if constexpr (std::is_same<IDType, std::wstring>::value) {
+				stringStorage.push_back(Converters::convert_from_wstring(id));
+			}
+			else {
+				stringStorage.push_back(id);
+			}
+			charVec.push_back(stringStorage.back().c_str());
+		}
+		charVectorDirty = false;
+	}
+
+	void IncrementID(IDType ID) {
+		entries[ID]->first++;
+	}
+
+	void DeincrementID(IDType ID) {
 		auto it = entries.find(ID);
 		if (it != entries.end()) {
-			it->second.first--;
-			if (it->second.first == 0) {
-				if (valueDestructor != nullptr) {
-					(*valueDestructor)(it->second.second);
+			it->second->first--;
+			if (it->second->first == 0) {
+				if (valueHandler != nullptr) {
+					(*valueHandler)(it->second->second);
 				}
-				entryCache.Remove(ID);
-				entries.erase(it);
-				freeIDs.push_back(ID);
+				if (RemoveOnZeroInstances) {
+					entryCache.Remove(ID);
+					entries.erase(it);
+					if constexpr (std::is_integral<IDType>::value) {
+						freeIDs.push_back(ID);
+					}
+					charVectorDirty = true;
+				}
 			}
 		}
 	}
+	mutable LRUCache<IDType, std::shared_ptr<InstanceData>> entryCache;
+	std::unordered_map<IDType, std::shared_ptr<InstanceData>> entries;
+	std::vector<std::string> stringStorage;
+	std::vector<const char*> charVec;
+	std::vector<IDType> freeIDs;
+	IDType currentID{};
 
-	LRUCache<size_t, std::pair<size_t, std::shared_ptr<Value>>*> entryCache;
-	std::unordered_map<size_t, std::pair<size_t, std::shared_ptr<Value>>> entries;
+	bool RemoveOnZeroInstances;
+	bool charVectorDirty;
 
-	std::vector<size_t> freeIDs;
-	size_t currentID;
-	std::unique_ptr<std::function<void(std::shared_ptr<Value>)>> valueDestructor;
+	std::unique_ptr<std::function<void(std::shared_ptr<Value>)>> valueHandler;
+	std::unique_ptr<std::function<void(std::shared_ptr<Value>)>> valueInitialiser;
 };
 
 #endif

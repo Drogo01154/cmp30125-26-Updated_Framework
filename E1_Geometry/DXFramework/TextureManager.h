@@ -27,28 +27,28 @@ using Microsoft::WRL::ComPtr;
 struct TextureResource {
 	std::wstring uid;
 	ComPtr<ID3D11ShaderResourceView> texture;
-	TextureResource(ComPtr<ID3D11ShaderResourceView> t) : texture(t) {}
+	TextureResource(ComPtr<ID3D11ShaderResourceView> t, const std::wstring& uid) : texture(t) {}
 };
+
+#define TextureInstance Instance<std::wstring, TextureResource>
 
 class TextureManager
 {
 public:
 	TextureManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 	~TextureManager();
-	Instance<TextureResource> getTexture(const std::wstring& uid);
-	void checkRemove(const std::wstring& uid); //Unloads texture if no more in scene
+	TextureInstance getTexture(const std::wstring& uid);
 private:
 	bool does_file_exist(const wchar_t *fileName);
 	//void generateTexture(ID3D11Device* device);
 	void addDefaultTexture();
-	std::shared_ptr<TextureResource> loadTexture(const std::wstring& uid, const std::wstring& filename);
+	TextureInstance loadTexture(const std::wstring& uid, const std::wstring& filename);
 
 	
-	
+	TextureInstance defaultTexture;	// Instance will always remain
 	ID3D11Device* device;
 	ID3D11DeviceContext* deviceContext;
-	InstanceCache<TextureResource> textureCache;
-	std::unordered_map<std::wstring, size_t> UIDsToID;
+	InstanceCache<std::wstring, TextureResource> textureCache;
 };
 
 #endif

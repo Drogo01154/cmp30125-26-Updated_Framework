@@ -7,7 +7,7 @@
 #include "FPCamera.h"
 #include "MaterialManager.h"
 #include "GeometryManager.h"
-#include "IDMap.h"
+#include "InstanceCache.h"
 #include <variant>
 #include "Input.h"
 

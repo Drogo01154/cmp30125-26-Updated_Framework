@@ -12,14 +12,10 @@ TextureManager::TextureManager(ID3D11Device* ldevice, ID3D11DeviceContext* ldevi
 	device = ldevice;
 	deviceContext = ldeviceContext;
 
-	textureCache.addTypeDestructor([this](std::shared_ptr<TextureResource> texture) {
-		UIDsToID.erase(texture->uid); // Remove lookup from map;
-		});
-
 	addDefaultTexture();
 }
 
-std::shared_ptr<TextureResource> TextureManager::loadTexture(const std::wstring& uid, const std::wstring& filename)
+TextureInstance TextureManager::loadTexture(const std::wstring& uid, const std::wstring& filename)
 {
 	ComPtr<ID3D11ShaderResourceView> texture;
 	HRESULT result;
@@ -29,7 +25,7 @@ std::shared_ptr<TextureResource> TextureManager::loadTexture(const std::wstring&
 	{
 		//filename = L"../res/DefaultDiffuse.png";
 		MessageBox(NULL, L"Texture filename does not exist", L"ERROR", MB_OK);
-		return nullptr;
+		return TextureInstance();
 	}
 	// if not set default texture
 	if (!does_file_exist(filename.c_str()))
@@ -37,7 +33,7 @@ std::shared_ptr<TextureResource> TextureManager::loadTexture(const std::wstring&
 		// change default texture
 		//filename = L"../res/DefaultDiffuse.png";
 		MessageBox(NULL, L"Texture filename does not exist", L"ERROR", MB_OK);
-		return nullptr;
+		return TextureInstance();
 	}
 
 	// check file extension for correct loading function.
@@ -69,13 +65,11 @@ std::shared_ptr<TextureResource> TextureManager::loadTexture(const std::wstring&
 	if (FAILED(result))
 	{
 		MessageBox(NULL, L"Texture loading error", L"ERROR", MB_OK);
-		return nullptr;
+		return TextureInstance();
 	}
 	else
 	{
-		auto pair = textureMap.insert(std::make_pair(uid, std::make_shared<TextureResource>(texture)));
-		textureLru.EmplaceReplace(uid, pair.first->second);
-		return pair.first->second;
+		return textureCache.emplaceID(uid, TextureResource(texture, uid));
 	}
 }
 
@@ -83,32 +77,16 @@ std::shared_ptr<TextureResource> TextureManager::loadTexture(const std::wstring&
 TextureManager::~TextureManager() {}
 
 // Return texture as a shader resource.
-std::shared_ptr<TextureResource> TextureManager::getTexture(const std::wstring& uid)
+TextureInstance TextureManager::getTexture(const std::wstring& uid)
 {
 	//Attempt retrieval from LRU cache
-	std::shared_ptr<TextureResource> retrievedTexture = textureLru.get(uid);
-	//If not in LRU cache
-	if (retrievedTexture == nullptr) {
-		//Attept retrieval from texture map
-		if (textureMap.find(uid) != textureMap.end())
-		{
-			// texture exists
-			retrievedTexture = textureMap.at(uid);
-		} else {
-			//Attept to find texture in file handler map
-			std::wstring* filePath = FileHandler::get().locateImage(uid);
-			//Load texture if in file
-			if (filePath != nullptr) {
-				retrievedTexture = loadTexture(uid, *filePath);
-				if (retrievedTexture == nullptr) {
-					throw std::runtime_error("Texture:" + Converters::convert_from_wstring(uid) + " Could not be loaded!");
-				}
-			}
-			else {
-				throw std::runtime_error("Texture:" + Converters::convert_from_wstring(uid) + " does not exist!");
-			}
+	TextureInstance retrievedTexture = textureCache.getID(uid);
+	if (!retrievedTexture.IsValid()) {
+		std::wstring* filePath = FileHandler::get().locateImage(uid);
+		retrievedTexture = loadTexture(uid, *filePath);
+		if (!retrievedTexture.IsValid()) {
+			throw std::runtime_error("Texture:" + Converters::convert_from_wstring(uid) + " Could not be loaded!");
 		}
-		textureLru.EmplaceReplace(uid, retrievedTexture); // Update LRU cache
 	}
 	return retrievedTexture;
 }
@@ -137,36 +115,6 @@ void TextureManager::generateTexture(ID3D11Device* device)
 }
 */
 
-void TextureManager::checkRemove(const std::wstring& uid) {
-	if (uid == L"default") {
-		throw std::runtime_error("Error: Cannot delete default texture!");
-	}
-
-	// Try to get from LRU cache first
-	std::shared_ptr<TextureResource> TR = textureLru.get(uid);
-	//Set internal refs to one for above local reference
-	int internalRefs = 1;
-	//If in LRU cache also in map so add 2 to references
-	if(TR != nullptr) { internalRefs += 2; }
-	else {
-		
-		auto it = textureMap.find(uid);
-		//If in map increase internal refs and set TR
-		if (it != textureMap.end()) 
-		{ 
-			TR = it->second;
-			++internalRefs; 
-		}
-		else { return; }
-	}
-	//If use count only in manager class remove
-	if (TR.use_count() == internalRefs) {
-		// No external references, safe to remove
-		textureLru.Remove(uid);
-		textureMap.erase(uid);
-	}
-}
-
 void TextureManager::addDefaultTexture()
 {
 	ComPtr<ID3D11ShaderResourceView> texture;
@@ -190,9 +138,8 @@ void TextureManager::addDefaultTexture()
 		SRVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		SRVDesc.Texture2D.MipLevels = 1;
-
+		std::wstring defaultUid = L"default";
+		defaultTexture = textureCache.emplaceID(defaultUid, TextureResource(texture, defaultUid));
 		hr = device->CreateShaderResourceView(pTexture.Get(), &SRVDesc, texture.GetAddressOf());
-		textureMap.insert(std::make_pair(const_cast < wchar_t*>(L"default"), std::make_shared<TextureResource>(texture)));
-	}
-	
+	}	
 }

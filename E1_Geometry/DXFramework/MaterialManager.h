@@ -4,7 +4,6 @@
 #define _MATERIALMANAGER_H_
 
 #include "Material.h"
-#include "IDMap.h"
 #include "ShaderManager.h"
 #include "Converters.h"
 #include "SerializationHelpers.h"
@@ -12,110 +11,79 @@
 class MaterialManager {
 public:
 	//Constructor
-	MaterialManager(ShaderManager* shaderManager, TextureManager* textureManager) : shaderManager(shaderManager), textureManager(textureManager) {
+	MaterialManager(ShaderManager* shaderManager, TextureManager* textureManager) : 
+		materialCache(10, false),
+		shaderManager(shaderManager), 
+		textureManager(textureManager) {
+		materialCache.addTypeInitialiser([&](std::shared_ptr<Material> mat) {
+			if (mat->shaderName != "") {
+				mat->shader = shaderManager->getGeometryShader(mat->shaderName);
+			}
+			if (mat->textureString != L"") {
+				mat->texture = textureManager->getTexture(mat->textureString);
+			}
+			});
+
+		materialCache.addTypeEndHandler([](std::shared_ptr<Material> mat) {
+			if (mat->shader.IsValid()) {
+				mat->shader = ShaderInstance();
+			}
+			if (mat->texture.IsValid()) {
+				mat->texture = TextureInstance();
+			}
+			});
+
+		
 		selectedMaterial = -1;
 		selectedTexture = -1;
 		createMaterial("Default");
 	};
 
 	//Gets material ID from name
-	size_t getMaterialID(const std::string& name) {
-		auto it = materialNamesToIDs.find(name);
-		if (it != materialNamesToIDs.end()) {
-			return it->second;
+	MaterialInstance getMaterial(const std::string& name) {
+		MaterialInstance inst = materialCache.getID(name);
+		if (!inst.IsValid()) {
+			throw std::runtime_error("Error: material does not exist at: " + name);
 		}
-		throw std::runtime_error("Error: material does not exist at: " + name);
+		return inst;
 	}
 
 	//Renames a given material
-	void renameMaterial(const std::string& oldName, const std::string& newName, bool selectedMaterial = false) {
-		if (oldName == "Default") { return; }
-		//Check if new name already in use
-		if (materialNamesToIDs.find(newName) != materialNamesToIDs.end()) {
-			return;
-		}
-		auto it = materialNamesToIDs.find(oldName);
-		if (it == materialNamesToIDs.end()) {
-			throw std::runtime_error("Error: Old material name does not exist: " + oldName);
-		}
-		//Get ID of material
-		size_t ID = it->second;
-		materialNamesToIDs.erase(it);
-		materialNamesToIDs[newName] = ID;
-		materialMap.getID(ID)->MaterialName = newName;
-		resizeMaterialNames(true, newName);
-	}
-
-	//Gets a chosen material by its ID
-	std::shared_ptr<Material> getMaterial(size_t ID) {
-		//Attempt get material
-		std::shared_ptr<Material> mat = materialMap.getID(ID);
-		if (mat) { // if material in map
-			if (mat->liveUsers == 0) { // if no users yet load data
-				mat->texture = textureManager->getTexture(mat->textureString);
-				shaderManager->addGeometryShaderInstanceReference(mat->ShaderID); // Tracks that this shader is going to be used so instantiates it if not already
+	bool renameMaterial(const std::string& oldName, const std::string& newName, bool selectedMaterial = false) {
+		if (materialCache.changeID(oldName, newName)) {
+			const std::vector<std::string>& stringCache = materialCache.getCachedStringVec(false);
+			for (int i = 0; i < stringCache.size(); ++i) {
+				if (stringCache[i] == newName) {
+					selectedMaterial = i;
+					return true;
+				}
 			}
+			throw std::runtime_error("Error: somehow name not in cache at: " + newName);
+			return false;
 		}
-		else {
-			throw std::runtime_error("Error: Material does not exist at ID " + std::to_string(ID));
-		}
-		mat->liveUsers++;
-		return mat;
+		return false;
 	}
 
-	//Function for removing a reference to the material being used
-	void removeMaterialReference(size_t ID) {
-		std::shared_ptr<Material> mat = materialMap.getID(ID);
-		if (!mat) {
-			throw std::runtime_error("Error: Material does not exist at ID " + std::to_string(ID));
-		}
-		
-		if (mat->liveUsers == 0) {	// Prevent underflow by clamping to zero
-			return;
-		}
-		mat->liveUsers--;
-		if (mat->liveUsers == 0) { // If material only refernced in this class and not used anywhere else
-			mat->texture = nullptr;
-			shaderManager->deReferenceGeometryShader(mat->ShaderID); // Tell shader manager geometry shader no longer in use
-			textureManager->checkRemove(mat->textureString); // Tell texture manager texture no longer being used here
-		}
-	}
-
-
-	//Resized vector of material names for combo list
-	inline void resizeMaterialNames(bool preserveSelection = false, const std::string& selectedName = "") {
-		materialNames.clear();
-		int newSelectedIndex = -1;
-		size_t iterator = 0;
-		for (auto& it : materialNamesToIDs) {
-			if (preserveSelection && it.first == selectedName) {
-				newSelectedIndex = static_cast<int>(iterator);
-			}
-			materialNames.push_back(it.first.c_str());
-			iterator++;
-		}
-
-		if (preserveSelection) {
-			selectedMaterial = (newSelectedIndex != -1) ? newSelectedIndex : -1;
-		}
-		else if (selectedMaterial >= static_cast<int>(materialNames.size())) {
-			selectedMaterial = -1; // reset if out of bounds
-		}
-	}
 
 	//Creates material
-	inline size_t createMaterial(const std::string& name) {
-		std::pair<size_t, std::shared_ptr<Material>> materialData = materialMap.emplaceID(Material());
-		materialData.second->MaterialName = name;
-		materialData.second->liveUsers = 0;
-		materialData.second->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-		materialData.second->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-		materialData.second->specularPower = 32.f;
-		materialData.second->ShaderID = shaderManager->getDefaultGeometryShader();
-		materialData.second->textureString = L"brick1";
-		materialData.second->texture = textureManager->getTexture(materialData.second->textureString);
-		resizeMaterialNames();
-		return materialData.first;
+	inline void createMaterial(const std::string& name) {
+		if (name == "" || name == "Default") return;
+		Material mat;
+
+		mat.MaterialName = name;
+		mat.baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+		mat.specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+		mat.specularPower = 32.f;
+		mat.textureString = L"brick1";
+		mat.shaderName = shaderManager->getDefaultGeometryShaderName();
+
+		materialCache.emplaceID(name, std::move(mat));
+	}
+
+	void updateSelectedMaterial() {
+		if (selectedMaterial >= 0) {
+
+		}
 	}
 
 	//Updates what material is selected
@@ -155,106 +123,22 @@ public:
 	}
 
 	inline bool deleteMaterial(const std::string& name) {
-		bool hasUsers = false;
-		auto it = materialNamesToIDs.find(name);	// Find material
-		if (it != materialNamesToIDs.end()) { // Material exists!
-			
-			std::string selectedName = "";
-			bool nameSelected = selectedMaterial >= 0;
-
-			if (nameSelected) {
-				selectedName = std::string(materialNames[selectedMaterial]);
-				if (selectedName == name) {
-					selectedMaterial = -1;
-					nameSelected = false;
-				}
-			}
-			size_t ID = materialNamesToIDs[name];
-
-
-			auto mat = materialMap.getID(ID);
-			hasUsers = mat->liveUsers > 0;
-			if (hasUsers) {
-				if (mat->textureString != L"") {
-					mat->texture = nullptr;
-					textureManager->checkRemove(mat->textureString);
-				}
-
-				shaderManager->deReferenceGeometryShader(mat->ShaderID);
-			}
-		
-
-			materialNamesToIDs.erase(name);
-			materialMap.eraseID(ID);
-
-			resizeMaterialNames(nameSelected, selectedName);
-		}
-		else {
-			throw std::runtime_error("Error: material does not exist at: " + name);
-		}
-		return hasUsers;
-	}
-
-	inline bool deleteMaterial(size_t ID) {
-		bool hasUsers = false;
 		if (selectedMaterial >= 0) {
-			std::string selectedName = std::string(materialNames[selectedMaterial]);
-		}
-		;
-		if (auto mat = materialMap.getID(ID)) { // Find material
-			
-			std::string selectedName = "";
-			bool nameSelected = selectedMaterial >= 0;
-
-			hasUsers = mat->liveUsers > 0;
-
-			if (hasUsers) {
-				if (mat->textureString != L"") {
-					mat->texture = nullptr;
-					textureManager->checkRemove(mat->textureString);
-				}
-
-				shaderManager->deReferenceGeometryShader(mat->ShaderID);
+			if (name == materialCache.getCachedStringVec()[selectedMaterial]) 
+			{ 
+				selectedMaterial = -1;
+				nameInput[0] = '\0';
+				selectedTexture = -1;
 			}
-
-			if (nameSelected) {
-				selectedName = std::string(materialNames[selectedMaterial]);
-				if (selectedName == mat->MaterialName) {
-					selectedMaterial = -1;
-					nameSelected = false;
-				}
-			}
-		
-			materialNamesToIDs.erase(mat->MaterialName);
-			materialMap.eraseID(ID);
-
-			resizeMaterialNames(nameSelected, selectedName);
-
 		}
-		else {
-			throw std::runtime_error("Error: material does not exist at ID: " + std::to_string(ID));
-		}
-		return hasUsers;
+		materialCache.removeID(name);
 	}
 
 	inline void deleteAllMaterials() {
-		materialMap.forEach([&](size_t ID, std::shared_ptr<Material> mat) {
-			if (mat->liveUsers > 0) {
-				if (mat->textureString != L"") {
-					mat->texture = nullptr;
-					textureManager->checkRemove(mat->textureString);
-				}
-
-				shaderManager->deReferenceGeometryShader(mat->ShaderID);
-				}
-			});
-		materialNamesToIDs.clear();
-		materialMap.clear();
-		materialNames.clear();
 		selectedMaterial = -1;
-		// Clear buffer
 		nameInput[0] = '\0';
 		selectedTexture = -1;
+		materialCache.clear();
 	}
 
 	inline void imGuiRender() {
@@ -344,7 +228,7 @@ public:
 private:
 	ShaderManager* shaderManager;
 	TextureManager* textureManager;
-	IDMap<Material> materialMap;
+	InstanceCache<std::string, Material> materialCache;
 	std::unordered_map<std::string, size_t> materialNamesToIDs;
 	std::vector<const char*> materialNames;
 
