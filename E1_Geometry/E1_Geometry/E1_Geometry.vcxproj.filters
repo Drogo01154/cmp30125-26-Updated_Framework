@@ -152,9 +152,6 @@
     <ClInclude Include="ColourShader.h">
       <Filter>Header Files\Shaders\MeshShaders</Filter>
     </ClInclude>
-    <ClInclude Include="ManipulationShader.h">
-      <Filter>Header Files\Shaders\MeshShaders</Filter>
-    </ClInclude>
     <ClInclude Include="KernelShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
@@ -165,6 +162,12 @@
       <Filter>Header Files\RendedPasses</Filter>
     </ClInclude>
     <ClInclude Include="MaterialDataModule.h">
+      <Filter>Header Files\ShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="ManipulationShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraDataModule.h">
       <Filter>Header Files\ShaderModules</Filter>
     </ClInclude>
   </ItemGroup>

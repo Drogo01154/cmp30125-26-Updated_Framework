@@ -16,10 +16,9 @@ struct sceneNode {
 	size_t lightID;
 	size_t cameraID;
 
-	
-	std::weak_ptr<CameraInstance> camera;
-	std::weak_ptr<GeometryInstance> meshInstance;
-	std::weak_ptr<Light> light;
+	CameraInstance cameraInstance;
+	GeometryInstance meshInstance;
+	LightInstance lightInstance;
 
 	std::vector<std::shared_ptr<sceneNode>> children;
 	std::shared_ptr<sceneNode> parent;
@@ -48,15 +47,14 @@ public:
 		root->m_transform.computeGlobalMatrix();
 		auto CameraNode = createChild("Default Camera", root);
 
-		auto [ID, Camera] = instanceManager->createFPCamera();
-		CameraNode->camera = Camera;
-		CameraNode->cameraID = ID;
-		if (auto cameraInstance = CameraNode->camera.lock()) {
-			cameraInstance->camera->m_transform.setParent(&CameraNode->m_transform);
-			cameraInstance->camera->m_transform.setPosition(0.0f, 0.0f, -10.0f);
-			cameraInstance->camera->updateGlobals(true);
-			cameraInstance->camera->update();
-
+		CameraNode->cameraInstance = instanceManager->createFPCamera(CameraNode->cameraID);
+		if (CameraNode->cameraInstance.IsValid()) {
+			std::shared_ptr<Camera> camera = CameraNode->cameraInstance->camera;
+			camera->m_transform.setParent(&CameraNode->m_transform);
+			camera->m_transform.setPosition(0.0f, 0.0f, -10.0f);
+			camera->updateGlobals(true);
+			camera->update();
+			CameraNode->cameraInstance->camera;
 		}
 	}
 
@@ -97,26 +95,23 @@ public:
 	}
 
 	inline void deleteNodeMesh(std::shared_ptr<sceneNode> node) {
-		instanceManager->removeGeometryInstance(node->meshID);
+		node->meshInstance = GeometryInstance();
 		node->meshID = SIZE_MAX;
-		node->meshInstance.reset();
 	}
 
 	inline void deleteNodeCamera(std::shared_ptr<sceneNode> node) {
-		instanceManager->removeCameraInstance(node->cameraID);
+		node->cameraInstance = CameraInstance();
 		node->cameraID = SIZE_MAX;
-		node->camera.reset();
 	}
 
 	inline void deleteNodeLight(std::shared_ptr<sceneNode> node) {
-		instanceManager->removeLightInstance(node->lightID);
+		node->lightInstance = LightInstance();
 		node->lightID = SIZE_MAX;
-		node->light.reset();
 	}
 
 	//ImGui function for attaching mesh to scene node
 	inline void imGuiMeshCreation(std::shared_ptr<sceneNode> node) {
-		bool meshExists = !node->meshInstance.expired();
+		bool meshExists = !node->meshInstance.IsValid();
 		ImGui::Text(meshExists ? "Replace Mesh: " : "Add Mesh: ");
 
 		if (ImGui::Combo(
@@ -207,7 +202,8 @@ public:
 				}
 			}
 			if (meshCreated) {
-				if (auto mesh = node->meshInstance.lock()) {
+				if (node->meshInstance.IsValid()) {
+					GeometryData* mesh = node->meshInstance.Get();
 					mesh->m_transform.setParent(&node->m_transform);
 					mesh->m_transform.computeGlobalMatrix(true);
 				}
@@ -224,11 +220,12 @@ public:
 			3))
 		{}
 		if (selectedCreateLight > 0 && ImGui::Button("Attach Light")) {
-			auto [ID, Light] = instanceManager->createLight(static_cast<lightTypes>(selectedCreateLight));
-			Light->m_transform.setParent(&node->m_transform);
-			Light->updateGlobals(true);
-			node->light = Light;
-			node->lightID = ID;
+			node->lightInstance = instanceManager->createLight(node->lightID, static_cast<lightTypes>(selectedCreateLight));
+			if (node->lightInstance.IsValid()) {
+				Light& light = *node->lightInstance;
+				light.m_transform.setParent(&node->m_transform);
+				light.updateGlobals(true);
+			}
 		}
 	}
 
@@ -240,27 +237,19 @@ public:
 			2
 		)) {}
 		if (selectedCreateCamera > 0 && ImGui::Button("Attach Camera")) {
-
-			std::function<std::pair<size_t, std::shared_ptr<CameraInstance>>()> createFunction;
 			switch (static_cast<CameraTypes>(selectedCreateCamera)) 
 			{	
 			case CameraTypes::BASIC:
-				createFunction = [&]() -> std::pair<size_t, std::shared_ptr<CameraInstance>> {
-					instanceManager->createCamera();
-					};
+				node->cameraInstance = instanceManager->createCamera(node->cameraID);
 				break;
 			case CameraTypes::FPCAMERA:
-				createFunction = [&]() -> std::pair<size_t, std::shared_ptr<CameraInstance>> {
-					instanceManager->createFPCamera();
-					};
+				node->cameraInstance = instanceManager->createFPCamera(node->cameraID);
 				break;
 			}
-			auto [ID, Camera] = createFunction();
-			node->camera = Camera;
-			node->cameraID = ID;
-			if (auto camera = node->camera.lock()) {
-				camera->camera->m_transform.setParent(&node->m_transform);
-				camera->camera->updateGlobals(true);
+			if (node->cameraInstance.IsValid()) {
+				CameraData* CamData = node->cameraInstance.Get();
+				CamData->camera->m_transform.setParent(&node->m_transform);
+				CamData->camera->updateGlobals(true);
 			}
 		}
 	}
@@ -268,16 +257,16 @@ public:
 	inline void updateNodeGlobals(std::shared_ptr<sceneNode> node, bool updateLocal) {
 		
 		node->m_transform.computeGlobalMatrix(updateLocal);
-		if (auto mesh = node->meshInstance.lock()) {
-			mesh->m_transform.computeGlobalMatrix(false);
+		if (node->meshInstance.IsValid()) {
+			node->meshInstance->m_transform.computeGlobalMatrix(false);
 		}
 
-		if (auto camera = node->camera.lock()) {
-			camera->camera->updateGlobals(false);
+		if (node->cameraInstance.IsValid()) {
+			node->cameraInstance->camera->updateGlobals(false);
 		}
 
-		if (auto light = node->light.lock()) {
-			light->updateGlobals(false);
+		if (node->lightInstance.IsValid()) {
+			node->lightInstance->updateGlobals(false);
 		}
 
 		for (auto child : node->children) {
@@ -291,8 +280,8 @@ public:
 			if (node->m_transform.imGuiRender("Node Transform: ", 0, true, true, true)) {
 				updateNodeGlobals(node, true);
 			}
-			if (!node->meshInstance.expired() && ImGui::CollapsingHeader(("Node " + node->name + " Mesh Settings").c_str())) {
-				if (auto mesh = node->meshInstance.lock()) {
+			if (node->meshInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Mesh Settings").c_str())) {
+				if (GeometryData* mesh = node->meshInstance.Get()) {
 					if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, false)) {
 						mesh->m_transform.computeGlobalMatrix(true);
 					}
@@ -300,19 +289,18 @@ public:
 			} else {
 				imGuiMeshCreation(node);
 			}
-			if (!node->camera.expired() && ImGui::CollapsingHeader(("Node " + node->name + " Camera Settings").c_str())) {
-				if (auto cameraInstance = node->camera.lock()) {
+			if (node->cameraInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Camera Settings").c_str())) {
+				if (CameraData* cameraInstance = node->cameraInstance.Get()) {
 					cameraInstance->camera->imGuiRender(2, cameraInstance->type);
 				}
 			}
 			else {
 				imGuiCameraCreation(node);
 			}
-			if (!node->light.expired() && ImGui::CollapsingHeader(("Node " + node->name + " Light Settings").c_str())) {
-				if (auto light = node->light.lock()) {
+			if (node->lightInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Light Settings").c_str())) {
+				if (Light* light = node->lightInstance.Get()) {
 					light->imGuiRender(3);
 				}
-				node->light.lock()->imGuiRender(3);
 			}
 			else {
 				imGuiLightCreation(node);
@@ -351,13 +339,13 @@ public:
 			(*nodeJsonPtr)["NodeName"] = nodePtr->name;
 			(*nodeJsonPtr)["Transform"] = nodePtr->m_transform;
 
-			if (!nodePtr->camera.expired()) {
+			if (!nodePtr->cameraInstance.IsValid()) {
 				(*nodeJsonPtr)["CameraID"] = static_cast<int64_t>(nodePtr->cameraID);
 			}
-			if (!nodePtr->light.expired()) {
+			if (!nodePtr->lightInstance.IsValid()) {
 				(*nodeJsonPtr)["LightID"] = static_cast<int64_t>(nodePtr->lightID);
 			}
-			if (!nodePtr->meshInstance.expired()) {
+			if (!nodePtr->meshInstance.IsValid()) {
 				(*nodeJsonPtr)["MeshID"] = static_cast<int64_t>(nodePtr->meshID);
 			}
 
@@ -390,6 +378,8 @@ public:
 			std::shared_ptr<sceneNode> parent;
 		};
 
+		instanceManager->setDestroyNoInstances(false);
+
 		std::queue<nodeData> nodeQueue;
 		root = std::make_shared<sceneNode>();
 		nodeQueue.push(nodeData(&j["Nodes"], root, nullptr));
@@ -409,8 +399,8 @@ public:
 
 			if (data.nodeJson->contains("CameraID")) {
 				data.node->cameraID = newCameraIDMap[static_cast<size_t>(data.nodeJson->at("CameraID").get<uint64_t>())];
-				data.node->camera = instanceManager->getCameraInstance(data.node->cameraID);
-				if (auto camera = data.node->camera.lock()) {
+				data.node->cameraInstance = instanceManager->tryGetCameraInstance(data.node->cameraID);
+				if (CameraData* camera = data.node->cameraInstance.Get()) {
 					camera->camera->m_transform.setParent(&data.node->m_transform);
 					camera->camera->updateGlobals(true);
 				}
@@ -418,8 +408,8 @@ public:
 
 			if (data.nodeJson->contains("LightID")) {
 				data.node->lightID = newLightIDMap[static_cast<size_t>(data.nodeJson->at("LightID").get<uint64_t>())];
-				data.node->light = instanceManager->getLightInstance(data.node->lightID);
-				if (auto light = data.node->light.lock()) {
+				data.node->lightInstance = instanceManager->tryGetLightInstance(data.node->lightID);
+				if (Light* light = data.node->lightInstance.Get()) {
 					light->m_transform.setParent(&data.node->m_transform);
 					light->updateGlobals(true);
 				}
@@ -427,10 +417,10 @@ public:
 
 			if (data.nodeJson->contains("MeshID")) {
 				data.node->meshID = newMeshIDMap[static_cast<size_t>(data.nodeJson->at("MeshID").get<uint64_t>())];
-				data.node->meshInstance = instanceManager->getGeometryInstance(data.node->meshID);
-				if (auto mesh = data.node->meshInstance.lock()) {
-					mesh->m_transform.setParent(&data.node->m_transform);
-					mesh->m_transform.computeGlobalMatrix(true);
+				data.node->meshInstance = instanceManager->tryGetGeometryInstance(data.node->meshID);
+				if (GeometryData* meshInstance = data.node->meshInstance.Get()) {
+					meshInstance->m_transform.setParent(&data.node->m_transform);
+					meshInstance->m_transform.computeGlobalMatrix(true);
 				}
 			}
 			
@@ -443,6 +433,8 @@ public:
 				}
 			}
 		}
+
+		instanceManager->setDestroyNoInstances(true);
 	}
 
 private:

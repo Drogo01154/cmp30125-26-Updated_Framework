@@ -1,6 +1,6 @@
 #include "MatrixDataModule.h"
 
-MatrixDataModule::MatrixDataModule(ID3D11Device* device, HWND hwnd) : BaseShaderModule(device, hwnd) {
+MatrixDataModule::MatrixDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager) : BaseShaderModule(device, hwnd), instanceManager(instanceManager) {
 	matrixBuffer = nullptr;
 }
 
@@ -25,9 +25,7 @@ void MatrixDataModule::initModule() {
 
 void MatrixDataModule::setModuleParamaters(
 	ID3D11DeviceContext* deviceContext,
-	const XMMATRIX& worldMatrix,
-	const XMMATRIX& viewMatrix,
-	const XMMATRIX& projectionMatrix) {
+	GeometryData* mesh, const XMMATRIX& projectionMatrix) {
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	
@@ -39,8 +37,8 @@ void MatrixDataModule::setModuleParamaters(
 	XMMATRIX tworld, tview, tproj;
 
 	// Transpose the matrices to prepare them for the shader.
-	tworld = XMMatrixTranspose(worldMatrix);
-	tview = XMMatrixTranspose(viewMatrix);
+	tworld = XMMatrixTranspose(mesh->m_transform.getGlobalMatrix());
+	tview = XMMatrixTranspose(instanceManager->getActiveCamera()->camera->getViewMatrix());
 	tproj = XMMatrixTranspose(projectionMatrix);
 	result = deviceContext->Map(matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
@@ -48,6 +46,11 @@ void MatrixDataModule::setModuleParamaters(
 	dataPtr->view = tview;
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer.Get(), 0);
+
+}
+
+void MatrixDataModule::setResources(ID3D11DeviceContext* deviceContext, size_t startingRegister) {
+
 	ID3D11Buffer* matrixBufferPtr = matrixBuffer.Get();
-	deviceContext->VSSetConstantBuffers(0, 1, &matrixBufferPtr);
+	deviceContext->VSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
 }

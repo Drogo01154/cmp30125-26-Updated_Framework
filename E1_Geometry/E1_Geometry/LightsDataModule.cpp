@@ -64,7 +64,7 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
 	lightPtr = (LightBufferType*)mappedResource.pData;
 
 	int i = 0;
-	instanceManager->forEachLight([&](size_t id, std::shared_ptr<Light>& light) {
+	instanceManager->forEachLight([&](const size_t& ID, Light* light) {
 		lightPtr[i].attenuation = light->getAttenuation();
 		lightPtr[i].position = light->getGlobalPosition();
 		lightPtr[i].direction = light->getGlobalDirection();
@@ -78,7 +78,7 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
 	deviceContext->Unmap(lightsBuffer.Get(), 0);
 }
 
-void LightsDataModule::setResources(ID3D11DeviceContext* deviceContext) {
+void LightsDataModule::setResources(ID3D11DeviceContext* deviceContext, size_t startingRegister) {
 	ID3D11ShaderResourceView* lightBufferSRVPtr = lightBufferSRV.Get();
-	deviceContext->PSSetShaderResources(0, 1, &lightBufferSRVPtr);
+	deviceContext->PSSetShaderResources(startingRegister, 1, &lightBufferSRVPtr);
 }

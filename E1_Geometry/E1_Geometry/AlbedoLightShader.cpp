@@ -1,13 +1,16 @@
 #include "albedoLightShader.h"
-AlbedoLightShader::AlbedoLightShader(ShaderManager* shaderManager, InstanceManager* instanceManager, ID3D11Device* device, HWND hwnd) :
+
+#include "MatrixDataModule.h"
+#include "LightsDataModule.h"
+AlbedoLightShader::AlbedoLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) :
 	BaseShader(device, hwnd),
 	shaderManager(shaderManager),
 	instanceManager(instanceManager)
 
 {
-	size_t matrixModuleID = shaderManager->getShaderModuleID("MatrixDataModule");
-	matrixDataModule = std::dynamic_pointer_cast<MatrixDataModule>(shaderManager->getShaderModule(matrixModuleID));
-	shaderManager->addShaderModuleInstanceReference(matrixModuleID);
+	MatrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
+	LightDataModule = shaderManager->getShaderModuleID("LightDataModule");
+	//matrixDataModule = std::dynamic_pointer_cast<MatrixDataModule>(shaderManager->getShaderModule(matrixModuleID));
 	initShader(L"light_vs.cso", L"albedoLight_ps.cso");
 }
 
@@ -50,15 +53,9 @@ void AlbedoLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psF
 }
 
 void AlbedoLightShader::setShaderParamaters(
-	ID3D11DeviceContext* deviceContext,
-	const XMMATRIX& worldMatrix,
-	const XMMATRIX& viewMatrix,
-	const XMMATRIX& projectionMatrix,
-	std::shared_ptr<Material> material,
-	std::vector<std::shared_ptr<Light>>& lights,
-	const XMFLOAT4& ambient,
-	Camera* camera)
+	ID3D11DeviceContext* deviceContext, Camera* camera)
 {
+	std::shared_ptr<MatrixDataModule> matrixModule
 	matrixDataModule->
 	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
 	lightsDataModule.setModuleParamaters(deviceContext, material, lights, ambient);

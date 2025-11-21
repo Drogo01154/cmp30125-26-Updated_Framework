@@ -85,7 +85,7 @@ void MiniMapTextureShader::setShaderParameters(ID3D11DeviceContext* deviceContex
 	Camera* camera,
 	Camera* miniMapCamera)
 {
-	XMFLOAT3 cameraPos = camera->getPosition();
+	XMFLOAT3 cameraPos = camera->getGlobalPosition();
 
 	XMVECTOR projectedPos = XMVector3Project(
 		XMLoadFloat3(&cameraPos),

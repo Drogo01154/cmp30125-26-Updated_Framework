@@ -12,7 +12,10 @@ private:
 		float padding;
 	};
 public:
-	TexturedLightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd);
+	TexturedLightShader(
+		MatrixDataModule* matrixDataModule,
+		LightsDataModule* lightsDataModule,
+		ID3D11Device* device, TextureManager* textureManager, HWND hwnd);
 	~TexturedLightShader();
 
 	void setShaderParamaters(
@@ -34,7 +37,7 @@ private:
 	
 	ComPtr<ID3D11SamplerState> sampleState;
 	
-	MatrixDataModule matrixDataModule;
-	LightsDataModule lightsDataModule;
+	std::shared_ptr<MatrixDataModule> matrixDataModule;
+	LightsDataModule* lightsDataModule;
 };
 

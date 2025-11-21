@@ -6,8 +6,9 @@
 #include "BaseShader.h"
 #include "BaseShaderModule.h"
 #include "InstanceCache.h"
-#include "Material.h"
 #include <functional>
+
+struct Material;
 
 struct ShaderData {
 	ShaderData(const std::string& name, std::function<std::shared_ptr<BaseShader>()> constructShader) :
@@ -33,54 +34,8 @@ struct ModuleData {
 #define ModuleInstance Instance<std::string, ModuleData>
 
 class ShaderManager {
-private:
-	
-	InstanceCache<std::string, ShaderData> GeometryShaderCache;		 // geometry passes
-	InstanceCache<std::string, ShaderData> PassShaderCache;			 // post-processing, lighting, etc.
-	InstanceCache<std::string, ModuleData> ShaderModuleCache;		 // post-processing, lighting, etc.
-
-	int selectedGeometryShader;
-
-	std::string defaultGeometryShader;
-	std::string defaultPassShader;
 public:
-	ShaderManager() :
-		GeometryShaderCache(10, false),
-		PassShaderCache(10, false),
-		ShaderModuleCache(10, false)
-	{
-		//Add shader and module construction
-		GeometryShaderCache.addTypeInitialiser([](std::shared_ptr<ShaderData> data) {
-			data->constructShader();
-			});
-
-		PassShaderCache.addTypeInitialiser([](std::shared_ptr<ShaderData> data) {
-			data->constructShader();
-			});
-
-		ShaderModuleCache.addTypeInitialiser([](std::shared_ptr<ModuleData> data) {
-			data->constructModule();
-			});
-
-
-		//Add shader and module destruction
-		GeometryShaderCache.addTypeEndHandler([](std::shared_ptr<ShaderData> data) {
-			data->shader.reset();
-			});
-
-		PassShaderCache.addTypeEndHandler([](std::shared_ptr<ShaderData> data) {
-			data->shader.reset();
-			});
-
-		ShaderModuleCache.addTypeEndHandler([](std::shared_ptr<ModuleData> data) {
-			data->module.reset();
-			});
-
-		selectedGeometryShader = -1;
-
-		defaultGeometryShader = SIZE_MAX;
-		defaultPassShader = SIZE_MAX;
-	}
+	ShaderManager();
 
 	template<typename ShaderType, typename... Args>
 	void addGeometryShader(const std::string& name, Args&&... args) {
@@ -116,59 +71,46 @@ public:
 		);
 	}
 
-	ShaderInstance getGeometryShader(const std::string& name) {
-		ShaderInstance instance = GeometryShaderCache.getID(name);
-		if (!instance.IsValid()) {
-			throw std::runtime_error("Error: Geometry shader not found: " + name);
-		}
-		return instance;
+	template<typename ModuleType, typename... Args>
+	void AddShaderModule(const std::string& name, Args&&... args) {
+		// Capture constructor arguments by value or move
+		auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
+		ShaderModuleCache.emplaceID(
+			name,
+			ModuleData(
+				name,
+				[argsTuple]() -> std::shared_ptr<BaseShaderModule> {
+					return std::apply([](auto&&... unpackedArgs) {
+						return std::make_shared<BaseShaderModule>(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
+						}, argsTuple);
+				}
+			)
+		);
 	}
 
-	ShaderInstance getPassShader(const std::string& name) {
-		ShaderInstance instance = PassShaderCache.getID(name);
-		if (!instance.IsValid()) {
-			throw std::runtime_error("Error: Pass shader not found: " + name);
-		}
-		return instance;
-	}
+	ShaderInstance getGeometryShader(const std::string& name);
 
-	ModuleInstance getShaderModuleID(const std::string& name) {
-		ModuleInstance instance = ShaderModuleCache.getID(name);
-		if (!instance.IsValid()) {
-			throw std::runtime_error("Error: Shader Module not found: " + name);
-		}
-		return instance;
-	}
+	ShaderInstance getPassShader(const std::string& name);
 
-	void setDefaultGeometryShader(const std::string& name) {
-		if (GeometryShaderCache.hasID(name)) {
-			defaultGeometryShader = name;
-			return;
-		}
-		throw std::runtime_error("Error: " + name + " Shader does not exist!");
-	}
+	ModuleInstance getShaderModuleID(const std::string& name);
 
-	const std::string& getDefaultGeometryShaderName() {
-		return defaultGeometryShader;
-	}
+	void setDefaultGeometryShader(const std::string& name);
 
-	ModuleInstance getDefaultGeometryShader()
-	{
-		if (defaultGeometryShader != "") {
-			return getShaderModuleID(defaultGeometryShader);
-		}
-		else {
-			return ModuleInstance();
-		}
-	}
+	const std::string& getDefaultGeometryShaderName(); 
 
-	void selectGeometryShaderImGui(std::shared_ptr<Material> mat) {
-		const std::vector<const char*>& vecNames = GeometryShaderCache.getCharVec();
-		
-		if (ImGui::Combo("Select Geometry Shader: ", &selectedGeometryShader, vecNames.data(), vecNames.size())) {
-			mat->shader = getGeometryShader(GeometryShaderCache.getCachedName(selectedGeometryShader));
-		}
-	}
+	ShaderInstance getDefaultGeometryShader();
+
+	void selectGeometryShaderImGui(Material* mat);
+private:
+
+	InstanceCache<std::string, ShaderData> GeometryShaderCache;		 // geometry passes
+	InstanceCache<std::string, ShaderData> PassShaderCache;			 // post-processing, lighting, etc.
+	InstanceCache<std::string, ModuleData> ShaderModuleCache;		 // post-processing, lighting, etc.
+
+	int selectedGeometryShader;
+
+	std::string defaultGeometryShader;
+	std::string defaultPassShader;
 };
 
 #endif

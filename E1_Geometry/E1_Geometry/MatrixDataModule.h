@@ -15,18 +15,17 @@ private:
 		XMMATRIX projection;
 	};
 public:
-	MatrixDataModule(ID3D11Device* device, HWND hwnd);
+	MatrixDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager);
 	~MatrixDataModule();
 
 	void initModule();
 
 	void setModuleParamaters(
 		ID3D11DeviceContext* deviceContext,
-		const XMMATRIX& world,
-		const XMMATRIX& view,
-		const XMMATRIX& projection);
+		GeometryData* mesh, const XMMATRIX& projectionMatrix);
 
-	void setResources(ID3D11DeviceContext* deviceContext);
+	void setResources(ID3D11DeviceContext* deviceContext, size_t startingRegister);
 private: 
+	InstanceManager* instanceManager;
 	ComPtr<ID3D11Buffer> matrixBuffer;
 };

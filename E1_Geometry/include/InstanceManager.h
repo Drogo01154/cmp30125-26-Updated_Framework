@@ -7,39 +7,33 @@
 #include "FPCamera.h"
 #include "MaterialManager.h"
 #include "GeometryManager.h"
-#include "IDMap.h"
-#include <variant>
+#include "InstanceCache.h"
 #include "Input.h"
 
-using ParamValue = std::variant<int, std::string>;
-
-struct GeometryInstance {
+struct GeometryData {
 
 	Transform m_transform;									// Local Transform
-	
-	std::shared_ptr<BaseMesh> mesh = nullptr;				// Runtime only basemesh ptr
-	MeshType type;											// Stored type for serialization
-	std::unordered_map<std::string, ParamValue> params;		// Stored paramaters for serialization
 
-	std::shared_ptr<Material> mat = nullptr;				// Runtime only matertial ptr
-	size_t materialID;										// Material ID for serializaton
+	MeshInstance mesh;		// Base Mesh instance
+	MaterialInstance mat;	// Material Instance
 };
 
-struct CameraInstance {
+struct CameraData {
+	CameraData(CameraTypes type, std::shared_ptr<Camera> camera) : type(type), camera(camera) {}
 	std::shared_ptr<Camera> camera;
 	CameraTypes type;
 };
 
-
+#define GeometryInstance Instance<size_t, GeometryData>
+#define LightInstance Instance<size_t, Light>
+#define CameraInstance Instance<size_t, CameraData>
 
 class InstanceManager {
 public:
 	InstanceManager(GeometryManager* geometryManager, MaterialManager* materialManager, Input* input, HWND hwnd, int screenWidth, int screenHeight);
-	std::weak_ptr<GeometryInstance> getGeometryInstance(size_t ID);
-	std::weak_ptr<Light> getLightInstance(size_t ID);
-	std::weak_ptr<CameraInstance> getCameraInstance(size_t ID);
-
-	std::string buildMeshUID(std::weak_ptr<GeometryInstance> instance);
+	GeometryInstance tryGetGeometryInstance(size_t ID);
+	LightInstance tryGetLightInstance(size_t ID);
+	CameraInstance tryGetCameraInstance(size_t ID);
 
 	void removeGeometryInstance(size_t ID);
 	void removeLightInstance(size_t ID);
@@ -55,25 +49,25 @@ public:
 	void clearAll();
 
 	//Create Geometry
-	std::weak_ptr<GeometryInstance> createAModelInstance(size_t& instanceID, const std::string& file);
-	std::weak_ptr<GeometryInstance> createCubeMeshInstance(size_t& instanceID, int resolution = 20);
-	std::weak_ptr<GeometryInstance> createModelInstance(size_t& instanceID, const std::string& filename);
-	std::weak_ptr<GeometryInstance> createOrthoMeshInstance(size_t& instanceID, int width, int height, int xPosition = 0, int yPosition = 0);
-	std::weak_ptr<GeometryInstance> createPlaneMeshInstance(size_t& instanceID, int resolution = 20);
-	std::weak_ptr<GeometryInstance> createPointMeshInstance(size_t& instanceID);
-	std::weak_ptr<GeometryInstance> createQuadMeshInstance(size_t& instanceID);
-	std::weak_ptr<GeometryInstance> createSphereMeshInstance(size_t& instanceID, int resolution = 20);
-	std::weak_ptr<GeometryInstance> createTesselationMeshInstance(size_t& instanceID);
-	std::weak_ptr<GeometryInstance> createTriangleMeshInstance(size_t& instanceID);
+	GeometryInstance createAModelInstance(size_t& instanceID, const std::string& file);
+	GeometryInstance createCubeMeshInstance(size_t& instanceID, int resolution = 20);
+	GeometryInstance createModelInstance(size_t& instanceID, const std::string& filename);
+	GeometryInstance createOrthoMeshInstance(size_t& instanceID, int width, int height, int xPosition = 0, int yPosition = 0);
+	GeometryInstance createPlaneMeshInstance(size_t& instanceID, int resolution = 20);
+	GeometryInstance createPointMeshInstance(size_t& instanceID);
+	GeometryInstance createQuadMeshInstance(size_t& instanceID);
+	GeometryInstance createSphereMeshInstance(size_t& instanceID, int resolution = 20);
+	GeometryInstance createTesselationMeshInstance(size_t& instanceID);
+	GeometryInstance createTriangleMeshInstance(size_t& instanceID);
 
 	//Create Lights
-	std::pair<size_t, std::shared_ptr<Light>>  createLight(lightTypes type);
+	LightInstance createLight(size_t& instanceID, lightTypes type);
 
 	//Create Cameras
-	std::pair<size_t, std::shared_ptr<CameraInstance>>  createCamera();
-	std::pair<size_t, std::shared_ptr<CameraInstance>>  createFPCamera();
+	CameraInstance  createCamera(size_t& instanceID);
+	CameraInstance  createFPCamera(size_t& instanceID);
 
-	std::shared_ptr<CameraInstance> getActiveCamera();
+	CameraData* getActiveCamera();
 	void setActiveCamera(size_t ID);
 
 	void to_json(nlohmann::json& j);
@@ -84,21 +78,22 @@ public:
 
 	template<typename Func>
 	inline void forEachMesh(Func&& func) const {
-		geometryInstances.forEach(std::forward<Func>(func));
+		geometryCache.forEach(std::forward<Func>(func));
 	}
 
 	template<typename Func>
 	inline void forEachLight(Func&& func) const {
-		lightInstances.forEach(std::forward<Func>(func));
+		lightCache.forEach(std::forward<Func>(func));
 	}
 
 	template<typename Func>
 	inline void forEachCamera(Func&& func) const {
-		cameraInstances.forEach(std::forward<Func>(func));
+		cameraCache.forEach(std::forward<Func>(func));
 	}
+	void setDestroyNoInstances(bool value);
 
 private:
-	std::shared_ptr<GeometryInstance> createGeometryInstance(size_t& instanceID, MeshType type, std::shared_ptr<BaseMesh> newMesh);
+	GeometryInstance createGeometryInstance(size_t& instanceID, MeshInstance mesh);
 
 	Input* input; 
 	HWND hwnd; 
@@ -110,9 +105,9 @@ private:
 
 	GeometryManager* geometryManager;
 	MaterialManager* materialManager;
-	IDMap<GeometryInstance> geometryInstances;
-	IDMap<Light> lightInstances;
-	IDMap<CameraInstance> cameraInstances;
+	InstanceCache<size_t, GeometryData> geometryCache;
+	InstanceCache<size_t, Light> lightCache;
+	InstanceCache<size_t, CameraData> cameraCache;
 };
 
 #endif

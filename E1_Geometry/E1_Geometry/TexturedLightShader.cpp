@@ -1,6 +1,6 @@
 #include "TexturedLightShader.h"
 
-TexturedLightShader::TexturedLightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd) : BaseShader(device, hwnd), matrixDataModule(device, hwnd), lightsDataModule(device, hwnd), textureManager(textureManager)
+TexturedLightShader::TexturedLightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd)
 {
 	initShader(L"light_vs.cso", L"texturedLight_ps.cso");
 }
@@ -29,9 +29,6 @@ void TexturedLightShader::initShader(const wchar_t* vsFilename, const wchar_t* p
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
 
-	matrixDataModule.initModule();
-
-
 	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
 	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
@@ -56,8 +53,6 @@ void TexturedLightShader::initShader(const wchar_t* vsFilename, const wchar_t* p
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	renderer->CreateSamplerState(&samplerDesc, sampleState.GetAddressOf());
-
-	lightsDataModule.initModule();
 }
 void TexturedLightShader::setShaderParamaters(
 	ID3D11DeviceContext* deviceContext, 
@@ -70,7 +65,7 @@ void TexturedLightShader::setShaderParamaters(
 	Camera* camera)
 {
 	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
-	lightsDataModule.setModuleParamaters(deviceContext, material, lights, ambient);
+	lightsDataModule.setModuleParamaters(deviceContext);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 
@@ -79,14 +74,14 @@ void TexturedLightShader::setShaderParamaters(
 	CameraBufferType* cameraPtr;
 	deviceContext->Map(cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	cameraPtr = (CameraBufferType*)mappedResource.pData;
-	cameraPtr->cameraPosition = camera->getPosition();
+	cameraPtr->cameraPosition = camera->getGlobalPosition();
 	deviceContext->Unmap(cameraBuffer.Get(), 0);
 	ID3D11Buffer* cameraBufferPtr = cameraBuffer.Get();
 	deviceContext->VSSetConstantBuffers(1, 1, &cameraBufferPtr);
 
 	// Set shader texture resource in the pixel shader.
 
-	ID3D11ShaderResourceView* texturePtr = textureManager->getTexture(material->texture);
+	ID3D11ShaderResourceView* texturePtr = material->texture->texture.Get();
 	deviceContext->PSSetShaderResources(1, 1, &texturePtr);
 	ID3D11SamplerState* sampleStatePtr = sampleState.Get();
 	deviceContext->PSSetSamplers(0, 1, &sampleStatePtr);

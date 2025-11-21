@@ -8,11 +8,12 @@
 
 #include "BaseMesh.h"
 #include "LRUCache.h"
+#include "InstanceCache.h"
 #include <array>
-#include <string>
-#include <functional>
 #include <span>
 #include <unordered_set>
+#include <optional>
+#include <variant>
 
 enum class MeshType : uint8_t
 {
@@ -28,40 +29,61 @@ enum class MeshType : uint8_t
 	ORTHO				// four int paramater
 };
 
+using ParamValue = std::variant<int, std::string>;
+
 struct MeshData {
+	MeshData(MeshType type, std::shared_ptr<BaseMesh> mesh,
+		std::unordered_map<std::string, ParamValue> params = {})
+		: type(type), mesh(mesh), params(std::move(params)) {
+	}
 	MeshType type;
+	std::unordered_map<std::string, ParamValue> params;		// Stored paramaters for serialization
 	std::shared_ptr<BaseMesh> mesh;
 };
+
+#define MeshInstance Instance<std::string, MeshData>
 
 class GeometryManager {
 public:
 	GeometryManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 
-	std::string generateUID(MeshType type);
-	std::string generateUID(MeshType type, const std::string& file);
-	std::string generateUID(MeshType type, int resolution);
-	std::string generateUID(MeshType type, int width, int height, int xPosition, int yPosition);
+	std::string generateUID(MeshType type,
+		std::optional<std::string> file = std::nullopt,
+		std::optional<int> resolution = std::nullopt,
+		std::optional<int> width = std::nullopt,
+		std::optional<int> height = std::nullopt,
+		std::optional<int> xPos = std::nullopt,
+		std::optional<int> yPos = std::nullopt);
 
-	std::shared_ptr<BaseMesh> getMesh(const std::string& uid);
 
-	std::shared_ptr<BaseMesh> createAModel(const std::string& file);
-	std::shared_ptr<BaseMesh> createCubeMesh(int resolution = 20);
-	std::shared_ptr<BaseMesh> createModel(const std::string& filename);
-	std::shared_ptr<BaseMesh> createOrthoMesh(int width, int height, int xPosition = 0, int yPosition = 0);
-	std::shared_ptr<BaseMesh> createPlaneMesh(int resolution = 20);
-	std::shared_ptr<BaseMesh> createPointMesh();
-	std::shared_ptr<BaseMesh> createQuadMesh();
-	std::shared_ptr<BaseMesh> createSphereMesh(int resolution = 20);
-	std::shared_ptr<BaseMesh> createTesselationMesh();
-	std::shared_ptr<BaseMesh> createTriangleMesh();
+	MeshInstance tryGetMesh(const std::string& uid);
 
-	void checkRemove(const std::string& uid); //Unloads mesh if no more in scene
-	 
+	MeshInstance createAModel(const std::string& file);
+	MeshInstance createCubeMesh(int resolution = 20);
+	MeshInstance createModel(const std::string& filename);
+	MeshInstance createOrthoMesh(int width, int height, int xPosition = 0, int yPosition = 0);
+	MeshInstance createPlaneMesh(int resolution = 20);
+	MeshInstance createPointMesh();
+	MeshInstance createQuadMesh();
+	MeshInstance createSphereMesh(int resolution = 20);
+	MeshInstance createTesselationMesh();
+	MeshInstance createTriangleMesh();
+
+	std::string determineMeshUID(MeshData* data);
+
+	void setDestroyNoInstances(bool value);
+
 	std::span<const char* const> GetMeshTypeStrings();
 
 private:
-	std::shared_ptr<BaseMesh> retrieveAdd(const std::string& uid, std::function<std::shared_ptr<BaseMesh>()> createFunc);
-	std::shared_ptr<BaseMesh> addMesh(std::shared_ptr<BaseMesh>, std::string uid);
+
+	MeshInstance RetrieveAddMesh(MeshType type,
+		std::optional<std::string> file = std::nullopt,
+		std::optional<int> resolution = std::nullopt,
+		std::optional<int> width = std::nullopt,
+		std::optional<int> height = std::nullopt,
+		std::optional<int> xPos = std::nullopt,
+		std::optional<int> yPos = std::nullopt);
 
 	inline static const char* meshTypeStrings[10] = {
 		"AModel",
@@ -78,8 +100,7 @@ private:
 
 	ID3D11Device* device;
 	ID3D11DeviceContext* deviceContext;
-	LRUCache<std::string, std::shared_ptr<BaseMesh>> meshLRU;
-	std::unordered_map<std::string, std::shared_ptr<BaseMesh>> meshMap;
+	InstanceCache<std::string, MeshData> meshCache;
 };
 
 #endif

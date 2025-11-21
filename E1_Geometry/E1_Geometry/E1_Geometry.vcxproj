@@ -251,6 +251,7 @@
   <ItemGroup>
     <ClInclude Include="..\DXFramework\Material.h" />
     <ClInclude Include="App1.h" />
+    <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="HeightMapShader.h" />

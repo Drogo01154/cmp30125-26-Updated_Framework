@@ -2,6 +2,7 @@
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
 #include "MaterialDataModule.h"
+#include "ShaderManager.h"
 
 App1::App1()
 {
@@ -14,9 +15,10 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
-	shaderMgr->addShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
-	shaderMgr->addShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr);
-	shaderMgr->addShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd, instanceMgr, sceneGraph);
+	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
+	//shaderMgr->addShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
+	//shaderMgr->addShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr);
+	//shaderMgr->addShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd, instanceMgr, sceneGraph);
 
 	/*
 	// Create Mesh object and shader object

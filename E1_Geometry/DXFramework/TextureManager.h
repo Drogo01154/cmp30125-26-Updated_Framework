@@ -38,12 +38,14 @@ public:
 	TextureManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
 	~TextureManager();
 	TextureInstance getTexture(const std::wstring& uid);
+	std::wstring getTextureNameFromIndex(size_t index);
 private:
 	bool does_file_exist(const wchar_t *fileName);
 	//void generateTexture(ID3D11Device* device);
 	void addDefaultTexture();
 	TextureInstance loadTexture(const std::wstring& uid, const std::wstring& filename);
 
+	
 	
 	TextureInstance defaultTexture;	// Instance will always remain
 	ID3D11Device* device;
