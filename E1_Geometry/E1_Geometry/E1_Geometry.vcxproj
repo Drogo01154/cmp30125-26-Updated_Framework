@@ -165,12 +165,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
+    <ClCompile Include="CameraDataModule.cpp" />
     <ClCompile Include="GreyScaleTextureShader.cpp" />
     <ClCompile Include="GreyScaleTextureShader.h" />
+    <ClCompile Include="HeightMapDataModule.cpp" />
     <ClCompile Include="HeightMapShader.cpp" />
     <ClCompile Include="AlbedoLightShader.cpp" />
     <ClCompile Include="KernelShader.cpp" />
     <ClCompile Include="MaterialDataModule.cpp" />
+    <ClCompile Include="SamplerDataModule.cpp" />
+    <ClCompile Include="TextureDataModule.cpp" />
     <ClCompile Include="TexturedLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
     <ClCompile Include="ManipulationShader.cpp" />
@@ -254,6 +258,7 @@
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
+    <ClInclude Include="HeightMapDataModule.h" />
     <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="AlbedoLightShader.h" />
     <ClInclude Include="KernelShader.h" />
@@ -261,6 +266,8 @@
     <ClInclude Include="MaterialDataModule.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderPassManager.h" />
+    <ClInclude Include="SamplerDataModule.h" />
+    <ClInclude Include="TextureDataModule.h" />
     <ClInclude Include="TexturedLightShader.h" />
     <ClInclude Include="ManipulationShader.h" />
     <ClInclude Include="MiniMapTextureShader.h" />

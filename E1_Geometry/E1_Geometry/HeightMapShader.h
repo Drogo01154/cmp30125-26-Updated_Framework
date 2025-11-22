@@ -14,12 +14,7 @@ private:
 		int padding;
 	};
 
-	struct MapBufferType
-	{
-		XMFLOAT2 pixelOffset;
-		float heightMultiplier;
-		int resolution;
-	};
+
 
 public:
 	HeightMapShader(ID3D11Device* device, HWND hwnd);

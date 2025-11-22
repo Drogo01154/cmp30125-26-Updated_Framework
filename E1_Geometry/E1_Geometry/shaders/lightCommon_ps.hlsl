@@ -3,16 +3,23 @@
 
 //Utilises B0 and t0 pixel shader buffers
 
-cbuffer SceneDataBuffer : register(b0) // 48 bytes
+
+cbuffer CameraDataBuffer : register(b0)
+{
+    float4 ambientLight; // 16
+    float3 cameraPosition; // 12
+    int numberOfLights; // 4
+    
+};
+
+
+cbuffer MaterialDataBuffer : register(b1)
 {
     float4 baseColour; // 16
-    float4 ambientLight; // 16
     float4 specularColour; // 16
     float specularPower; // 4
-    int numberOfLights; // 4
-    float2 padding; // 8
-}
-
+    float3 padding; // 12
+};
 
 struct Light // 80 bytes
 {

@@ -29,7 +29,7 @@ public:
 
 	void setModuleParamaters(ID3D11DeviceContext* deviceContext);
 
-	void setResources(ID3D11DeviceContext* deviceContext);
+	void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister);
 
 	void initModule();
 

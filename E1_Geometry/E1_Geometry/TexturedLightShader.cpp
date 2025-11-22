@@ -1,6 +1,6 @@
 #include "TexturedLightShader.h"
 
-TexturedLightShader::TexturedLightShader(ID3D11Device* device, TextureManager* textureManager, HWND hwnd)
+TexturedLightShader::TexturedLightShader(ID3D11Device* device, HWND hwnd)
 {
 	initShader(L"light_vs.cso", L"texturedLight_ps.cso");
 }
@@ -22,37 +22,9 @@ TexturedLightShader::~TexturedLightShader()
 
 void TexturedLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
-	D3D11_SAMPLER_DESC samplerDesc;
-	D3D11_BUFFER_DESC cameraBufferDesc;
-
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
-
-	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
-	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
-	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cameraBufferDesc.MiscFlags = 0;
-	cameraBufferDesc.StructureByteStride = 0;
-	HRESULT result = renderer->CreateBuffer(&cameraBufferDesc, NULL, &cameraBuffer);
-	if (FAILED(result))
-	{
-		assert(false);
-	}
-
-	// Create a texture sampler state description.
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	samplerDesc.MinLOD = 0;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	renderer->CreateSamplerState(&samplerDesc, sampleState.GetAddressOf());
 }
 void TexturedLightShader::setShaderParamaters(
 	ID3D11DeviceContext* deviceContext, 
@@ -83,6 +55,5 @@ void TexturedLightShader::setShaderParamaters(
 
 	ID3D11ShaderResourceView* texturePtr = material->texture->texture.Get();
 	deviceContext->PSSetShaderResources(1, 1, &texturePtr);
-	ID3D11SamplerState* sampleStatePtr = sampleState.Get();
-	deviceContext->PSSetSamplers(0, 1, &sampleStatePtr);
+
 }

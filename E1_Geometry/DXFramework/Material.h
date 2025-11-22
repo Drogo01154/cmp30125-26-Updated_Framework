@@ -17,6 +17,12 @@ enum shaderTypes {
 
 class BaseShader;
 
+struct HeightMapInfo {
+	std::wstring HeightTextureString;
+	TextureInstance HeightTexture;
+	float HeightMultiplier;
+};
+
 struct Material
 {
 	std::string MaterialName;					///< name of material
@@ -27,6 +33,7 @@ struct Material
 	ShaderInstance shader;						///< Materials Geometry Shader
 	std::wstring textureString;
 	TextureInstance texture;					///< Materials texture
+	std::unique_ptr<HeightMapInfo> HeightMapData;	///< Ptr to height map data of plane.
 };
 
 #define MaterialInstance Instance<std::string, Material>

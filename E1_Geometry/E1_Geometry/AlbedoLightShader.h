@@ -15,7 +15,7 @@ public:
 	AlbedoLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
 	~AlbedoLightShader();
 
-	void setShaderParamaters(ID3D11DeviceContext* deviceContext, GeometryData& geometryData);
+	void setResources(ID3D11DeviceContext* deviceContext);
 
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
@@ -23,10 +23,11 @@ private:
 private:
 	InstanceManager* instanceManager;
 	ShaderManager* shaderManager;
-	ComPtr<ID3D11Buffer> cameraBuffer;
 	ModuleInstance MatrixDataModule;
 	ModuleInstance LightDataModule;
 	ModuleInstance MaterialDataModule;
+	ModuleInstance LightDataModule;
+	ModuleInstance CameraDataModule;
 };
 
 

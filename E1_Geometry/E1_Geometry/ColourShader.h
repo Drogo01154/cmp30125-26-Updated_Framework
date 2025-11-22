@@ -3,8 +3,7 @@
 #ifndef _COLOURSHADER_H_
 #define _COLOURSHADER_H_
 
-#include "../DXFramework/BaseShader.h"
-#include "MatrixDataModule.h"
+#include "DXF.h"
 
 class ColourShader : public BaseShader
 {
@@ -20,7 +19,7 @@ private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 
 private:
-	MatrixDataModule matrixDataModule;
+	ModuleInstance matrixDataModule;
 };
 
 #endif

@@ -1,6 +1,5 @@
 #pragma once
-#include "MatrixDataModule.h"
-#include "LightsDataModule.h"
+#include "ShaderManager.h"
 
 class TexturedLightShader : public BaseShader
 {
@@ -12,32 +11,19 @@ private:
 		float padding;
 	};
 public:
-	TexturedLightShader(
-		MatrixDataModule* matrixDataModule,
-		LightsDataModule* lightsDataModule,
-		ID3D11Device* device, TextureManager* textureManager, HWND hwnd);
+	TexturedLightShader(ID3D11Device* device, HWND hwnd);
 	~TexturedLightShader();
 
-	void setShaderParamaters(
-		ID3D11DeviceContext* deviceContext, 
-		const XMMATRIX& world, 
-		const XMMATRIX& view, 
-		const XMMATRIX& projection, 
-		std::shared_ptr<Material> material, 
-		std::vector<std::shared_ptr<Light>>& light, 
-		const XMFLOAT4& ambient,
-		Camera* camera);
+	void setResources(ID3D11DeviceContext* deviceContext);
 
 private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
 
 private:
-	TextureManager* textureManager;
-	ComPtr<ID3D11Buffer> cameraBuffer;
-	
-	ComPtr<ID3D11SamplerState> sampleState;
-	
-	std::shared_ptr<MatrixDataModule> matrixDataModule;
-	LightsDataModule* lightsDataModule;
+	ModuleInstance matrixDataModule;
+	ModuleInstance cameraDataModule;
+	ModuleInstance materialDataModule;
+	ModuleInstance samplerStateModule;
+	ModuleInstance textureDataModule;
 };
 

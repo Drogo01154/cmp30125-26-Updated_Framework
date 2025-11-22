@@ -49,8 +49,30 @@ void MatrixDataModule::setModuleParamaters(
 
 }
 
-void MatrixDataModule::setResources(ID3D11DeviceContext* deviceContext, size_t startingRegister) {
+void MatrixDataModule::setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister) {
 
 	ID3D11Buffer* matrixBufferPtr = matrixBuffer.Get();
-	deviceContext->VSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+
+	switch (shaderType) {
+	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_COMPUTE_SHADER:
+		deviceContext->CSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+		break;
+	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_DOMAIN_SHADER:
+		deviceContext->DSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+		break;
+	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_GEOMETRY_SHADER:
+		deviceContext->GSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+		break;
+	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_HULL_SHADER:
+		deviceContext->HSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+		break;
+	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER:
+		deviceContext->PSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+		break;
+	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER:
+		deviceContext->VSSetConstantBuffers(startingRegister, 1, &matrixBufferPtr);
+		break;
+	default:
+		throw std::runtime_error("Error: Shader type does not exist!");
+	}
 }

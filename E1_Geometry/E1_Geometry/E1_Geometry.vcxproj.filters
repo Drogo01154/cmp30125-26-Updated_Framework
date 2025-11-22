@@ -117,6 +117,18 @@
     <ClCompile Include="MaterialDataModule.cpp">
       <Filter>Source Files\ShaderModules</Filter>
     </ClCompile>
+    <ClCompile Include="CameraDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplerDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -168,6 +180,15 @@
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
     <ClInclude Include="CameraDataModule.h">
+      <Filter>Header Files\ShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerDataModule.h">
+      <Filter>Header Files\ShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDataModule.h">
+      <Filter>Header Files\ShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapDataModule.h">
       <Filter>Header Files\ShaderModules</Filter>
     </ClInclude>
   </ItemGroup>

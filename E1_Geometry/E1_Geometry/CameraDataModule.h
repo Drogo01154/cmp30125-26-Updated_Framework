@@ -12,22 +12,23 @@ class CameraDataModule : BaseShaderModule {
 private:
 	struct CameraBufferType
 	{
+		XMFLOAT4 ambient;
 		XMFLOAT3 cameraPosition;
 		int numLights;
 	};
 
 public:
-	CameraDataModule(ID3D11Device * device, HWND hwnd, InstanceManager* instanceManager);
+	CameraDataModule(ID3D11Device * device, HWND hwnd, InstanceManager* instanceManager, SceneGraph* sceneGraph);
 	~CameraDataModule();
 
 	void setModuleParamaters(ID3D11DeviceContext* deviceContext);
 
-	void setResources(ID3D11DeviceContext* deviceContext, size_t );
+	void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister);
 
 	void initModule();
 
 private:
-	ComPtr<ID3D11Buffer> sceneDataBuffer;
+	ComPtr<ID3D11Buffer> cameraDataBuffer;
 	InstanceManager* instanceManager;
 	SceneGraph* sceneGraph;
 };

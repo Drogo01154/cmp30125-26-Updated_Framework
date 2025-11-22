@@ -10,7 +10,8 @@ AlbedoLightShader::AlbedoLightShader(ShaderManager* shaderManager, ID3D11Device*
 {
 	MatrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	LightDataModule = shaderManager->getShaderModuleID("LightDataModule");
-	//matrixDataModule = std::dynamic_pointer_cast<MatrixDataModule>(shaderManager->getShaderModule(matrixModuleID));
+	MaterialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
+	CameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 	initShader(L"light_vs.cso", L"albedoLight_ps.cso");
 }
 
@@ -37,38 +38,17 @@ void AlbedoLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psF
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
-
-	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
-	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
-	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cameraBufferDesc.MiscFlags = 0;
-	cameraBufferDesc.StructureByteStride = 0;
-	HRESULT result = renderer->CreateBuffer(&cameraBufferDesc, NULL, &cameraBuffer);
-	if (FAILED(result))
-	{
-		assert(false);
-	}
 }
 
-void AlbedoLightShader::setShaderParamaters(
-	ID3D11DeviceContext* deviceContext, Camera* camera)
+void AlbedoLightShader::setShaderParamaters(ID3D11DeviceContext* deviceContext)
 {
-	std::shared_ptr<MatrixDataModule> matrixModule
-	matrixDataModule->
-	matrixDataModule.setModuleParamaters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
-	lightsDataModule.setModuleParamaters(deviceContext, material, lights, ambient);
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-
-	//Additional
-	// Send camera data to vertex shader
-	CameraBufferType* cameraPtr;
-	deviceContext->Map(cameraBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	cameraPtr = (CameraBufferType*)mappedResource.pData;
-	cameraPtr->cameraPosition = camera->getGlobalPosition();
-	deviceContext->Unmap(cameraBuffer.Get(), 0);
-	ID3D11Buffer* cameraBufferPtr = cameraBuffer.Get();
-	deviceContext->VSSetConstantBuffers(1, 1, &cameraBufferPtr);
+	//Set vertex shader resources
+	MatrixDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
+	
+	//Set pixel shaders cBuffers
+	CameraDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);
+	MaterialDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);
+	
+	//Set light SRVs
+	LightDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);
 }

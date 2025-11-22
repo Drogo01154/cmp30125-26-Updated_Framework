@@ -260,6 +260,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClCompile Include="PointMesh.cpp" />
     <ClCompile Include="QuadMesh.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="SphereMesh.cpp" />

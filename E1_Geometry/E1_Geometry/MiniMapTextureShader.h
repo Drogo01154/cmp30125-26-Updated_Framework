@@ -22,6 +22,7 @@ public:
 	MiniMapTextureShader(ID3D11Device* device, HWND hwnd, int screenWidth, int screenHeight);
 	~MiniMapTextureShader();
 
+	void serShaderResources(ID3D11DeviceContext* deviceContext);
 	void setShaderParameters(ID3D11DeviceContext* deviceContext,
 		const XMMATRIX& world,
 		const XMMATRIX& view,

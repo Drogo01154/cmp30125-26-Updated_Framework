@@ -44,6 +44,7 @@ public:
 	/** \Brief render function
 	* Sets shader stages and draws the indexed data
 	*/
+	virtual void setResources(ID3D11DeviceContext* deviceContext) = 0;
 	virtual void render(ID3D11DeviceContext* deviceContext, int vertexCount);
 	void compute(ID3D11DeviceContext* dc, int x, int y, int z);
 

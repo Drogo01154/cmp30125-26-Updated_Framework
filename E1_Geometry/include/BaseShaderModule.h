@@ -23,7 +23,7 @@ public:
 	BaseShaderModule(ID3D11Device* device, HWND hwnd);
 	~BaseShaderModule();
 	virtual void initModule() = 0;
-	virtual void setResources(ID3D11DeviceContext* deviceContext, size_t startingRegister) = 0;
+	virtual void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister) = 0;
 protected:
 	ID3D11Device* renderer;
 	HWND hwnd;

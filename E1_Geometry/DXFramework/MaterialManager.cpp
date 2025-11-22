@@ -6,13 +6,16 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	shaderManager(shaderManager),
 	textureManager(textureManager) {
 	materialCache.addTypeInitialiser([&](Material* mat) {
-		if (mat->shaderName != "") {
+		if (mat->shaderName.empty()) {
 			mat->shader = shaderManager->getGeometryShader(mat->shaderName);
 		}
-		if (mat->textureString != L"") {
+		if (!mat->textureString.empty()) {
 			mat->texture = textureManager->getTexture(mat->textureString);
 		}
-		});
+		if (mat->HeightMapData != nullptr && !mat->HeightMapData->HeightTextureString.empty()) {
+			mat->HeightMapData->HeightTexture = textureManager->getTexture(mat->HeightMapData->HeightTextureString);
+		}
+	});
 
 	materialCache.addTypeEndHandler([](Material* mat) {
 		if (mat->shader.IsValid()) {
@@ -21,7 +24,10 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 		if (mat->texture.IsValid()) {
 			mat->texture = TextureInstance();
 		}
-		});
+		if (mat->HeightMapData != nullptr && mat->HeightMapData->HeightTexture.IsValid()) {
+			mat->HeightMapData->HeightTexture = TextureInstance();
+		}
+	});
 
 
 	selectedMaterial = -1;

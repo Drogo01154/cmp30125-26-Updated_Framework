@@ -24,7 +24,7 @@ public:
 		ID3D11DeviceContext* deviceContext,
 		GeometryData* mesh, const XMMATRIX& projectionMatrix);
 
-	void setResources(ID3D11DeviceContext* deviceContext, size_t startingRegister);
+	void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister);
 private: 
 	InstanceManager* instanceManager;
 	ComPtr<ID3D11Buffer> matrixBuffer;
