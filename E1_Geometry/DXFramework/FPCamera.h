@@ -1,0 +1,50 @@
+#pragma once
+
+#include "camera.h"
+#include "input.h"
+
+
+using namespace DirectX;
+
+class FPCamera : public Camera
+{
+public:
+	/*void* operator new(size_t i)
+	{
+		return _mm_malloc(i, 16);
+	}
+
+	void operator delete(void* p)
+	{
+		_mm_free(p);
+	}*/
+
+	FPCamera(Input* in, int width, int height, HWND hnd);	///< Initialised default camera object
+	//~FPCamera();
+
+	void move(float dt);	///< Move camera, handles basic camera movement
+
+private:
+	Input* input;
+	int winWidth, winHeight;///< stores window width and height
+	int deltax, deltay;		///< for mouse movement
+	POINT cursor;			///< Used for converting mouse coordinates for client to screen space
+	HWND wnd;				///< handle to the window
+};
+
+namespace nlohmann {
+	template<>
+	struct adl_serializer<FPCamera> {
+		static void to_json(json& j, const FPCamera& c) {
+			j["transform"] = c.m_transform;
+			j["speed"] = c.getSpeed();
+			j["lookSpeed"] = c.getLookSpeed();
+		}
+
+		static void from_json(const json& j, FPCamera& c) {
+			c.m_transform = j.at("transform").get<Transform>();
+			c.setSpeed(j.at("speed").get<float>());
+			c.setLookSpeed(j.at("lookSpeed").get<float>());
+		}
+	};
+}

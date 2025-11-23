@@ -1,0 +1,310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{1c05ad22-aff5-4bac-a5ba-f3a05366e03e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{4e3de12a-27aa-4c05-912e-8a65defb49a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Colour Shaders">
+      <UniqueIdentifier>{efb85c8f-a1de-44c1-8911-4e8223243e7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\light shaders">
+      <UniqueIdentifier>{2013a94e-6741-4ab3-bb93-9ef502b0a76c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{a95bc871-9fc7-46c4-911b-2542350eafbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Geometry Shaders">
+      <UniqueIdentifier>{562a2028-c27b-4795-941c-dbe908f59e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Texture Shaders">
+      <UniqueIdentifier>{176c7533-5e8d-43b7-9948-e2fd7f1feb37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ShaderModules">
+      <UniqueIdentifier>{35ff11a1-1eb5-4757-b79e-98f585dc823d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ShaderModules">
+      <UniqueIdentifier>{14b53fd6-d159-498a-9f0e-b9d264a4dad1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\MeshShaders">
+      <UniqueIdentifier>{9565f764-d8ac-4458-8240-078fcfe773a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\MeshShaders\LightShaders">
+      <UniqueIdentifier>{8647b47a-9331-45b7-afe3-56e0fc7655fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\MeshShaders">
+      <UniqueIdentifier>{838c2f57-7985-4156-8030-e167c6c92d64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\MeshShaders\LightShaders">
+      <UniqueIdentifier>{baafc8f0-80eb-4dca-885a-41eed7c97df2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\TextureShaders">
+      <UniqueIdentifier>{fe88c998-6d8f-4dd5-b4c9-8b4ab2ae58ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Texture Shaders\KernelShaders">
+      <UniqueIdentifier>{941fd6ef-9a9b-4ae9-aa01-d3cf16f0055e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\TextureShaders">
+      <UniqueIdentifier>{c39674f0-330a-488a-9a3e-5a9914ec23e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Managers">
+      <UniqueIdentifier>{d16629d1-0b23-4751-9648-5b4958ced940}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RendedPasses">
+      <UniqueIdentifier>{7a655bd7-3691-4ecc-9f6c-b884fa6e0589}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ShaderModules\GeometryShaderModules">
+      <UniqueIdentifier>{408559b8-34f3-48b9-8abf-7816d18d7ed6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ShaderModules\RenderPassModules">
+      <UniqueIdentifier>{090a945e-e1e1-44fe-ab2d-9b58ec5589ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ShaderModules\SharedModules">
+      <UniqueIdentifier>{720aa882-7546-4ada-9f62-5b063dc68b03}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightsDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="MatrixDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="GreyScaleTextureShader.cpp">
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ColourShaderGradient.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="AlbedoLightShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TexturedLightShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ManipulationShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniMapTextureShader.cpp">
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="GreyScaleTextureShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureShader.cpp">
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="KernelShader.cpp">
+      <Filter>Source Files\Shaders\TextureShaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplerDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="GreyScaleDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="KernelDataModule.h">
+      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniMapDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="ManipulationDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="KernelDataModule.cpp">
+      <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DXFramework\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TexturedLightShader.h">
+      <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="AlbedoLightShader.h">
+      <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourShaderGradient.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPassManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPass.h">
+      <Filter>Header Files\RendedPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ManipulationShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GreyScaleDataModule.h">
+      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapDataModule.h">
+      <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraDataModule.h">
+      <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="LightsDataModule.h">
+      <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialDataModule.h">
+      <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixDataModule.h">
+      <Filter>Header Files\ShaderModules\SharedModules</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerDataModule.h">
+      <Filter>Header Files\ShaderModules\SharedModules</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDataModule.h">
+      <Filter>Header Files\ShaderModules\SharedModules</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniMapDataModule.h">
+      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniMapPass.h">
+      <Filter>Header Files\RendedPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTexturePass.h">
+      <Filter>Header Files\RendedPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderInit.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniMapTextureShader.h">
+      <Filter>Header Files\Shaders\TextureShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ManipulationDataModule.h">
+      <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\colour_ps.hlsl">
+      <Filter>Resource Files\Colour Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\colour_vs.hlsl">
+      <Filter>Resource Files\Colour Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="colourGradient_ps.hlsl">
+      <Filter>Resource Files\Colour Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="colourGradient_vs.hlsl">
+      <Filter>Resource Files\Colour Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\texturedLight_ps.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\light_vs.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\manipulation_ps.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\manipulation_vs.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\heightMap_ps.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\heightMap_vs.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\texture_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\texture_vs.hlsl">
+      <Filter>Resource Files\Texture Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\albedoLight_ps.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\textureGreyscale_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="BoxBlur_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Gaussian3X3_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Gaussian5X5_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="EdgeDetection_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Sharpen_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\lightCommon_ps.hlsl">
+      <Filter>Resource Files\light shaders</Filter>
+    </None>
+    <None Include="kernel_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ProjectPlan.txt" />
+  </ItemGroup>
+</Project>
