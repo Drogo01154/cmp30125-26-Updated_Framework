@@ -233,6 +233,9 @@
     <ClInclude Include="ManipulationDataModule.h">
       <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
     </ClInclude>
+    <ClInclude Include="GeometryPass.h">
+      <Filter>Header Files\RendedPasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">

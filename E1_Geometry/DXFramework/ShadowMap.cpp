@@ -44,7 +44,7 @@ ShadowMap::ShadowMap(ID3D11Device* device, int mWidth, int mHeight)
 	viewport.TopLeftY = 0.0f;
 
 	//NULL render target
-	renderTargets[1] = { 0 };
+	renderTargets[0] = { 0 };
 }
 
 ShadowMap::~ShadowMap()

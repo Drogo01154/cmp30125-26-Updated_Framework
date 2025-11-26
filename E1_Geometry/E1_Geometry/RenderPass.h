@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DXFramework/DXF.h"
+#include "DXF.h"
 
 class renderPass {
 public:
@@ -9,3 +9,9 @@ public:
 	virtual void ImGuiMenu() {}
 	bool hasImGui;
 };
+
+/*
+	Render pass will require two functions:
+		1: render, renders result of pass to render target or its required data?
+
+*/

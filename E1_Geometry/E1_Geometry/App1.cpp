@@ -8,6 +8,7 @@
 #include "SamplerDataModule.h"
 #include "LightsDataModule.h"
 #include "MatrixDataModule.h"
+#include "RenderPass.h"
 App1::App1()
 {
 	UIConstants::InitialiseSystem();

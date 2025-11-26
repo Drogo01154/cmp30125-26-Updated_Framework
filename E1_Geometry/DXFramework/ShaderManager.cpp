@@ -8,15 +8,15 @@ ShaderManager::ShaderManager() :
 {
 	//Add shader and module construction
 	GeometryShaderCache.addTypeInitialiser([](ShaderData* data) {
-		data->constructShader();
+		data->shader = data->constructShader();
 		});
 
 	PassShaderCache.addTypeInitialiser([](ShaderData* data) {
-		data->constructShader();
+		data->shader = data->constructShader();
 		});
 
 	ShaderModuleCache.addTypeInitialiser([](ModuleData* data) {
-		data->constructModule();
+		data->module = data->constructModule();
 		});
 
 
