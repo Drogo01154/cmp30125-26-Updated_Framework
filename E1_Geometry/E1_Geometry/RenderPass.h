@@ -4,8 +4,7 @@
 
 class renderPass {
 public:
-	virtual void Render(ID3D11Device* device) = 0;
-	virtual ~renderPass() {};
+	virtual void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device, const XMMATRIX& projectionMatrix) = 0;
 	virtual void ImGuiMenu() {}
 	bool hasImGui;
 };

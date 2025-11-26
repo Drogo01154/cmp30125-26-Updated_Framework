@@ -4,9 +4,10 @@
 
 class GeometryPass : renderPass {
 public:
-	GeometryPass(InstanceManager* instanceManager, ShaderManager* shaderManager) : 
+	GeometryPass(InstanceManager* instanceManager, ShaderManager* shaderManager, D3D* renderer) :
 		instanceManager(instanceManager) ,
-		shaderManager(shaderManager)
+		shaderManager(shaderManager),
+		renderer(renderer)
 	{
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	}
@@ -17,19 +18,14 @@ public:
 			std::shared_ptr<BaseShader> shader = instance->mat->shader->shader;
 			const std::string& shaderType = instance->mat->shader->name;
 
-			matrixModule->setModuleParamaters(deviceContext, instance, )
+			matrixModule->setModuleParamaters(deviceContext, instance, renderer->getProjectionMatrix());
 			BaseMesh* mesh = instance->mesh->mesh.get();
-
-
 			shader->render(deviceContext, mesh->getIndexCount());
 			});
 	};
 private:
+	D3D* renderer;
 	ShaderManager* shaderManager;
 	InstanceManager* instanceManager;
 	ModuleInstance matrixDataModule;	//Matrix Data Module;
 };
-
-/*
-* 
-* 

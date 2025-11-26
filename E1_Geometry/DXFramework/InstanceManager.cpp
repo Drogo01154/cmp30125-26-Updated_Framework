@@ -7,7 +7,11 @@ struct OrthoMeshData {
 	int yPosition;
 };
 
-InstanceManager::InstanceManager(GeometryManager* geometryManager, MaterialManager* materialManager, Input* input, HWND hwnd, int screenWidth, int screenHeight) :
+InstanceManager::InstanceManager(
+	ShaderManager* shaderManager, GeometryManager* geometryManager, 
+	MaterialManager* materialManager, Input* input, HWND hwnd, 
+	int screenWidth, int screenHeight) :
+	shaderManager(shaderManager),
 	geometryManager(geometryManager),
 	materialManager(materialManager),
 	input(input),
@@ -18,7 +22,14 @@ InstanceManager::InstanceManager(GeometryManager* geometryManager, MaterialManag
 	lightCache(),
 	cameraCache()
 {
-
+	cameraCache.addTypeEndHandler([&](CameraData* data) {
+		if (data->camera == getActiveCamera()->camera) {
+			shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+		}
+	});
+	lightCache.addTypeEndHandler([&](Light* data) {
+		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+		});
 }
 
 GeometryInstance InstanceManager::tryGetGeometryInstance(size_t ID) {
@@ -50,14 +61,18 @@ void InstanceManager::clearGeometry() {
 }
 void InstanceManager::clearLights() {
 	lightCache.clear();
+	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
 }
 void InstanceManager::clearCameras() {
 	cameraCache.clear();
+	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
 }
 void InstanceManager::clearAll() {
 	geometryCache.clear();
 	lightCache.clear();
 	cameraCache.clear();
+	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
 }
 
 GeometryInstance InstanceManager::createGeometryInstance(size_t& instanceID, MeshInstance mesh) {
@@ -114,11 +129,17 @@ LightInstance  InstanceManager::createLight(size_t& instanceID, lightTypes type)
 
 //Create Cameras
 CameraInstance InstanceManager::createCamera(size_t& instanceID) {
-	return cameraCache.emplaceID(instanceID, CameraData(CameraTypes::BASIC, std::make_shared<Camera>()));
+	CameraInstance returnInst =  cameraCache.emplaceID(instanceID, CameraData(CameraTypes::BASIC, std::make_shared<Camera>()));
+	setActiveCamera(instanceID);
+	return returnInst;
 }
 CameraInstance InstanceManager::createFPCamera(size_t& instanceID) {
-	return cameraCache.emplaceID(instanceID, CameraData(CameraTypes::FPCAMERA, std::make_shared<Camera>(FPCamera(input, screenWidth, screenHeight, hwnd))));
+	CameraInstance returnInst = cameraCache.emplaceID(instanceID, CameraData(CameraTypes::FPCAMERA, std::make_shared<Camera>(FPCamera(input, screenWidth, screenHeight, hwnd))));
+	setActiveCamera(instanceID);
+	return returnInst;
 }
+
+size_t InstanceManager::getActiveCameraID() { return activeCameraID; }
 
 CameraData* InstanceManager::getActiveCamera() {
 	return cameraCache.tryGetValue(activeCameraID);
@@ -126,6 +147,7 @@ CameraData* InstanceManager::getActiveCamera() {
 void InstanceManager::setActiveCamera(size_t ID) {
 	if (cameraCache.hasID(ID)) {
 		activeCameraID = ID;
+		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
 	}
 	else {
 		throw std::runtime_error("Error: Camera does not exist at ID: " + std::to_string(ID));
@@ -330,6 +352,9 @@ void InstanceManager::from_json(
 		}
 		size_t oldID = static_cast<size_t>(meshInstanceJson.at("ID").get<uint64_t>());
 		size_t newID;
+
+		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
 
 		//Add to cache?
 		geometryCache.emplaceID(newID, data);

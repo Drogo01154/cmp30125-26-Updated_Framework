@@ -44,8 +44,6 @@ private:
 	//void generateTexture(ID3D11Device* device);
 	void addDefaultTexture();
 	TextureInstance loadTexture(const std::wstring& uid, const std::wstring& filename);
-
-	
 	
 	TextureInstance defaultTexture;	// Instance will always remain
 	ID3D11Device* device;

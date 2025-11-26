@@ -60,7 +60,7 @@ class MiniMapPass : RenderTexturePass {
 		orthographicProjectionMatrix = XMMatrixOrthographicLH(miniMapWidth, miniMapHeight, miniMapNearZ, miniMapFarZ);
 	}
 
-	void Render(ID3D11DeviceContext* device, const XMMATRIX& projectionMatrix) {
+	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device, const XMMATRIX& projectionMatrix) {
 
 		XMFLOAT3 currentCameraPos = instanceManager->getActiveCamera()->camera->getGlobalPosition();
 

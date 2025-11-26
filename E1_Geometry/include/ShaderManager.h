@@ -21,22 +21,38 @@ struct ShaderData {
 	std::shared_ptr<BaseShader> shader;
 };
 
+
+enum DirtyModuleFlags : uint32_t {
+	NONE = 0,
+	CAMERA = 1 << 0,
+	LIGHTS = 1 << 1,
+	HEIGHTMAP = 1 << 2
+};
+
 struct ModuleData {
-	ModuleData(const std::string& name, std::function<std::shared_ptr<BaseShaderModule>()> constructModule) :
-		name(name), constructModule(constructModule) {
+	ModuleData(const std::string& name, DirtyModuleFlags checkFlags, std::function<std::shared_ptr<BaseShaderModule>()> constructModule) :
+		name(name), checkFlags(checkFlags), constructModule(constructModule) {
 	}
 	std::string name;
 	// Factory function that creates the shader
 	std::function<std::shared_ptr<BaseShaderModule>()> constructModule;
 	std::shared_ptr<BaseShaderModule> module;
+	DirtyModuleFlags checkFlags;
 };
 
 #define ShaderInstance Instance<std::string, ShaderData>
 #define ModuleInstance Instance<std::string, ModuleData>
 
+
 class ShaderManager {
 public:
 	ShaderManager();
+
+	void SetModuleDirtyflag(uint32_t flag) { flag |= flag; }
+	void clearModuleDirtyflag(uint32_t flag) { flag &= ~flag; }
+	bool isModuleDirtyflagSet(uint32_t flag) const { return (flags & flag) != 0; }
+	void ResetModuleDirtyflags() { flags = DirtyModuleFlags::NONE; }
+
 
 	template<typename ShaderType, typename... Args>
 	void addGeometryShader(const std::string& name, Args&&... args) {
@@ -73,13 +89,14 @@ public:
 	}
 
 	template<typename ModuleType, typename... Args>
-	void AddShaderModule(const std::string& name, Args&&... args) {
+	void AddShaderModule(const std::string& name, DirtyModuleFlags checkFlags, Args&&... args) {
 		// Capture constructor arguments by value or move
 		auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
 		ShaderModuleCache.emplaceID(
 			name,
 			ModuleData(
-				name,
+				name, 
+				checkFlags,
 				[argsTuple]() -> std::shared_ptr<BaseShaderModule> {
 					return std::apply([](auto&&... unpackedArgs) {
 						return std::make_shared<ModuleType>(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
@@ -105,6 +122,7 @@ public:
 
 	void AddHeightMapShaderName(const std::string& shader);
 	void RemoveHeightMapShaderName(const std::string& shader);
+
 	bool isHeightMapShader(const std::string& shader);
 private:
 
@@ -118,6 +136,8 @@ private:
 
 	std::string defaultGeometryShader;
 	std::string defaultPassShader;
+
+	DirtyModuleFlags flags;
 };
 
 #endif

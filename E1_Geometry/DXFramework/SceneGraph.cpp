@@ -1,6 +1,9 @@
 #include "SceneGraph.h"
 
-SceneGraph::SceneGraph(InstanceManager* instanceManager, GeometryManager* geometryManager) : instanceManager(instanceManager), geometryManager(geometryManager)
+SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager) : 
+	shaderManager(shaderManager), 
+	instanceManager(instanceManager), 
+	geometryManager(geometryManager)
 {
 	selectedCreateCamera = -1;
 	selectedCreateLight = -1;
@@ -238,10 +241,14 @@ void SceneGraph::updateNodeGlobals(std::shared_ptr<sceneNode> node, bool updateL
 
 	if (node->cameraInstance.IsValid()) {
 		node->cameraInstance->camera->updateGlobals(false);
+		if (instanceManager->getActiveCameraID() == node->cameraID) {
+			shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+		}
 	}
 
 	if (node->lightInstance.IsValid()) {
 		node->lightInstance->updateGlobals(false);
+		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
 	}
 
 	for (auto child : node->children) {
@@ -267,7 +274,7 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		}
 		if (node->cameraInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Camera Settings").c_str())) {
 			if (CameraData* cameraInstance = node->cameraInstance.Get()) {
-				cameraInstance->camera->imGuiRender(2, cameraInstance->type);
+				if(cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA); }
 			}
 		}
 		else {
@@ -275,7 +282,7 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		}
 		if (node->lightInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Light Settings").c_str())) {
 			if (Light* light = node->lightInstance.Get()) {
-				light->imGuiRender(3);
+				if (light->imGuiRender(3)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS); }
 			}
 		}
 		else {

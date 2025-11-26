@@ -55,7 +55,7 @@ public:
 	void setSpeed(float speed);
 	void setLookSpeed(float speed);
 
-	void imGuiRender(size_t transformIterator, CameraTypes type);
+	bool imGuiRender(size_t transformIterator, CameraTypes type);
 
 	void moveForward();			///< default function for moving forward
 	void moveBackward();		///< default function for moving backward

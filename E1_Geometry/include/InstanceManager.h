@@ -32,7 +32,12 @@ struct OrthoMeshData;
 
 class InstanceManager {
 public:
-	InstanceManager(GeometryManager* geometryManager, MaterialManager* materialManager, Input* input, HWND hwnd, int screenWidth, int screenHeight);
+	InstanceManager(
+		ShaderManager* shaderManager, 
+		GeometryManager* geometryManager, 
+		MaterialManager* materialManager, 
+		Input* input, HWND hwnd, 
+		int screenWidth, int screenHeight);
 	GeometryInstance tryGetGeometryInstance(size_t ID);
 	LightInstance tryGetLightInstance(size_t ID);
 	CameraInstance tryGetCameraInstance(size_t ID);
@@ -70,6 +75,7 @@ public:
 	CameraInstance  createCamera(size_t& instanceID);
 	CameraInstance  createFPCamera(size_t& instanceID);
 
+	size_t getActiveCameraID();
 	CameraData* getActiveCamera();
 	void setActiveCamera(size_t ID);
 
@@ -106,6 +112,7 @@ private:
 	size_t activeCameraID;
 	std::shared_ptr<CameraInstance> activeCamera;
 
+	ShaderManager* shaderManager;
 	GeometryManager* geometryManager;
 	MaterialManager* materialManager;
 	InstanceCache<size_t, GeometryData> geometryCache;

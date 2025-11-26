@@ -171,34 +171,36 @@ std::span<const char* const> Light::GetLightTypeStrings() {
 	return LightTypeStrings;
 }
 
-void Light::imGuiRender(size_t transformIncrement) {
-
+bool Light::imGuiRender(size_t transformIncrement) {
+	bool lightUpdated = false;
 	ImGui::Text(("Light Type: " + std::string(LightTypeStrings[type])).c_str());
 
 	//Lights Diffuse Colour setting
 	if (ImGui::TreeNode("Light Diffuse Colour")) {
-		if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuseColour.x)) {}
+		if (ImGui::ColorPicker4("Light Diffuse Colour: ", &diffuseColour.x)) { lightUpdated = true; }
 		ImGui::TreePop();
 	}
 
 	if (m_transform.imGuiRender("Light Transform: ", transformIncrement, type != lightTypes::directional, type != lightTypes::point, false))
 	{
 		updateGlobals(true);
+		lightUpdated = true;
 	}
 
 	if (type != lightTypes::directional)
 	{
 		if (ImGui::TreeNode("Attenuation")) {
-			if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) {}
-			if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) {}
-			if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) {}
-			if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) {}
+			if (ImGui::DragFloat("Constant ", &attenuation.x, 0.1f, 1.0f, 1000.f, "%.2f")) { lightUpdated = true; }
+			if (ImGui::DragFloat("Linear ", &attenuation.y, 0.01f, 0.01f, 0.15f, "%.2f")) { lightUpdated = true; }
+			if (ImGui::DragFloat("Quadratic ", &attenuation.z, 0.0001f, 0.0001f, 0.2f, "%.4f")) { lightUpdated = true; }
+			if (ImGui::DragFloat("Falloff ", &attenuation.w, 0.1f, 0.01f, 1000.f, "%.2f")) { lightUpdated = true; }
 			ImGui::TreePop();
 		}
 	}
 
 	if (type == lightTypes::spot) {
-		if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) {}
-		if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) {}
+		if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) { lightUpdated = true; }
+		if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) { lightUpdated = true; }
 	}
+	return lightUpdated;
 }

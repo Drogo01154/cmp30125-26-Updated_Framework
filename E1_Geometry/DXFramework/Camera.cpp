@@ -28,8 +28,8 @@ XMFLOAT3 Camera::getGlobalDirection() const {
 	return globalDirection;
 }
 
-void Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
-
+bool Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
+	bool cameraUpdated = false;
 	std::string outputPos = "X: " + std::to_string(globalPosition.x) + " Y: " + std::to_string(globalPosition.y) + " Z: " + std::to_string(globalPosition.z);
 	ImGui::Text(outputPos.c_str());
 
@@ -37,6 +37,7 @@ void Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
 	case CameraTypes::BASIC:
 		if (m_transform.imGuiRender("Camera Transform", transformIterator, true, true, false)) {
 			updateGlobals(true);
+			cameraUpdated = true;
 		}
 		break;
 	case CameraTypes::FPCAMERA:
@@ -44,6 +45,7 @@ void Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
 		if(ImGui::SliderFloat("Look Speed", &lookSpeed, 0.1f, 100.f)) {}
 		break;
 	}
+	return cameraUpdated;
 }
 
 // Store frame/delta time.

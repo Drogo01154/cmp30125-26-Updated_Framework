@@ -27,7 +27,7 @@ struct sceneNode {
 class SceneGraph {
 public:
 	SceneGraph() = delete;
-	SceneGraph(InstanceManager* instanceManager, GeometryManager* geometryManager);
+	SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager);
 
 
 	void createBaseScene();
@@ -59,6 +59,7 @@ public:
 	void from_json(const nlohmann::json& j);
 
 private:
+	ShaderManager* shaderManager;
 	GeometryManager* geometryManager;
 	InstanceManager* instanceManager;
 	std::shared_ptr<sceneNode> root;

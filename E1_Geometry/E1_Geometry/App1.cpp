@@ -12,13 +12,14 @@
 App1::App1()
 {
 	UIConstants::InitialiseSystem();
-	selectedLight = -1;
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
 {	
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
+
+	passMgr = std::make_unique<RenderPassManager>();
 
 	//Add matrix data modules
 	//shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
@@ -115,23 +116,14 @@ bool App1::frame()
 bool App1::render()
 {
 	// Get matrices
-	camera->update();
+	instanceMgr->getActiveCamera()->camera->update();
 
-	// Render first pass to top left render texture
-	firstPass();
-
-	// Render second pass to top right render texture
-	secondPass();
-
-	// Render final pass to frame buffer
-	finalPass();
 
 	return true;
 }
-
+/*
 void App1::firstPass()
 {
-	/*
 	// Set the render target to be the render to terxture and clear it
 	renderTextureTR->setRenderTarget(renderer->getDeviceContext());
 	renderTextureTR->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
@@ -157,12 +149,10 @@ void App1::firstPass()
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
-	*/
 }
 
 void App1::secondPass()
 {
-	/*
 	// Set the render target to be the render to terxture and clear it
 	renderTextureMain->setRenderTarget(renderer->getDeviceContext());
 	renderTextureMain->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
@@ -184,14 +174,13 @@ void App1::secondPass()
 
 	// Reset the render target back to the original back buffer and not the render to texture anymore.
 	renderer->setBackBufferRenderTarget();
-	*/
+	
 }
  
 VOID App1::finalPass()
 {
 	// Clear the scene. (default blue colour)
 	renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
-	/*
 	
 
 	// Get matrices
@@ -222,8 +211,8 @@ VOID App1::finalPass()
 
 	// Present the rendered scene to the screen.
 	renderer->endScene();
-	*/
 }
+*/
 
 void App1::gui()
 {

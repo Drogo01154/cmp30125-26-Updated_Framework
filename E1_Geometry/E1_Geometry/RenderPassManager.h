@@ -29,12 +29,12 @@ public:
 		});
 	};
 
-	void RunPasses(ID3D11Device* device) {
+	void RunPasses(ID3D11DeviceContext* deviceContext, ID3D11Device* device, const XMMATRIX& projectionMatrix) {
 		for (auto pass : ActivePasses) {
 			//Run passes set paramater function
 			pass.second->setParamaterFunction(pass.second.Get());
 			//Run pass render
-			pass.second->pass->Render(device);
+			pass.second->pass->Render(deviceContext, device, projectionMatrix);
 		}
 	}
 
@@ -74,54 +74,6 @@ public:
 		
 	}
 
-	/*		renderPassData test(
-			name,
-			[argsTuple]() -> std::shared_ptr<renderPass> {
-				
-			}
-		);
-		
-		passCache.emplaceID(
-			name,
-			
-		);
-	}
-
-	template<typename PassType, typename ParamaterFunction, typename... Args>
-	void addPassSetParamaterFunction(const std::string& name, Args&&... args) {
-
-	}
-	*/
-	/*void addPassToCache(std::string name, )
-
-	void addPass(std::unique_ptr<renderPass> pass) {
-		renderPasses.push_back(std::move(pass));
-	}
-
-	void renderAll() {
-		for (auto& pass : renderPasses) {
-			pass->Render();
-		}
-	}
-
-	void removePass(size_t  ID) {
-		if (ID < renderPasses.size()) {
-			renderPasses.erase(renderPasses.begin() + ID);
-		}
-		else {
-			throw std::runtime_error("Error: Pass " + std::to_string(ID) + " does not exist!");
-		}
-	}
-
-	renderPass* getPass(size_t ID) {
-		if (ID < renderPasses.size()) {
-			return renderPasses[ID].get();
-		}
-		return nullptr;
-	}
-
-	void clearPasses() { renderPasses.clear(); }
-	*/
 private:
 	std::vector<std::pair<std::string, passInstance>> ActivePasses;
 	InstanceCache<std::string, renderPassData> passCache;
