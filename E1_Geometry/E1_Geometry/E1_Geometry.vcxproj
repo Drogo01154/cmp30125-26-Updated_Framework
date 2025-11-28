@@ -166,6 +166,7 @@
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="CameraDataModule.cpp" />
+    <ClCompile Include="DepthShader.cpp" />
     <ClCompile Include="GreyScaleDataModule.cpp" />
     <ClCompile Include="GreyScaleTextureShader.cpp" />
     <ClCompile Include="GreyScaleTextureShader.h" />
@@ -186,13 +187,14 @@
     <ClCompile Include="MiniMapTextureShader.cpp" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
-    <FxCompile Include="BoxBlur_ps.hlsl">
+    <FxCompile Include="shaders\depth_vs.hlsl" />
+    <FxCompile Include="shaders\BoxBlur_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="colourGradient_ps.hlsl">
+    <FxCompile Include="shaders\colourGradient_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="colourGradient_vs.hlsl">
+    <FxCompile Include="shaders\colourGradient_vs.hlsl">
       <FileType>Document</FileType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
@@ -201,19 +203,22 @@
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <FxCompile Include="Sharpen_ps.hlsl">
+    <FxCompile Include="shaders\depth_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <None Include="kernel_ps.hlsl">
+    <FxCompile Include="shaders\Sharpen_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <None Include="shaders\kernel_ps.hlsl">
       <FileType>Document</FileType>
     </None>
-    <FxCompile Include="EdgeDetection_ps.hlsl">
+    <FxCompile Include="shaders\EdgeDetection_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Gaussian3X3_ps.hlsl">
+    <FxCompile Include="shaders\Gaussian3X3_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Gaussian5X5_ps.hlsl">
+    <FxCompile Include="shaders\Gaussian5X5_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\heightMap_ps.hlsl">
@@ -263,6 +268,8 @@
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
+    <ClInclude Include="DepthPass.h" />
+    <ClInclude Include="DepthShader.h" />
     <ClInclude Include="FinalPass.h" />
     <ClInclude Include="GeometryPass.h" />
     <ClInclude Include="GreyScaleDataModule.h" />

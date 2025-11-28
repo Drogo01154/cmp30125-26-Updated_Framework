@@ -22,12 +22,40 @@ struct ShaderData {
 };
 
 
-enum DirtyModuleFlags : uint32_t {
+enum class DirtyModuleFlags : uint32_t {
 	NONE = 0,
 	CAMERA = 1 << 0,
-	LIGHTS = 1 << 1,
-	HEIGHTMAP = 1 << 2
+	LIGHTSDATACHANGED = 1 << 1,
+	LIGHTNUMCHANGED = 1 << 2
+
 };
+
+// Bitwise OR
+inline DirtyModuleFlags operator|(DirtyModuleFlags a, DirtyModuleFlags b) {
+	return static_cast<DirtyModuleFlags>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+}
+
+inline DirtyModuleFlags& operator|=(DirtyModuleFlags& a, DirtyModuleFlags b) {
+	a = a | b;
+	return a;
+}
+
+// Bitwise AND
+inline DirtyModuleFlags operator&(DirtyModuleFlags a, DirtyModuleFlags b) {
+	return static_cast<DirtyModuleFlags>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+}
+
+inline DirtyModuleFlags& operator&=(DirtyModuleFlags& a, DirtyModuleFlags b) {
+	a = a & b;
+	return a;
+}
+
+// Bitwise NOT
+inline DirtyModuleFlags operator~(DirtyModuleFlags a) {
+	return static_cast<DirtyModuleFlags>(~static_cast<uint32_t>(a));
+}
+
+
 
 struct ModuleData {
 	ModuleData(const std::string& name, DirtyModuleFlags checkFlags, std::function<std::shared_ptr<BaseShaderModule>()> constructModule) :
@@ -48,9 +76,9 @@ class ShaderManager {
 public:
 	ShaderManager();
 
-	void SetModuleDirtyflag(uint32_t flag) { flag |= flag; }
-	void clearModuleDirtyflag(uint32_t flag) { flag &= ~flag; }
-	bool isModuleDirtyflagSet(uint32_t flag) const { return (flags & flag) != 0; }
+	void SetModuleDirtyflags(DirtyModuleFlags flag) { flags |= flag; }
+	void clearModuleDirtyflags(DirtyModuleFlags flag) { flags &= ~flag; }
+	bool isModuleDirtyflagSet(DirtyModuleFlags flag) const { return (flags & flag) != DirtyModuleFlags::NONE; }
 	void ResetModuleDirtyflags() { flags = DirtyModuleFlags::NONE; }
 
 

@@ -76,6 +76,15 @@
     <Filter Include="Header Files\RenderPasses">
       <UniqueIdentifier>{7a655bd7-3691-4ecc-9f6c-b884fa6e0589}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Depth Shaders">
+      <UniqueIdentifier>{a913509a-5d89-4ed9-b16a-0ca8f2c24c45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\MeshShaders\DepthShaders">
+      <UniqueIdentifier>{17de1eb1-621d-4570-a61b-766ed5ac874a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders\MeshShaders\DepthShaders">
+      <UniqueIdentifier>{1acae538-62a6-4232-b979-6165bd0db18f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -152,6 +161,9 @@
     </ClCompile>
     <ClCompile Include="KernelDataModule.cpp">
       <Filter>Source Files\ShaderModules</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +251,12 @@
     <ClInclude Include="FinalPass.h">
       <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
+    <ClInclude Include="DepthShader.h">
+      <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthPass.h">
+      <Filter>Header Files\RenderPasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">
@@ -247,10 +265,10 @@
     <FxCompile Include="shaders\colour_vs.hlsl">
       <Filter>Resource Files\Colour Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="colourGradient_ps.hlsl">
+    <FxCompile Include="shaders\colourGradient_ps.hlsl">
       <Filter>Resource Files\Colour Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="colourGradient_vs.hlsl">
+    <FxCompile Include="shaders\colourGradient_vs.hlsl">
       <Filter>Resource Files\Colour Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\texturedLight_ps.hlsl">
@@ -286,27 +304,33 @@
     <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
       <Filter>Resource Files\Texture Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="BoxBlur_ps.hlsl">
+    <FxCompile Include="shaders\BoxBlur_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </FxCompile>
-    <FxCompile Include="Gaussian3X3_ps.hlsl">
+    <FxCompile Include="shaders\Gaussian3X3_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </FxCompile>
-    <FxCompile Include="Gaussian5X5_ps.hlsl">
+    <FxCompile Include="shaders\Gaussian5X5_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </FxCompile>
-    <FxCompile Include="EdgeDetection_ps.hlsl">
+    <FxCompile Include="shaders\EdgeDetection_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </FxCompile>
-    <FxCompile Include="Sharpen_ps.hlsl">
+    <FxCompile Include="shaders\Sharpen_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\depth_ps.hlsl">
+      <Filter>Resource Files\Depth Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\depth_vs.hlsl">
+      <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\lightCommon_ps.hlsl">
       <Filter>Resource Files\light shaders</Filter>
     </None>
-    <None Include="kernel_ps.hlsl">
+    <None Include="shaders\kernel_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </None>
   </ItemGroup>

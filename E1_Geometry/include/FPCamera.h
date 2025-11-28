@@ -22,6 +22,8 @@ public:
 	FPCamera(Input* in, int width, int height, HWND hnd);	///< Initialised default camera object
 	//~FPCamera();
 
+	void update() override;
+
 	void move(float dt);	///< Move camera, handles basic camera movement
 
 private:

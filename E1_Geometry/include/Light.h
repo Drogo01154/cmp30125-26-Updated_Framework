@@ -66,8 +66,10 @@ public:
 	const XMMATRIX& getOrthoMatrix() const;			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
 
 	void updateGlobals(bool updateTransform = true);	///> Set global values from transform and parent matrix
-	XMFLOAT3 getGlobalPosition() const;				///> Get lights global translation
-	XMFLOAT3 getGlobalDirection() const;			///> Get lights global rotation
+	XMFLOAT3 getGlobalPosition() const;					///> Get lights global translation as float3
+	XMFLOAT3 getGlobalDirection() const;				///> Get lights global direction as float3
+	const XMVECTOR& getGlobalPositionVector() const;	///> Get lights global translation as XMVECRTOR
+	const XMVECTOR& getGlobalDirectionVector() const;	///> Get light global direction as XMVECTOR;
 
 	float getInnerCone() const;						///< Get light Inner cone angle, returns float
 	float getOuterCone() const;						///< Get light Outer cone angle, returns float

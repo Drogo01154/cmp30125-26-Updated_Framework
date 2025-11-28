@@ -192,6 +192,12 @@
     <ClInclude Include="SceneGraph.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowMapArray.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapArray.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseMesh.cpp">
@@ -306,6 +312,12 @@
       <Filter>Source Files\Managers</Filter>
     </ClCompile>
     <ClCompile Include="SceneGraph.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMapArray.cpp">
+      <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMapArray.cpp">
       <Filter>Source Files\Scene</Filter>
     </ClCompile>
   </ItemGroup>

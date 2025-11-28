@@ -11,6 +11,27 @@ FPCamera::FPCamera(Input* in, int width, int height, HWND hnd)
 	wnd = hnd;
 }
 
+void FPCamera::update() {
+	XMVECTOR worldUp = XMVectorSet(0, 1, 0, 0);         // fixed world up
+
+	XMVECTOR yawQ = XMQuaternionRotationAxis(worldUp, yaw);
+	XMVECTOR outputRotation = XMQuaternionMultiply(yawQ, XMQuaternionIdentity());
+
+
+	XMVECTOR localRight = XMVector3Rotate(XMVectorSet(1, 0, 0, 0), outputRotation); // current right
+	XMVECTOR pitchQ = XMQuaternionRotationAxis(localRight, pitch);
+
+
+	outputRotation = XMQuaternionMultiply(outputRotation, pitchQ);
+
+	//Normalize before storing
+	outputRotation = XMQuaternionNormalize(outputRotation);
+
+	m_transform.setRotationQuat(outputRotation, false);
+
+	Camera::update();
+}
+
 void FPCamera::move(float dt)
 {
 	setFrameTime(dt);

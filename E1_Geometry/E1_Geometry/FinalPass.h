@@ -4,7 +4,7 @@
 
 class FinalRenderPass : public renderPass {
 public:
-	FinalRenderPass(size_t stage, const passDependancies& deps, D3D* renderer, ShaderManager* shaderManager, InstanceManager* instanceManager, const OrthoMeshData& orthoData) : renderPass(stage, deps), renderer(renderer) {
+	FinalRenderPass(size_t stage, const passDependancies& deps, D3D* renderer, ShaderManager* shaderManager, InstanceManager* instanceManager, const OrthoMeshData& orthoData) : renderPass(stage, deps), renderer(renderer), instanceManager(instanceManager) {
 		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 
@@ -16,6 +16,7 @@ public:
 	}
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
+		XMMATRIX viewMatrix = instanceManager->getActiveCamera()->camera->getOrthoViewMatrix();
 		//Set render target back to back buffer
 		renderer->setBackBufferRenderTarget();
 		renderer->resetViewport();
@@ -25,7 +26,7 @@ public:
 
 		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		std::shared_ptr<TextureDataModule> textureModule = dynamic_pointer_cast<TextureDataModule>(textureDataModule->module);
-		matrixModule->setModuleParamaters(deviceContext, orthoMesh, renderer->getOrthoMatrix(), true);
+		matrixModule->setModuleParamaters(deviceContext, orthoMesh, renderer->getOrthoMatrix(), viewMatrix);
 		textureModule->setModuleParamaters(deviceContext, inputTexture->getShaderResourceView());
 
 		renderer->setZBuffer(false);
@@ -36,6 +37,7 @@ public:
 	}
 
 private:
+	InstanceManager* instanceManager;
 	//Manager Ptrs
 	ShaderInstance shader;
 

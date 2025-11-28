@@ -1,0 +1,82 @@
+#include "CubeMapArray.h"
+
+CubeMapArray::CubeMapArray(ID3D11Device* device, int mWidth, int mHeight, int size) {
+	resize(device, mWidth, mHeight, size, true);
+
+	// Setup the viewport for rendering.
+	viewport.Width = (float)mWidth;
+	viewport.Height = (float)mHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+}
+
+void CubeMapArray::resize(ID3D11Device* device, std::optional<int> newSize, std::optional<int> mWidth, std::optional<int> mHeight, bool first) {
+	if (!first) {
+		mCubeMapArrayDSV.clear();
+		mCubeMapArraySRV.Reset();
+		depthMapArray.Reset();
+	}
+	size = newSize == std::nullopt ? size : *newSize;
+	shadowMapWidth = mWidth == std::nullopt ? shadowMapWidth : *mWidth;
+	shadowMapHeight = mHeight == std::nullopt ? shadowMapHeight : *mHeight;
+
+	// Use typeless format because the DSV is going to interpret
+	// the bits as DXGI_FORMAT_D24_UNORM_S8_UINT, whereas the SRV is going to interpret
+	// the bits as DXGI_FORMAT_R24_UNORM_X8_TYPELESS.
+	D3D11_TEXTURE2D_DESC texDesc;
+	texDesc.Width = shadowMapWidth;
+	texDesc.Height = shadowMapHeight;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 6 * size;
+	texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+
+	//ID3D11Texture2D* depthMap = 0;
+	device->CreateTexture2D(&texDesc, 0, depthMapArray.GetAddressOf());
+
+	mCubeMapArrayDSV.resize(size);
+
+	for (int i = 0; i < size; i++) {
+		mCubeMapArrayDSV[i].resize(6);
+		for (int f = 0; f < 6; f++) {
+			int index = i * 6 + f;
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+			dsvDesc.Flags = 0;
+			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+			dsvDesc.Texture2DArray.MipSlice = 0;
+			dsvDesc.Texture2DArray.FirstArraySlice = index;
+			dsvDesc.Texture2DArray.ArraySize = 1;
+			device->CreateDepthStencilView(depthMapArray.Get(), &dsvDesc, mCubeMapArrayDSV[i][f].GetAddressOf());
+		}
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
+	srvDesc.TextureCubeArray.MipLevels = texDesc.MipLevels;
+	srvDesc.TextureCubeArray.MostDetailedMip = 0;
+	srvDesc.TextureCubeArray.First2DArrayFace = 0;
+	srvDesc.TextureCubeArray.NumCubes = size;
+	device->CreateShaderResourceView(depthMapArray.Get(), &srvDesc, mCubeMapArraySRV.GetAddressOf());
+	renderTarget.Reset();
+}
+
+CubeMapArray::~CubeMapArray() {
+
+}
+
+void CubeMapArray::BindDsvAndSetNullRenderTarget(ID3D11DeviceContext* dc, int map, int slice) {
+	assert(map < size);
+	assert(slice < 6);
+	dc->RSSetViewports(1, &viewport);
+	dc->OMSetRenderTargets(1, renderTarget.GetAddressOf(), mCubeMapArrayDSV[map][slice].Get());
+	dc->ClearDepthStencilView(mCubeMapArrayDSV[map][slice].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+}

@@ -10,7 +10,7 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 	selectedCreateMesh = -1;
 	selectedModel = -1;
 	selectedCreateModel = -1;
-	inputResolution = 100;
+	inputResolution = 20;
 	ambientLight = { 0.0f, 0.0f, 0.0f, 1.f };
 
 	createBaseScene();
@@ -272,13 +272,13 @@ void SceneGraph::updateNodeGlobals(std::shared_ptr<sceneNode> node, bool updateL
 	if (node->cameraInstance.IsValid()) {
 		node->cameraInstance->camera->updateGlobals(false);
 		if (instanceManager->getActiveCameraID() == node->cameraID) {
-			shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+			shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 		}
 	}
 
 	if (node->lightInstance.IsValid()) {
 		node->lightInstance->updateGlobals(false);
-		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED);
 	}
 
 	for (auto child : node->children) {
@@ -330,7 +330,7 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		{
 			if (ImGui::TreeNode(("Node: " + node->name + " Camera Settings").c_str())) {
 				if (CameraData* cameraInstance = node->cameraInstance.Get()) {
-					if (cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA); }
+					if (cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA); }
 				}
 				ImGui::TreePop();
 			}
@@ -346,7 +346,7 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		if (hasLight) {
 			if (ImGui::TreeNode(("Node: " + node->name + " Light Settings").c_str())) {
 				if (Light* light = node->lightInstance.Get()) {
-					if (light->imGuiRender(3)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS); }
+					if (light->imGuiRender(3)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED); }
 				}
 				ImGui::TreePop();
 			}

@@ -29,7 +29,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd, instanceMgr.get());
 	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd);
 	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSampleModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
-	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", DirtyModuleFlags::LIGHTS, renderer->getDevice(), hwnd, instanceMgr.get());
+	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", DirtyModuleFlags::LIGHTSDATACHANGED | DirtyModuleFlags::LIGHTNUMCHANGED, renderer->getDevice(), hwnd, instanceMgr.get());
 
 	//Add geometry Shaders
 	shaderMgr->addGeometryShader<ColourShader>("ColourShader", shaderMgr.get(), renderer->getDevice(), hwnd);
@@ -48,9 +48,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	ShaderInstance test = shaderMgr->getGeometryShader("ColourShader");
 	std::shared_ptr<ColourShader> testCast = std::dynamic_pointer_cast<ColourShader>(test.Get()->shader);
-	int testInt = 0;
-	testCast->testStuff(testInt);
-	int test2 = testInt;
 
 	//ID3D11Texture3D* test;
 	//D3D11_SHADER_RESOURCE_VIEW_DESC

@@ -35,6 +35,8 @@
 #include "Material.h"
 #include "RenderTexture.h"
 #include "ShadowMap.h"
+#include "ShadowMapArray.h"
+#include "CubeMapArray.h"
 #include "ImGuiHelpers.h"
 
 // imGUI includes

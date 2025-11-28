@@ -167,6 +167,13 @@ XMFLOAT3 Light::getGlobalDirection() const
 	return XMFLOAT3(XMVectorGetX(globalDirection), XMVectorGetY(globalDirection), XMVectorGetZ(globalDirection));
 }
 
+const XMVECTOR& Light::getGlobalPositionVector() const {
+	return globalPosition;
+}
+const XMVECTOR& Light::getGlobalDirectionVector() const {
+	return globalDirection;
+}
+
 std::span<const char* const> Light::GetLightTypeStrings() {
 	return LightTypeStrings;
 }

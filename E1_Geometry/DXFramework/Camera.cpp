@@ -13,6 +13,7 @@ Camera::Camera()
 	position = XMVectorSet(0.0f, 0.0, -10.0, 1.0f);
 	lookAt = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0);
 	orthoMatrix = XMMatrixLookAtLH(position, lookAt, up);
+	yaw = 0; pitch = 0;
 }
 
 float Camera::getLookSpeed() const { return lookSpeed; }
@@ -104,7 +105,7 @@ void Camera::moveForward()
 	XMVECTOR delta = forward * speed;
 
 	// Apply translation
-	m_transform.translate(delta);
+	m_transform.translate(delta, false);
 }
 
 
@@ -119,7 +120,7 @@ void Camera::moveBackward()
 	XMVECTOR delta = -forward * speed;
 
 	// Apply translation
-	m_transform.translate(delta);
+	m_transform.translate(delta, false);
 }
 
 
@@ -134,7 +135,7 @@ void Camera::moveUpward()
 	XMVECTOR delta = up * speed;
 
 	// Apply translation
-	m_transform.translate(delta);
+	m_transform.translate(delta, false);
 }
 
 
@@ -149,7 +150,7 @@ void Camera::moveDownward()
 	XMVECTOR delta = -up * speed;
 
 	// Apply translation
-	m_transform.translate(delta);
+	m_transform.translate(delta, false);
 }
 
 
@@ -157,8 +158,7 @@ void Camera::turnLeft()
 {
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f * 0.0174533f;
-	
-	m_transform.rotate(XMFLOAT3(0.0f, -speed, 0.0f));
+	yaw -= speed;
 }
 
 
@@ -166,8 +166,7 @@ void Camera::turnRight()
 {
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f * 0.0174533f;
-
-	m_transform.rotate(XMFLOAT3(0.0f, speed, 0.0f));
+	yaw += speed;
 }
 
 
@@ -175,8 +174,7 @@ void Camera::turnUp()
 {
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f * 0.0174533f;
-
-	m_transform.rotate(XMFLOAT3(speed, 0.0f, 0.0f));
+	pitch += speed;
 }
 
 
@@ -185,18 +183,15 @@ void Camera::turnDown()
 	// Update the left turn movement based on the frame time 
 	speed = frameTime * 25.0f * 0.0174533f;
 
-	m_transform.rotate(XMFLOAT3(-speed, 0.0f, 0.0f));
+	pitch -= speed;
 }
 
 
 void Camera::turn(int x, int y)
 {
 	float deg2rad = 0.0174533f;
-	m_transform.rotate(XMFLOAT3(
-		((float)y / lookSpeed) * deg2rad,  // pitch
-		((float)x / lookSpeed) * deg2rad,  // yaw
-		0.0f
-	));
+	pitch += float(y) / lookSpeed * deg2rad;
+	yaw += float(x) / lookSpeed * deg2rad;
 }
 
 void Camera::strafeRight()
@@ -210,7 +205,7 @@ void Camera::strafeRight()
 	XMVECTOR delta = right * speed;
 
 	// Apply translation
-	m_transform.translate(delta);
+	m_transform.translate(delta, false);
 }
 
 void Camera::strafeLeft()
@@ -224,8 +219,9 @@ void Camera::strafeLeft()
 	XMVECTOR delta = -right * speed;
 
 	// Apply translation
-	m_transform.translate(delta);
+	m_transform.translate(delta, false);
 }
+
 std::span<const char* const> Camera::GetCameraTypeStrings() {
 	return CameraTypeStrings;
 }

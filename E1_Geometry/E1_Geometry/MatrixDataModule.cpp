@@ -26,7 +26,7 @@ void MatrixDataModule::initModule() {
 
 void MatrixDataModule::setModuleParamaters(
 	ID3D11DeviceContext* deviceContext,
-	GeometryData* mesh, const XMMATRIX& projectionMatrix, bool orthCameraMat) {
+	GeometryData* mesh, const XMMATRIX& projectionMatrix, const XMMATRIX& viewMatrix) {
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	
@@ -56,15 +56,7 @@ void MatrixDataModule::setModuleParamaters(
 	XMStoreFloat3(&t, translation);
 	XMStoreFloat4(&r, rotationQuat);
 
-
-
-	if (orthCameraMat) {
-		tview = XMMatrixTranspose(instanceManager->getActiveCamera()->camera->getOrthoViewMatrix());
-	}
-	else {
-		tview = XMMatrixTranspose(instanceManager->getActiveCamera()->camera->getViewMatrix());
-	}
-	
+	tview = XMMatrixTranspose(viewMatrix);
 	tproj = XMMatrixTranspose(projectionMatrix);
 	result = deviceContext->Map(matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (MatrixBufferType*)mappedResource.pData;

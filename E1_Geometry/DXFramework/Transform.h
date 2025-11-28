@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef _TRANSFORM_H_
 #define _TRANSFORM_H_
 
@@ -43,7 +43,7 @@ public:
 	inline void computeGlobalMatrix(bool computeLocal = true) {
 		if (computeLocal) { computeLocalMatrix(); }
 		if (parentTransform != nullptr) {
-			globalMatrix = localMatrix * parentTransform->getGlobalMatrix();
+			globalMatrix = XMMatrixMultiply(localMatrix, parentTransform->getGlobalMatrix());
 		} else {
 			globalMatrix = localMatrix;
 		}
@@ -72,100 +72,116 @@ public:
 
 	inline const XMFLOAT3 getEuler() const { return QuaternionToEuler(rotation); }
 
-	inline void translate(float x, float y, float z) {
+	inline void translate(float x, float y, float z, bool updateMatrixes = true) {
 		translation = XMVectorAdd(translation, XMVectorSet(x, y, z, 0.0f));
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void translate(const XMVECTOR& vec) {
+	inline void translate(const XMVECTOR& vec, bool updateMatrixes = true) {
 		translation = XMVectorAdd(translation, vec);
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void translate(const XMFLOAT3& vec) {
+	inline void translate(const XMFLOAT3& vec, bool updateMatrixes = true) {
 		translation = XMVectorAdd(translation, XMLoadFloat3(&vec));
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void setPosition(float x, float y, float z) 
+	inline void setPosition(float x, float y, float z, bool updateMatrixes = true)
 	{ 
 		translation = XMVectorSet(x, y, z, 0.f); 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
-	inline void setScale(float x, float y, float z) 
+	inline void setScale(float x, float y, float z, bool updateMatrixes = true)
 	{ 
 		scale = XMVectorSet(x, y, z, 0.f); 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void setPosition(const XMFLOAT3& pos) 
+	inline void setPosition(const XMFLOAT3& pos, bool updateMatrixes = true)
 	{ 
 		translation = XMLoadFloat3(&pos); 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
-	inline void setScale(const XMFLOAT3& s) 
+	inline void setScale(const XMFLOAT3& s, bool updateMatrixes = true)
 	{ 
 		scale = XMLoadFloat3(&s); 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void setPositionVector(const XMVECTOR& position) 
+	inline void setPositionVector(const XMVECTOR& position, bool updateMatrixes = true)
 	{ 
 		translation = position; 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
-	inline void setScaleVector(const XMVECTOR& scale) 
+	inline void setScaleVector(const XMVECTOR& scale, bool updateMatrixes = true)
 	{ 
 		this->scale = scale; 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
-	inline void setRotationQuat(const XMVECTOR& rotation) 
+	inline void setRotationQuat(const XMVECTOR& rotation, bool updateMatrixes = true)
 	{ 
 		this->rotation = rotation; 
-		computeGlobalMatrix(true);
+		if(updateMatrixes) { computeGlobalMatrix(true); }	
 	}
 
-	inline void setEulerAngles(float x, float y, float z) 
+	inline void setEulerAngles(float x, float y, float z, bool updateMatrixes = true)
 	{ 
 		rotation = XMQuaternionRotationRollPitchYaw(x, y, z); 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void setEulerAngles(const XMVECTOR& vec) 
+	inline void setEulerAngles(const XMVECTOR& vec, bool updateMatrixes = true)
 	{ 
 		rotation = XMQuaternionRotationRollPitchYawFromVector(vec); 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void setEulerX(float x) {
+	inline void setEulerX(float x, bool updateMatrixes = true) {
 		XMFLOAT3 eulerAngles = QuaternionToEuler(rotation);
 		setEulerAngles(x, eulerAngles.y, eulerAngles.z);
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void SetEulerY(float y) {
+	inline void SetEulerY(float y, bool updateMatrixes = true) {
 		XMFLOAT3 eulerAngles = QuaternionToEuler(rotation);
 		setEulerAngles(eulerAngles.x, y, eulerAngles.z);
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
-	inline void setEulerZ(float z) {
+	inline void setEulerZ(float z, bool updateMatrixes = true) {
 		XMFLOAT3 eulerAngles = QuaternionToEuler(rotation);
 		setEulerAngles(eulerAngles.x, eulerAngles.y, z);
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
 	// Add a rotation quat to current transform rotation
-	inline void rotate(const XMVECTOR& deltaRot)
+	inline void setRotation(const XMVECTOR& deltaRot, bool updateMatrixes = true)
 	{
 		rotation = XMQuaternionMultiply(deltaRot, rotation);
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	};
 	// Add a rotation from x,y,z to current transform rotation
-	inline void rotate(const XMFLOAT3& eulerDeltaRot)
+	inline void rotate(const XMFLOAT3& eulerDeltaRot, bool updateMatrixes = true)
 	{
-		rotate(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&eulerDeltaRot)));
-		computeGlobalMatrix(true);
+		XMVECTOR localForward = XMVector3Normalize(XMVector3TransformNormal({ 0,0,1,0 }, localMatrix));
+		XMVECTOR localRight = XMVector3Normalize(XMVector3TransformNormal({ 1,0,0,0 }, localMatrix));
+		XMVECTOR localUp = XMVector3Normalize(XMVector3TransformNormal({ 0,1,0,0 }, localMatrix));
+
+
+		// Create quaternions for each component
+		XMVECTOR pitchQ = XMQuaternionRotationAxis(localRight, eulerDeltaRot.x);
+		XMVECTOR yawQ = XMQuaternionRotationAxis(localUp, eulerDeltaRot.y);
+		XMVECTOR rollQ = XMQuaternionRotationAxis(localForward, eulerDeltaRot.z);
+
+		// Apply in order: yaw → pitch → roll
+		rotation = XMQuaternionMultiply(yawQ, rotation);   // local or world up?
+		rotation = XMQuaternionMultiply(rotation, pitchQ);
+		rotation = XMQuaternionMultiply(rotation, rollQ);
+
+		rotation = XMQuaternionNormalize(rotation);
+
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	};
 
 	inline XMVECTOR getLocalForwardVector() const {
@@ -184,7 +200,7 @@ public:
 	XMVECTOR getWorldRight()   const { return XMVector3Normalize(XMVector3TransformNormal({ 1,0,0,0 }, globalMatrix)); }
 	XMVECTOR getWorldUp()      const { return XMVector3Normalize(XMVector3TransformNormal({ 0,1,0,0 }, globalMatrix)); }
 
-	inline void lookAt(XMVECTOR target) {
+	inline void lookAt(XMVECTOR target, bool updateMatrixes = true) {
 		XMVECTOR worldPos = XMVector3TransformCoord(translation, parentTransform ? parentTransform->globalMatrix : XMMatrixIdentity());
 		XMVECTOR forward = XMVector3Normalize(target - worldPos);
 		XMVECTOR up = XMVectorSet(0.f, 1.f, 0.f, 0.f);
@@ -196,7 +212,7 @@ public:
 		else
 			rotation = worldRot;
 
-		computeGlobalMatrix(true);
+		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 
 	inline bool imGuiRender(const std::string& label, int menuNum = 0, bool editTranslation = true, bool editRotation = true, bool editScale = true) {

@@ -44,7 +44,7 @@ public:
 
 	void updateGlobals(bool updateTransform);
 
-	void update();				///< Update camera, recalculates view matrix based on rotation
+	virtual void update();				///< Update camera, recalculates view matrix based on rotation
 	XMMATRIX getViewMatrix();	///< Get current view matrix of camera
 	XMMATRIX getOrthoViewMatrix();	///< Get current orthographic view matrix for camera
 
@@ -72,12 +72,13 @@ public:
 
 	Transform m_transform;
 
-private:
+protected:
 	XMFLOAT3 globalPosition;		///< float3 for position
 	XMFLOAT3 globalDirection;		///< float3 for direction vector
 	XMMATRIX viewMatrix;	///< matrix for current view
 	XMMATRIX orthoMatrix;	///< current orthographic matrix
 	float speed, frameTime;	///< movement speed and time variables
+	float yaw, pitch;		///< rotation storage
 	float lookSpeed;		///< rotation speed
 
 	inline static const char* CameraTypeStrings[3] =

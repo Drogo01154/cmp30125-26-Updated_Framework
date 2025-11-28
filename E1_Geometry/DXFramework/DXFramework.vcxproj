@@ -196,6 +196,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="BaseShader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Converters.h" />
+    <ClInclude Include="CubeMapArray.h" />
     <ClInclude Include="CubeMesh.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="DXF.h" />
@@ -222,6 +223,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="SerializationHelpers.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowMap.h" />
+    <ClInclude Include="ShadowMapArray.h" />
     <ClInclude Include="SphereMesh.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="TessellationMesh.h" />
@@ -246,6 +248,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClCompile Include="BaseShaderModule.cpp" />
     <ClCompile Include="BaseShaderModule.h" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CubeMapArray.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="FPCamera.cpp" />
@@ -263,6 +266,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClCompile Include="SceneGraph.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
+    <ClCompile Include="ShadowMapArray.cpp" />
     <ClCompile Include="SphereMesh.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="TessellationMesh.cpp" />

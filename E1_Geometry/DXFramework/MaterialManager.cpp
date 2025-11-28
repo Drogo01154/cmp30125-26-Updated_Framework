@@ -14,7 +14,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 		}
 		if (mat->HeightMapData != nullptr && !mat->HeightMapData->HeightTextureString.empty()) {
 			mat->HeightMapData->HeightTexture = this->textureManager->getTexture(mat->HeightMapData->HeightTextureString);
-			this->shaderManager->SetModuleDirtyflag(DirtyModuleFlags::HEIGHTMAP);
 		}
 	});
 

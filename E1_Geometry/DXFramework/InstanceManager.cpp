@@ -24,11 +24,11 @@ InstanceManager::InstanceManager(
 {
 	cameraCache.addTypeEndHandler([&](CameraData* data) {
 		if (data->camera == this->getActiveCamera()->camera) {
-			this->shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+			this->shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 		}
 	});
 	lightCache.addTypeEndHandler([&](Light* data) {
-		this->shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+		this->shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 		});
 }
 
@@ -61,18 +61,18 @@ void InstanceManager::clearGeometry() {
 }
 void InstanceManager::clearLights() {
 	lightCache.clear();
-	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+	shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 }
 void InstanceManager::clearCameras() {
 	cameraCache.clear();
-	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+	shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 }
 void InstanceManager::clearAll() {
 	geometryCache.clear();
 	lightCache.clear();
 	cameraCache.clear();
-	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
-	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+	shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
+	shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 }
 
 GeometryInstance InstanceManager::createGeometryInstance(size_t& instanceID, MeshInstance mesh, bool addMaterial) {
@@ -152,7 +152,7 @@ CameraData* InstanceManager::getActiveCamera() {
 void InstanceManager::setActiveCamera(size_t ID) {
 	if (cameraCache.hasID(ID)) {
 		activeCameraID = ID;
-		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 	}
 	else {
 		throw std::runtime_error("Error: Camera does not exist at ID: " + std::to_string(ID));
@@ -356,8 +356,7 @@ void InstanceManager::from_json(
 		size_t oldID = static_cast<size_t>(meshInstanceJson.at("ID").get<uint64_t>());
 		size_t newID;
 
-		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
-		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED | DirtyModuleFlags::LIGHTSDATACHANGED);
 
 		//Add to cache?
 		geometryCache.emplaceID(newID, data);
