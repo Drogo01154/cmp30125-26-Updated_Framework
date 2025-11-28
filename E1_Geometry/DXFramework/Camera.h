@@ -50,10 +50,8 @@ public:
 
 	void setFrameTime(float);
 	
-	float getSpeed() const;
 	float getLookSpeed() const;
 
-	void setSpeed(float speed);
 	void setLookSpeed(float speed);
 
 	bool imGuiRender(size_t transformIterator, CameraTypes type);
@@ -76,7 +74,7 @@ public:
 
 private:
 	XMFLOAT3 globalPosition;		///< float3 for position
-	XMFLOAT3 globalDirection;		///< float3 for rotation (angles)
+	XMFLOAT3 globalDirection;		///< float3 for direction vector
 	XMMATRIX viewMatrix;	///< matrix for current view
 	XMMATRIX orthoMatrix;	///< current orthographic matrix
 	float speed, frameTime;	///< movement speed and time variables

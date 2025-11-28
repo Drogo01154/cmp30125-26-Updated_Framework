@@ -15,10 +15,8 @@ Camera::Camera()
 	orthoMatrix = XMMatrixLookAtLH(position, lookAt, up);
 }
 
-float Camera::getSpeed() const { return speed; }
 float Camera::getLookSpeed() const { return lookSpeed; }
 
-void Camera::setSpeed(float speed) { this->speed = speed; }
 void Camera::setLookSpeed(float speed) { this->lookSpeed = speed; }
 
 XMFLOAT3 Camera::getGlobalPosition() const {
@@ -30,8 +28,11 @@ XMFLOAT3 Camera::getGlobalDirection() const {
 
 bool Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
 	bool cameraUpdated = false;
-	std::string outputPos = "X: " + std::to_string(globalPosition.x) + " Y: " + std::to_string(globalPosition.y) + " Z: " + std::to_string(globalPosition.z);
+	std::string outputPos = "Camera Position: X: " + std::to_string(globalPosition.x) + " Y: " + std::to_string(globalPosition.y) + " Z: " + std::to_string(globalPosition.z);
+	XMFLOAT3 dir = getGlobalDirection();
+	std::string outputDir = "Camera Direction: X: " + std::to_string(dir.x) + " Y: " + std::to_string(dir.y) + " Z: " + std::to_string(dir.z);
 	ImGui::Text(outputPos.c_str());
+	ImGui::Text(outputDir.c_str());
 
 	switch (type) {
 	case CameraTypes::BASIC:
@@ -41,7 +42,6 @@ bool Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
 		}
 		break;
 	case CameraTypes::FPCAMERA:
-		if(ImGui::SliderFloat("Speed", &speed, 0.1f, 100.f)) {}
 		if(ImGui::SliderFloat("Look Speed", &lookSpeed, 0.1f, 100.f)) {}
 		break;
 	}
@@ -68,26 +68,12 @@ void Camera::update()
 {
 	updateGlobals(true);
 	XMVECTOR up, positionv, lookAt;
-	float yaw, pitch, roll;
 	XMMATRIX rotationMatrix;
 	
 	// Setup the vectors
-	up = XMVectorSet(0.0f, 1.0, 0.0, 1.0f);
 	positionv = XMLoadFloat3(&globalPosition);
-	lookAt = XMVectorSet(0.0, 0.0, 1.0f, 1.0f);
-	
-	// Set the yaw (Y axis), pitch (X axis), and roll (Z axis) rotations in radians.
-	pitch = globalDirection.x * 0.0174532f;
-	yaw = globalDirection.y * 0.0174532f;
-	roll = globalDirection.z * 0.0174532f;
-
-	// Create the rotation matrix from the yaw, pitch, and roll values.
-	rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-
-	// Transform the lookAt and up vector by the rotation matrix so the view is correctly rotated at the origin.
-	lookAt = XMVector3TransformCoord(lookAt, rotationMatrix);
-	up = XMVector3TransformCoord(up, rotationMatrix);
-	
+	lookAt = XMLoadFloat3(&globalDirection);
+	up = m_transform.getWorldUp();
 	// Translate the rotated camera position to the location of the viewer.
 	lookAt = positionv + lookAt;
 
@@ -108,7 +94,7 @@ XMMATRIX Camera::getOrthoViewMatrix()
 
 void Camera::moveForward()
 {
-	float speed = frameTime * 5.0f;
+	speed = frameTime * 5.0f;
 
 	// Get forward vector from local transform
 	XMVECTOR forward = m_transform.getWorldForward(); // Z axis
@@ -124,7 +110,7 @@ void Camera::moveForward()
 
 void Camera::moveBackward()
 {
-	float speed = frameTime * 5.0f;
+	speed = frameTime * 5.0f;
 
 	// Get forward vector from local transform
 	XMVECTOR forward = m_transform.getWorldForward(); // Z axis
@@ -139,7 +125,7 @@ void Camera::moveBackward()
 
 void Camera::moveUpward()
 {
-	float speed = frameTime * 5.0f;
+	speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
 	XMVECTOR up = m_transform.getWorldUp(); // Y axis
@@ -154,7 +140,7 @@ void Camera::moveUpward()
 
 void Camera::moveDownward()
 {
-	float speed = frameTime * 5.0f;
+	speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
 	XMVECTOR up = m_transform.getWorldUp(); // Y axis
@@ -170,7 +156,7 @@ void Camera::moveDownward()
 void Camera::turnLeft()
 {
 	// Update the left turn movement based on the frame time 
-	speed = frameTime * 25.0f;
+	speed = frameTime * 25.0f * 0.0174533f;
 	
 	m_transform.rotate(XMFLOAT3(0.0f, -speed, 0.0f));
 }
@@ -179,7 +165,7 @@ void Camera::turnLeft()
 void Camera::turnRight()
 {
 	// Update the left turn movement based on the frame time 
-	speed = frameTime * 25.0f;
+	speed = frameTime * 25.0f * 0.0174533f;
 
 	m_transform.rotate(XMFLOAT3(0.0f, speed, 0.0f));
 }
@@ -188,7 +174,7 @@ void Camera::turnRight()
 void Camera::turnUp()
 {
 	// Update the left turn movement based on the frame time 
-	speed = frameTime * 25.0f;
+	speed = frameTime * 25.0f * 0.0174533f;
 
 	m_transform.rotate(XMFLOAT3(speed, 0.0f, 0.0f));
 }
@@ -197,7 +183,7 @@ void Camera::turnUp()
 void Camera::turnDown()
 {
 	// Update the left turn movement based on the frame time 
-	speed = frameTime * 25.0f;
+	speed = frameTime * 25.0f * 0.0174533f;
 
 	m_transform.rotate(XMFLOAT3(-speed, 0.0f, 0.0f));
 }
@@ -205,14 +191,19 @@ void Camera::turnDown()
 
 void Camera::turn(int x, int y)
 {
-	m_transform.rotate(XMFLOAT3((float)x / lookSpeed, (float)y / lookSpeed, 0.0f));
+	float deg2rad = 0.0174533f;
+	m_transform.rotate(XMFLOAT3(
+		((float)y / lookSpeed) * deg2rad,  // pitch
+		((float)x / lookSpeed) * deg2rad,  // yaw
+		0.0f
+	));
 }
 
 void Camera::strafeRight()
 {
-	float speed = frameTime * 5.0f;
+	speed = frameTime * 5.0f;
 
-	// Get up vector from local transform
+	// Get right vector from local transform
 	XMVECTOR right = m_transform.getWorldRight(); // Y axis
 
 	// Scale by speed
@@ -224,7 +215,7 @@ void Camera::strafeRight()
 
 void Camera::strafeLeft()
 {
-	float speed = frameTime * 5.0f;
+	speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
 	XMVECTOR right = m_transform.getWorldRight(); // Y axis

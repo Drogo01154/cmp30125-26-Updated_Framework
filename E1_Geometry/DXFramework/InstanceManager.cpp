@@ -196,7 +196,6 @@ void InstanceManager::to_json(nlohmann::json& j) {
 			//Serialize camera data
 			nlohmann::json& camJsonObject = camJson["Camera"];
 			camJsonObject["Transform"] = data->camera->m_transform;
-			camJsonObject["Speed"] = data->camera->getSpeed();
 			camJsonObject["LookSpeed"] = data->camera->getLookSpeed();
 
 			cameraArray.push_back(camJson);
@@ -277,7 +276,6 @@ void InstanceManager::from_json(
 
 		const nlohmann::json& camData = camJson["Camera"];
 		camera->m_transform = camData.at("Transform").get<Transform>();
-		camera->setSpeed(camData.at("Speed").get<float>());
 		camera->setLookSpeed(camData.at("LookSpeed").get<float>());
 
 		size_t oldID = static_cast<size_t>(camJson.at("ID").get<uint64_t>());
