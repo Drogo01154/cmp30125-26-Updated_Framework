@@ -2,8 +2,7 @@
 // alternative render target
 #include "rendertexture.h"
 
-RenderTexture::RenderTexture(ID3D11Device* device, const RenderTextureData& rtData) {
-	RenderTexture(device, rtData.screenDepth, rtData.screenHeight, rtData.screenNear, rtData.screenWidth);
+RenderTexture::RenderTexture(ID3D11Device* device, const RenderTextureData& rtData) : RenderTexture(device, rtData.screenWidth, rtData.screenHeight, rtData.screenNear, rtData.screenDepth) {
 }
 
 // Initialise texture object based on provided dimensions. Usually to match window.

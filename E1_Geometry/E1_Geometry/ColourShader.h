@@ -15,6 +15,10 @@ public:
 
 	void setResources(ID3D11DeviceContext* deviceContext);
 
+	inline void testStuff(int& testInt) {
+		testInt = 5;
+	}
+
 private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 

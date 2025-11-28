@@ -5,6 +5,7 @@ SamplerDataModule::SamplerDataModule(ID3D11Device* device, HWND hwnd,
 	D3D11_FILTER filter,
 	UINT maxAnisotropy,
 	D3D11_COMPARISON_FUNC compFunc) :
+	BaseShaderModule(device, hwnd),
 	textureMode(textureMode),
 	filter(filter),
 	maxAnisotropy(maxAnisotropy),

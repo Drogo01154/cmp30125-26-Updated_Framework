@@ -26,7 +26,7 @@ void MatrixDataModule::initModule() {
 
 void MatrixDataModule::setModuleParamaters(
 	ID3D11DeviceContext* deviceContext,
-	GeometryData* mesh, const XMMATRIX& projectionMatrix) {
+	GeometryData* mesh, const XMMATRIX& projectionMatrix, bool orthCameraMat) {
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	
@@ -39,7 +39,32 @@ void MatrixDataModule::setModuleParamaters(
 
 	// Transpose the matrices to prepare them for the shader.
 	tworld = XMMatrixTranspose(mesh->m_transform.getGlobalMatrix());
-	tview = XMMatrixTranspose(instanceManager->getActiveCamera()->camera->getViewMatrix());
+
+
+
+
+	XMVECTOR scale;
+	XMVECTOR rotationQuat;
+	XMVECTOR translation;
+
+	XMMatrixDecompose(&scale, &rotationQuat, &translation, tworld);
+
+	// Print components
+	XMFLOAT3 s, t;
+	XMFLOAT4 r;
+	XMStoreFloat3(&s, scale);
+	XMStoreFloat3(&t, translation);
+	XMStoreFloat4(&r, rotationQuat);
+
+
+
+	if (orthCameraMat) {
+		tview = XMMatrixTranspose(instanceManager->getActiveCamera()->camera->getOrthoViewMatrix());
+	}
+	else {
+		tview = XMMatrixTranspose(instanceManager->getActiveCamera()->camera->getViewMatrix());
+	}
+	
 	tproj = XMMatrixTranspose(projectionMatrix);
 	result = deviceContext->Map(matrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	dataPtr = (MatrixBufferType*)mappedResource.pData;

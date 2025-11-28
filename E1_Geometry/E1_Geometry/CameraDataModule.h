@@ -8,7 +8,7 @@ using namespace DirectX;
 
 
 
-class CameraDataModule : BaseShaderModule {
+class CameraDataModule : public BaseShaderModule {
 private:
 	struct CameraBufferType
 	{

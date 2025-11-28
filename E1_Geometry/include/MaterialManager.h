@@ -19,15 +19,15 @@ public:
 	bool renameMaterial(const std::string& oldName, const std::string& newName, bool selectedMaterial = false);
 
 	//Creates material
-	inline void createMaterial(const std::string& name);
+	void createMaterial(const std::string& name);
 
 	void updateSelectedMaterial();
 
-	inline bool deleteMaterial(const std::string& name);
+	bool deleteMaterial(const std::string& name);
 
-	inline void deleteAllMaterials();
+	void deleteAllMaterials();
 
-	inline void imGuiRender();
+	void imGuiRender();
 
 	void to_json(nlohmann::json& j);
 	void from_json(const nlohmann::json& j);

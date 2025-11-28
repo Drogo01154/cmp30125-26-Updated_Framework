@@ -6,7 +6,7 @@
 using namespace std;
 using namespace DirectX;
 
-class ManipulationDataModule : BaseShaderModule {
+class ManipulationDataModule : public BaseShaderModule {
 private:
 
 	struct TimeBufferType

@@ -2,13 +2,19 @@
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
 
+#include "MatrixDataModule.h"
 #include "ShaderManager.h"
-
-#include "MaterialDataModule.h"
+#include "TextureDataModule.h"
 #include "SamplerDataModule.h"
 #include "LightsDataModule.h"
-#include "MatrixDataModule.h"
+
+#include "ColourShader.h"
+#include "TextureShader.h"
+
+
 #include "RenderPass.h"
+#include "FinalPass.h"
+#include "GeometryPass.h"
 App1::App1()
 {
 	UIConstants::InitialiseSystem();
@@ -19,17 +25,49 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
 
+	//Add modules
+	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd, instanceMgr.get());
+	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSampleModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
+	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", DirtyModuleFlags::LIGHTS, renderer->getDevice(), hwnd, instanceMgr.get());
+
+	//Add geometry Shaders
+	shaderMgr->addGeometryShader<ColourShader>("ColourShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+	//Add pass sahders
+	shaderMgr->addPassShader<TextureShader>("TextureShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+
 	passMgr = std::make_unique<RenderPassManager>();
+	passMgr->AddPassConstructionFunction<GeometryPass>("GeometryPass", {}, instanceMgr.get(), shaderMgr.get(), renderer, RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
+	passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", {"GeometryPass"}, renderer, shaderMgr.get(), instanceMgr.get(), OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
+
+	shaderMgr->setDefaultGeometryShader("ColourShader");
+	materialMgr->createMaterial("Default");
+	//materialMgr->createMaterial("Default");	// Must be run for program to function
+
+	passMgr->InitPass("FinalPass");
+
+	ShaderInstance test = shaderMgr->getGeometryShader("ColourShader");
+	std::shared_ptr<ColourShader> testCast = std::dynamic_pointer_cast<ColourShader>(test.Get()->shader);
+	int testInt = 0;
+	testCast->testStuff(testInt);
+	int test2 = testInt;
+
+	//ID3D11Texture3D* test;
+	//D3D11_SHADER_RESOURCE_VIEW_DESC
+	
+	//passMgr->AddPassConstructionFunction<GeometryPass>("GeometryPass", {}, instanceMgr, shaderMgr, renderer, RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
+	//passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", { "GeometryPass" }, renderer, OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
+	//passMgr->InitPass("FinalPass");
+
 
 	//Add matrix data modules
 	//shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
 
 	//Add Sampler modules
 	//shaderMgr->AddShaderModule<SamplerDataModule>("GeometryTextureSampleModule", renderer->getDevice(), hwnd);
-	//shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSampleModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
 
 	//Add Light data modules
-	//shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+	//
 
 	
 	//shaderMgr->addShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
@@ -109,7 +147,7 @@ bool App1::frame()
 	{
 		return false;
 	}
-
+	shaderMgr->ResetModuleDirtyflags();
 	return true;
 }
 
@@ -118,7 +156,13 @@ bool App1::render()
 	// Get matrices
 	instanceMgr->getActiveCamera()->camera->update();
 
+	passMgr->RenderAll(renderer->getDeviceContext(), renderer->getDevice());
 
+	// Render GUI
+	gui();
+
+	// Present the rendered scene to the screen.
+	renderer->endScene();
 	return true;
 }
 /*
@@ -225,9 +269,7 @@ void App1::gui()
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 
-	XMFLOAT3 camPos = camera->getGlobalPosition();
-	
-
+	sceneGraph->imGuiRender();
 	/*
 	if (ImGui::SliderInt("Resolution: ", &resolution, 2, 1000)) {
 		plane.reset(); // Delete Plane

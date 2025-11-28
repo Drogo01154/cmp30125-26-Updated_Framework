@@ -23,12 +23,12 @@ InstanceManager::InstanceManager(
 	cameraCache()
 {
 	cameraCache.addTypeEndHandler([&](CameraData* data) {
-		if (data->camera == getActiveCamera()->camera) {
-			shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
+		if (data->camera == this->getActiveCamera()->camera) {
+			this->shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
 		}
 	});
 	lightCache.addTypeEndHandler([&](Light* data) {
-		shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
+		this->shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS);
 		});
 }
 
@@ -75,10 +75,15 @@ void InstanceManager::clearAll() {
 	shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA);
 }
 
-GeometryInstance InstanceManager::createGeometryInstance(size_t& instanceID, MeshInstance mesh) {
+GeometryInstance InstanceManager::createGeometryInstance(size_t& instanceID, MeshInstance mesh, bool addMaterial) {
 	GeometryData newData;
-	newData.mat = materialManager->getMaterialInstance("Default");
+	if (addMaterial) {
+		newData.mat = materialManager->getMaterialInstance("Default");
+	} else {
+		newData.mat = MaterialInstance();
+	}
 	newData.mesh = mesh;
+	
 	GeometryInstance newInst = geometryCache.emplaceID(instanceID, std::move(newData));
 	if (!newInst.IsValid()) {
 		throw std::runtime_error("Errror: Could not create new geometry instance!");
@@ -97,11 +102,11 @@ GeometryInstance InstanceManager::createModelInstance(size_t& instanceID, const 
 	return createGeometryInstance(instanceID, geometryManager->createModel(file));
 }
 GeometryInstance InstanceManager::createOrthoMeshInstance(size_t& instanceID, int width, int height, int xPosition, int yPosition) {
-	return createGeometryInstance(instanceID, geometryManager->createOrthoMesh(width, height, xPosition, yPosition));
+	return createGeometryInstance(instanceID, geometryManager->createOrthoMesh(width, height, xPosition, yPosition), false);
 }
 
 GeometryInstance InstanceManager::createOrthoMeshInstance(size_t& instanceID, const OrthoMeshData& orthoData) {
-	return createGeometryInstance(instanceID, geometryManager->createOrthoMesh(orthoData));
+	return createGeometryInstance(instanceID, geometryManager->createOrthoMesh(orthoData), false);
 }
 GeometryInstance InstanceManager::createPlaneMeshInstance(size_t& instanceID, int resolution) {
 	return createGeometryInstance(instanceID, geometryManager->createPlaneMesh(resolution));
@@ -134,7 +139,7 @@ CameraInstance InstanceManager::createCamera(size_t& instanceID) {
 	return returnInst;
 }
 CameraInstance InstanceManager::createFPCamera(size_t& instanceID) {
-	CameraInstance returnInst = cameraCache.emplaceID(instanceID, CameraData(CameraTypes::FPCAMERA, std::make_shared<Camera>(FPCamera(input, screenWidth, screenHeight, hwnd))));
+	CameraInstance returnInst = cameraCache.emplaceID(instanceID, CameraData(CameraTypes::FPCAMERA, std::make_shared<FPCamera>(input, screenWidth, screenHeight, hwnd)));
 	setActiveCamera(instanceID);
 	return returnInst;
 }
@@ -142,7 +147,7 @@ CameraInstance InstanceManager::createFPCamera(size_t& instanceID) {
 size_t InstanceManager::getActiveCameraID() { return activeCameraID; }
 
 CameraData* InstanceManager::getActiveCamera() {
-	return cameraCache.tryGetValue(activeCameraID);
+	return &cameraCache.getValue(activeCameraID);
 }
 void InstanceManager::setActiveCamera(size_t ID) {
 	if (cameraCache.hasID(ID)) {

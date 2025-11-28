@@ -5,7 +5,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class HeightMapDataModule : BaseShaderModule {
+class HeightMapDataModule : public BaseShaderModule {
 private:
 	/** Default world, view, projection matrix buffer struct */
 	struct MapBufferType

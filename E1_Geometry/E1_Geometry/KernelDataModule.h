@@ -3,7 +3,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class KernelDataModule : BaseShaderModule {
+class KernelDataModule : public BaseShaderModule {
 private:
 	struct screenDataBufferType
 	{

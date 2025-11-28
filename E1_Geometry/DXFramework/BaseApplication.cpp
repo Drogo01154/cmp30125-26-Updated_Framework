@@ -17,12 +17,6 @@ BaseApplication::~BaseApplication()
 		timer = 0;
 	}
 
-	if (camera)
-	{
-		delete camera;
-		camera = 0;
-	}
-
 	if (renderer)
 	{
 		delete renderer;
@@ -101,5 +95,10 @@ bool BaseApplication::frame()
 
 void BaseApplication::handleInput(float frameTime)
 {
-	camera->move(frameTime);
+	CameraData* camData = instanceMgr->getActiveCamera();
+	if (camData->type == CameraTypes::FPCAMERA) {
+		if (std::shared_ptr<FPCamera> fp = std::dynamic_pointer_cast<FPCamera>(camData->camera)) {
+			fp->move(frameTime);
+		}
+	}
 }

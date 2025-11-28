@@ -2,10 +2,16 @@
 
 #include "DXF.h"
 
+#define passDependancies std::unordered_map<std::string, std::shared_ptr<renderPass>>
+
 class renderPass {
 public:
-	virtual void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device, const XMMATRIX& projectionMatrix) = 0;
+
+	renderPass(size_t stage, const passDependancies&) { passStage = stage; }
+	virtual void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) = 0;
 	virtual void ImGuiMenu() {}
+private:
+	size_t passStage;
 	bool hasImGui;
 };
 

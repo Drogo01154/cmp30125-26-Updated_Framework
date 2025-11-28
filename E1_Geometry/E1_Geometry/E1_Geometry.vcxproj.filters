@@ -64,9 +64,6 @@
     <Filter Include="Header Files\Managers">
       <UniqueIdentifier>{d16629d1-0b23-4751-9648-5b4958ced940}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\RendedPasses">
-      <UniqueIdentifier>{7a655bd7-3691-4ecc-9f6c-b884fa6e0589}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ShaderModules\GeometryShaderModules">
       <UniqueIdentifier>{408559b8-34f3-48b9-8abf-7816d18d7ed6}</UniqueIdentifier>
     </Filter>
@@ -75,6 +72,9 @@
     </Filter>
     <Filter Include="Header Files\ShaderModules\SharedModules">
       <UniqueIdentifier>{720aa882-7546-4ada-9f62-5b063dc68b03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RenderPasses">
+      <UniqueIdentifier>{7a655bd7-3691-4ecc-9f6c-b884fa6e0589}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -186,7 +186,7 @@
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
     <ClInclude Include="RenderPass.h">
-      <Filter>Header Files\RendedPasses</Filter>
+      <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="ManipulationShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
@@ -219,10 +219,10 @@
       <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
     </ClInclude>
     <ClInclude Include="MiniMapPass.h">
-      <Filter>Header Files\RendedPasses</Filter>
+      <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTexturePass.h">
-      <Filter>Header Files\RendedPasses</Filter>
+    <ClInclude Include="RenderToTexturePass.h">
+      <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="ShaderInit.h">
       <Filter>Source Files\Shaders</Filter>
@@ -234,7 +234,10 @@
       <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
     </ClInclude>
     <ClInclude Include="GeometryPass.h">
-      <Filter>Header Files\RendedPasses</Filter>
+      <Filter>Header Files\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FinalPass.h">
+      <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

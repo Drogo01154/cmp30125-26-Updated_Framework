@@ -5,7 +5,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class SamplerDataModule : BaseShaderModule {
+class SamplerDataModule : public BaseShaderModule {
 private:
 public:
 	SamplerDataModule(ID3D11Device* device, HWND hwnd,

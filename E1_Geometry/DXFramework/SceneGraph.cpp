@@ -28,7 +28,6 @@ void SceneGraph::SceneGraph::createBaseScene() {
 		std::shared_ptr<Camera> camera = CameraNode->cameraInstance->camera;
 		camera->m_transform.setParent(&CameraNode->m_transform);
 		camera->m_transform.setPosition(0.0f, 0.0f, -10.0f);
-		camera->updateGlobals(true);
 		camera->update();
 		CameraNode->cameraInstance->camera;
 	}
@@ -58,7 +57,7 @@ void SceneGraph::graphImGui(std::shared_ptr<sceneNode> node)
 
 	// Detect click
 	if (ImGui::IsItemClicked()) {
-		selectedNode = node;
+		selectNode(node);
 	}
 
 	// Recurse into children
@@ -85,9 +84,40 @@ void SceneGraph::deleteNodeLight(std::shared_ptr<sceneNode> node) {
 	node->lightID = SIZE_MAX;
 }
 
+void SceneGraph::deleteNode(std::shared_ptr<sceneNode> node) {
+	if (selectedNode == node) {
+		childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+		nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+		selectedNode = nullptr;
+	}
+
+	if (node->parent) {
+		std::vector<std::shared_ptr<sceneNode>>* parentsChildren = &node->parent->children;
+		node->parent->children.erase(
+			std::remove(node->parent->children.begin(), node->parent->children.end(), node),
+			node->parent->children.end()
+		);
+		while (node->children.size() > 0) {
+			deleteNode(*node->children.begin());
+		}
+		if (node->meshInstance.IsValid()) { deleteNodeMesh(node); }
+		if (node->lightInstance.IsValid()) { deleteNodeLight(node); }
+		if (node->cameraInstance.IsValid()) { deleteNodeCamera(node); }
+	}
+}
+
+
+
+void SceneGraph::selectNode(std::shared_ptr<sceneNode> node) {
+	selectedNode = node;
+	strncpy_s(nodeNameBuffer, node->name.c_str(), sizeof(nodeNameBuffer));
+	nodeNameBuffer[sizeof(nodeNameBuffer) - 1] = '\0'; // ensure null-terminated
+	childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+}
+
 //ImGui function for attaching mesh to scene node
 void SceneGraph::imGuiMeshCreation(std::shared_ptr<sceneNode> node) {
-	bool meshExists = !node->meshInstance.IsValid();
+	bool meshExists = node->meshInstance.IsValid();
 	ImGui::Text(meshExists ? "Replace Mesh: " : "Add Mesh: ");
 
 	if (ImGui::Combo(
@@ -257,45 +287,96 @@ void SceneGraph::updateNodeGlobals(std::shared_ptr<sceneNode> node, bool updateL
 }
 
 void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
-	if (ImGui::CollapsingHeader(("Node " + node->name + ": Details:").c_str()))
+	if (ImGui::TreeNode(("Node: " + node->name + ": Details:").c_str()))
 	{
-		if (node->m_transform.imGuiRender("Node Transform: ", 0, true, true, true)) {
-			updateNodeGlobals(node, true);
+		if (ImGui::InputText("Node Name", nodeNameBuffer, sizeof(nodeNameBuffer))) {
+			node->name = nodeNameBuffer; // update the node name if user types
 		}
-		if (node->meshInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Mesh Settings").c_str())) {
-			if (GeometryData* mesh = node->meshInstance.Get()) {
-				if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, false)) {
-					mesh->m_transform.computeGlobalMatrix(true);
-				}
-			}
-		}
-		else {
-			imGuiMeshCreation(node);
-		}
-		if (node->cameraInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Camera Settings").c_str())) {
-			if (CameraData* cameraInstance = node->cameraInstance.Get()) {
-				if(cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA); }
-			}
-		}
-		else {
-			imGuiCameraCreation(node);
-		}
-		if (node->lightInstance.IsValid() && ImGui::CollapsingHeader(("Node " + node->name + " Light Settings").c_str())) {
-			if (Light* light = node->lightInstance.Get()) {
-				if (light->imGuiRender(3)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS); }
-			}
-		}
-		else {
-			imGuiLightCreation(node);
-		}
-	}
 
+		bool hasLight = node->lightInstance.IsValid();
+		bool hasCamera = node->cameraInstance.IsValid();
+		bool hasMesh = node->meshInstance.IsValid();
+
+		//Nodes Transform Settings
+		if (ImGui::TreeNode("Transform Settings: ")) {
+			if (node->m_transform.imGuiRender("Node Transform: ", 0, true, true, true)) {
+				updateNodeGlobals(node, true);
+			}
+			ImGui::TreePop();
+		}
+
+		//Mesh manipulation
+		if (hasMesh) {
+			if (ImGui::TreeNode(("Node: " + node->name + " Mesh Settings:").c_str())) {
+				if (GeometryData* mesh = node->meshInstance.Get()) {
+					if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, false)) {
+						mesh->m_transform.computeGlobalMatrix(true);
+					}
+				}
+				ImGui::TreePop();
+			}
+			if (ImGui::Button("Delete Mesh")) { deleteNodeMesh(node); }
+
+		}
+		else {
+			if (ImGui::TreeNode("Attach Mesh")) {
+				imGuiMeshCreation(node);
+				ImGui::TreePop();
+			}
+		}
+
+		//Camera manipulation
+		if (hasCamera)
+		{
+			if (ImGui::TreeNode(("Node: " + node->name + " Camera Settings").c_str())) {
+				if (CameraData* cameraInstance = node->cameraInstance.Get()) {
+					if (cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::CAMERA); }
+				}
+				ImGui::TreePop();
+			}
+			if (ImGui::Button("Delete Camera")) { deleteNodeCamera(node); }
+		}
+		else {
+			if (ImGui::TreeNode("Attach Camera")) {
+				imGuiCameraCreation(node);
+				ImGui::TreePop();
+			}
+		}
+		//Light manipulation
+		if (hasLight) {
+			if (ImGui::TreeNode(("Node: " + node->name + " Light Settings").c_str())) {
+				if (Light* light = node->lightInstance.Get()) {
+					if (light->imGuiRender(3)) { shaderManager->SetModuleDirtyflag(DirtyModuleFlags::LIGHTS); }
+				}
+				ImGui::TreePop();
+			}
+			if (ImGui::Button("Delete Light")) { deleteNodeLight(node); }
+		}
+		else {
+			if (ImGui::TreeNode("Attach Light")) {
+				imGuiLightCreation(node);
+				ImGui::TreePop();
+			}
+		}
+		if (ImGui::InputText("New Child Name", childNameBuffer, sizeof(childNameBuffer))) {
+		}
+		if (ImGui::Button("AttachChild")) {
+			createChild(childNameBuffer, node);
+		}
+		if (ImGui::Button("Delete Node")) {
+			deleteNode(node);
+		}
+		ImGui::TreePop();
+	}
 }
 
 void SceneGraph::imGuiRender() {
 	nodeIncrement = 0;
-	graphImGui(root);
-	if (selectedNode != nullptr) {
+	if (ImGui::CollapsingHeader("SceneGraph")) {
+		graphImGui(root);
+	}
+	
+	if (selectedNode != nullptr && ImGui::CollapsingHeader("NodeDetails")) {
 		nodeImGui(selectedNode);
 	}
 }

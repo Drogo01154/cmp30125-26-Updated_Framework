@@ -118,35 +118,33 @@ public:
 
 	//Returns if valid instance
 	bool IsValid() const {
-		return ownedCache && !value.expired();
+		return ownedCache != nullptr && value.lock() != nullptr;
 	}
 
-	//De reference overload
+	//De-reference overload
 	ValueType& operator*() {
-		if (value.expired())
+		auto sp = value.lock();
+		if (!sp)
 			throw std::runtime_error("Attempted to access inaccessible variable");
-		return value.lock().get()->second;
+		return sp->second;
 	}
 
 	//Ptr return overload
 	ValueType* operator->() {
-		if (value.expired())
-			return nullptr;
-		return &value.lock().get()->second;
+		auto sp = value.lock();
+		return sp ? &sp->second : nullptr;
 	}
 
 	//Get functon
 	ValueType* Get() {
-		if (value.expired())
-			return nullptr;
-		return &value.lock().get()->second;
+		auto sp = value.lock();
+		return sp ? &sp->second : nullptr;
 	}
 
 	//get ptr overload
 	operator ValueType* () {
-		if (value.expired())
-			return nullptr;
-		return &value.lock().get()->second;
+		auto sp = value.lock();
+		return sp ? &sp->second : nullptr;
 	}
 
 	//Constructor
@@ -356,7 +354,7 @@ public:
 		return 0;
 	}
 
-	inline void RemoveID(const IDType& ID, bool forceDelete = true) {
+	inline bool RemoveID(const IDType& ID, bool forceDelete = true) {
 
 		auto it = entries.find(ID);
 		if (it != entries.end()) {
@@ -371,8 +369,10 @@ public:
 					freeIDs.push_back(ID);
 				}
 				charVectorDirty = true;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	inline bool hasInstances(IDType ID) {

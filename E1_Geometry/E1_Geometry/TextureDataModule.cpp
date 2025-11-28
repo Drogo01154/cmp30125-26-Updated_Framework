@@ -10,6 +10,13 @@ void TextureDataModule::initModule() {
 
 }
 
+void TextureDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, TextureResource* textureResource) {
+	texturePtr = textureResource->texture.Get();
+}
+void TextureDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* texture) {
+	texturePtr = texture;
+}
+
 void TextureDataModule::setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister) {
 	switch (shaderType) {
 	case D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_COMPUTE_SHADER:

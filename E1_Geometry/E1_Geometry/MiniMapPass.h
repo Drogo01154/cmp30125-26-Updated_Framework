@@ -2,7 +2,7 @@
 #include "RenderTexturePass.h"
 #include "MiniMapDataModule.h"
 #include<optional>
-class MiniMapPass : RenderTexturePass {
+class MiniMapPass : public RenderTexturePass {
 	MiniMapPass(ShaderManager* shaderManager,
 		InstanceManager* instanceManager,
 		ID3D11Device* device,

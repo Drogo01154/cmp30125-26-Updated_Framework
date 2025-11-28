@@ -66,6 +66,7 @@ void Camera::updateGlobals(bool updateTransform) {
 // Re-calucation view Matrix.
 void Camera::update()
 {
+	updateGlobals(true);
 	XMVECTOR up, positionv, lookAt;
 	float yaw, pitch, roll;
 	XMMATRIX rotationMatrix;

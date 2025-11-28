@@ -3,7 +3,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class GreyScaleDataModule : BaseShaderModule {
+class GreyScaleDataModule : public BaseShaderModule {
 private:
 	struct greyScaleBufferType
 	{

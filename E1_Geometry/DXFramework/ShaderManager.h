@@ -67,7 +67,7 @@ public:
 						return std::make_shared<ShaderType>(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
 					}, argsTuple);
 				}
-			)
+			), false
 		);
 	}
 
@@ -84,7 +84,7 @@ public:
 						return std::make_shared<ShaderType>(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
 						}, argsTuple);
 				}
-			)
+			), false
 		);
 	}
 
@@ -95,14 +95,14 @@ public:
 		ShaderModuleCache.emplaceID(
 			name,
 			ModuleData(
-				name, 
+				name,
 				checkFlags,
 				[argsTuple]() -> std::shared_ptr<BaseShaderModule> {
 					return std::apply([](auto&&... unpackedArgs) {
 						return std::make_shared<ModuleType>(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
 						}, argsTuple);
 				}
-			)
+			), false
 		);
 	}
 

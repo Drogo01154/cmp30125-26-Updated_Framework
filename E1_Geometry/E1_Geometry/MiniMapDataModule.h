@@ -7,7 +7,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class MiniMapDataModule : BaseShaderModule {
+class MiniMapDataModule : public BaseShaderModule {
 private:
 	struct miniMapDataType
 	{

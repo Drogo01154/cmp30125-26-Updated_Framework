@@ -102,7 +102,7 @@ public:
 	void setDestroyNoInstances(bool value);
 
 private:
-	GeometryInstance createGeometryInstance(size_t& instanceID, MeshInstance mesh);
+	GeometryInstance createGeometryInstance(size_t& instanceID, MeshInstance mesh, bool addMaterial = true);
 
 	Input* input; 
 	HWND hwnd; 

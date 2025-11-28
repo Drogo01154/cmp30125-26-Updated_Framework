@@ -96,7 +96,8 @@ MeshInstance GeometryManager::RetrieveAddMesh(MeshType type,
 	std::optional<int> width,
 	std::optional<int> height,
 	std::optional<int> xPos,
-	std::optional<int> yPos) {
+	std::optional<int> yPos) 
+{
 	std::string uid = generateUID(type, file, resolution, width, height, xPos, yPos);
 	MeshInstance retrieval = tryGetMesh(uid);
 	if (!retrieval.IsValid()) {

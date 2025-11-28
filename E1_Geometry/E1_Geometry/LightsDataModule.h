@@ -7,7 +7,7 @@ using namespace DirectX;
 
 
 
-class LightsDataModule : BaseShaderModule {
+class LightsDataModule : public BaseShaderModule {
 private:
 	struct LightBufferType
 	{

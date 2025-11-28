@@ -6,7 +6,7 @@
 using namespace std;
 using namespace DirectX;
 
-class MaterialDataModule : BaseShaderModule {
+class MaterialDataModule : public BaseShaderModule {
 private:
 	struct MaterialBufferType
 	{

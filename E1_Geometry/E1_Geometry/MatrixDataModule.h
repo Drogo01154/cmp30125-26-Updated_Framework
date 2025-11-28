@@ -5,7 +5,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class MatrixDataModule : BaseShaderModule {
+class MatrixDataModule : public BaseShaderModule {
 private:
 	/** Default world, view, projection matrix buffer struct */
 	struct MatrixBufferType
@@ -21,7 +21,7 @@ public:
 	void initModule();
 	void setModuleParamaters(
 		ID3D11DeviceContext* deviceContext,
-		GeometryData* mesh, const XMMATRIX& projectionMatrix);
+		GeometryData* mesh, const XMMATRIX& projectionMatrix, bool orthCameraMat = false);
 	void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister);
 
 private: 

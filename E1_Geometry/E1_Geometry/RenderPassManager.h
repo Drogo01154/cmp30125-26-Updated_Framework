@@ -4,82 +4,74 @@
 /*
 	Class for managing render passes
 */
+#define passConstructionFunction std::function<std::shared_ptr<renderPass>(size_t, passDependancies&)>
 
-#define passInstance Instance<std::string, renderPassData>
-
-struct renderPassData {
-	renderPassData(const std::string& name, std::function<std::shared_ptr<renderPass>()> constructPass) :
-	name(name), constructPass(constructPass) {}
-	std::string name;
-	std::shared_ptr<renderPass> pass;
-	std::function<std::shared_ptr<renderPass>()> constructPass;
-	std::function<void(renderPassData*)> setParamaterFunction;
+struct PassData {
+	PassData(std::vector<std::string> dependancies, passConstructionFunction func) :
+		constructionFunction(std::move(func)), dependancies(std::move(dependancies)) {
+	}
+	passConstructionFunction constructionFunction;
+	std::vector<std::string> dependancies;
 };
 
-class RenderPassManager
-{
-public:
-	RenderPassManager() {
-		passCache.setDeleteNoInstances(false);
-		passCache.addTypeInitialiser([](renderPassData* data) {
-			data->pass = data->constructPass();
-		});
-		passCache.addTypeEndHandler([](renderPassData* data) {
-			data->pass.reset();
-		});
-	};
 
-	void RunPasses(ID3D11DeviceContext* deviceContext, ID3D11Device* device, const XMMATRIX& projectionMatrix) {
-		for (auto pass : ActivePasses) {
-			//Run passes set paramater function
-			pass.second->setParamaterFunction(pass.second.Get());
-			//Run pass render
-			pass.second->pass->Render(deviceContext, device, projectionMatrix);
+class RenderPassManager {
+public:
+	void calcualtePassIndexes() {
+		activePassIndexes.clear();
+		for (size_t i = 0; i < activePassList.size(); ++i) {
+			activePassIndexes.emplace(activePassList[i].first, i);
 		}
 	}
 
-	void ImGuiMenus() {
-		passCache.forEach([](const std::string& ID, renderPassData* passData) {
-			if (passData->pass) {
-				passData->pass->ImGuiMenu();
+	void RenderAll(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
+		for (auto& [name, pass] : activePassList) {
+			pass->Render(deviceContext, device);
+		}
+	}
+
+	std::shared_ptr<renderPass> InitPass(const std::string& name) {
+		//If pass alaready active return it;
+		if (activePassIndexes.contains(name)) { 
+			return activePassList[activePassIndexes[name]].second; } // Break as already in pass list
+		std::unordered_map<std::string, std::shared_ptr<renderPass>> dependencies;
+		
+		PassData& data = potentialPasses.at(name);
+		for (auto pass : data.dependancies) {
+			auto passIndex = activePassIndexes.find(pass);
+			if (passIndex != activePassIndexes.end()) {
+				dependencies.emplace(pass, activePassList[passIndex->second].second);
+			} else {
+				dependencies.emplace(pass, InitPass(pass));
 			}
-		});
+		}
+		size_t index = activePassList.size();
+		auto ptr = data.constructionFunction(index, dependencies);
+		activePassList.push_back(std::make_pair(name, ptr));
+		activePassIndexes[name] = index;
+		return ptr;
+	}
+
+	template<typename PassType, typename... Args>
+	void AddPassConstructionFunction(const std::string& name, std::vector<std::string> dependancies, Args&&... args) {
+		auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
+
+		passConstructionFunction constructionFunction = [argsTuple = std::move(argsTuple)](size_t stage, passDependancies& deps) -> std::shared_ptr<renderPass> {
+			// Capture argsTuple by value and use it to construct PassType
+			return std::apply(
+				[stage, &deps](auto&&... unpackedArgs) -> std::shared_ptr<renderPass> {
+					return std::make_shared<PassType>(stage, deps, std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
+				},
+				argsTuple
+			);
+			};
+
+		// Now store it in your potentialPasses map with empty dependencies by default
+		potentialPasses.emplace(name, PassData(dependancies, std::move(constructionFunction)));
 	}
 	
-	template<typename PassType, typename... Args>
-	void addPassToCache(const std::string& name, Args&&... args) {
-		auto argsTuple = std::make_tuple();
-
-		passCache.emplaceID(name, 
-				name, 
-				[argsTuple]() -> std::shared_ptr<renderPass> {
-					return std::apply([](auto&&... unpackedArgs) {
-						return std::make_shared<renderPass>(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
-					}, argsTuple);
-				}
-			)
-		);
-	}
-
-	template<typename PassType, typename... Args>
-	void addPassParamaterFunction(const std::string& name, Args&&... args) {
-		auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-		renderPassData& data = passCache.getValue(name);
-		data.setParamaterFunction = [argsTuple](renderPassData* data) {
-			std::apply([](auto&&... unpackedArgs) {
-				std::shared_ptr<PassType> typeCast = std::dynamic_pointer_cast<PassType>(data->pass);
-				typeCast->setParameters(std::forward<decltype(unpackedArgs)>(unpackedArgs)...)
-				}, argsTuple);
-			}
-		
-	}
-
 private:
-	std::vector<std::pair<std::string, passInstance>> ActivePasses;
-	InstanceCache<std::string, renderPassData> passCache;
+	std::unordered_map<std::string, PassData> potentialPasses;
+	std::vector<std::pair<std::string, std::shared_ptr<renderPass>>> activePassList;
+	std::unordered_map<std::string, size_t> activePassIndexes;
 };
-
-/*
-	Do i need to add more to this?
-
-*/

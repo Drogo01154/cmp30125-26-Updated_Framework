@@ -36,7 +36,8 @@ public:
 	}
 
 	Camera();	///< Initialised default camera object
-	//~Camera();
+
+	virtual ~Camera() = default;
 
 	XMFLOAT3 getGlobalPosition() const;		///< Get camera's current position
 	XMFLOAT3 getGlobalDirection() const;		///< Get camera's current rotation

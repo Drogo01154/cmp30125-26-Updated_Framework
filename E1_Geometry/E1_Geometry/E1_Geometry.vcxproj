@@ -263,6 +263,7 @@
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
+    <ClInclude Include="FinalPass.h" />
     <ClInclude Include="GeometryPass.h" />
     <ClInclude Include="GreyScaleDataModule.h" />
     <ClInclude Include="HeightMapDataModule.h" />
@@ -276,7 +277,7 @@
     <ClInclude Include="MiniMapPass.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderPassManager.h" />
-    <ClInclude Include="RenderTexturePass.h" />
+    <ClInclude Include="RenderToTexturePass.h" />
     <ClInclude Include="SamplerDataModule.h" />
     <ClInclude Include="ShaderInit.h" />
     <ClInclude Include="TextureDataModule.h" />

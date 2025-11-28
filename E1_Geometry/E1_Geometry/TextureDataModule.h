@@ -5,7 +5,7 @@
 #include "DXF.h"
 
 //Common module for setting up vertex data buffer
-class TextureDataModule : BaseShaderModule {
+class TextureDataModule : public BaseShaderModule {
 private:
 public:
 	TextureDataModule(ID3D11Device* device, HWND hwnd);

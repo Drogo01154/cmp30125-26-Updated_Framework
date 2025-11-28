@@ -41,6 +41,10 @@ public:
 
 	void deleteNodeLight(std::shared_ptr<sceneNode> node);
 
+	void deleteNode(std::shared_ptr<sceneNode> node);
+
+	void selectNode(std::shared_ptr<sceneNode> node);
+
 	//ImGui function for attaching mesh to scene node
 	void imGuiMeshCreation(std::shared_ptr<sceneNode> node);
 	void imGuiCameraCreation(std::shared_ptr<sceneNode> node);
@@ -86,6 +90,9 @@ private:
 	int selectedCreateMesh;
 	int selectedCreateModel;
 	int inputResolution;
+
+	char childNameBuffer[128];
+	char nodeNameBuffer[128];
 };
 
 #endif

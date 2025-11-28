@@ -21,8 +21,8 @@ using namespace DirectX;
 struct RenderTextureData {
 	int screenWidth;
 	int screenHeight;
-	int screenNear;
-	int screenDepth;
+	float screenNear;
+	float screenDepth;
 };
 
 class RenderTexture

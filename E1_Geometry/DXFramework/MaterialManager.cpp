@@ -6,14 +6,15 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	shaderManager(shaderManager),
 	textureManager(textureManager) {
 	materialCache.addTypeInitialiser([&](Material* mat) {
-		if (mat->shaderName.empty()) {
-			mat->shader = shaderManager->getGeometryShader(mat->shaderName);
+		if (!mat->shaderName.empty()) {
+			mat->shader = this->shaderManager->getGeometryShader(mat->shaderName);
 		}
 		if (!mat->textureString.empty()) {
-			mat->texture = textureManager->getTexture(mat->textureString);
+			mat->texture = this->textureManager->getTexture(mat->textureString);
 		}
 		if (mat->HeightMapData != nullptr && !mat->HeightMapData->HeightTextureString.empty()) {
-			mat->HeightMapData->HeightTexture = textureManager->getTexture(mat->HeightMapData->HeightTextureString);
+			mat->HeightMapData->HeightTexture = this->textureManager->getTexture(mat->HeightMapData->HeightTextureString);
+			this->shaderManager->SetModuleDirtyflag(DirtyModuleFlags::HEIGHTMAP);
 		}
 	});
 
@@ -33,7 +34,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	selectedMaterial = -1;
 	selectedTexture = -1;
 	selectedHeightMapTexture = -1;
-	createMaterial("Default");
 };
 
 //Gets material ID from name
@@ -63,19 +63,21 @@ bool MaterialManager::renameMaterial(const std::string& oldName, const std::stri
 
 
 //Creates material
-inline void MaterialManager::createMaterial(const std::string& name) {
-	if (name == "" || name == "Default") return;
+void MaterialManager::createMaterial(const std::string& name) {
+	if (name == "" || materialCache.hasID(name)) {
+		return;
+	}
 	Material mat;
 
 	mat.MaterialName = name;
 	mat.baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	mat.specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	mat.specularPower = 32.f;
-	mat.textureString = L"brick1";
+	mat.textureString = L"";
 	mat.shaderName = shaderManager->getDefaultGeometryShaderName();
 	mat.HeightMapData = nullptr;
 
-	materialCache.emplaceID(name, std::move(mat));
+	materialCache.emplaceID(name, std::move(mat), false);
 }
 
 void MaterialManager::updateSelectedMaterial() {
@@ -137,27 +139,26 @@ void MaterialManager::updateSelectedMaterial() {
 	}
 }
 
-inline bool MaterialManager::deleteMaterial(const std::string& name) {
-	if (selectedMaterial >= 0) {
-		if (name == materialCache.getCachedStringVec()[selectedMaterial])
-		{
-			selectedMaterial = -1;
-			nameInput[0] = '\0';
-			selectedTexture = -1;
-			selectedHeightMapTexture = -1;
-		}
+bool MaterialManager::deleteMaterial(const std::string& name) {
+	bool selectedName = ((selectedMaterial >= 0) && (name == materialCache.getCachedStringVec()[selectedMaterial]));
+	bool deleted = materialCache.RemoveID(name);
+	if (deleted and selectedName) {
+		selectedMaterial = -1;
+		nameInput[0] = '\0';
+		selectedTexture = -1;
+		selectedHeightMapTexture = -1;
 	}
-	materialCache.RemoveID(name);
+	return deleted;
 }
 
-inline void MaterialManager::deleteAllMaterials() {
+void MaterialManager::deleteAllMaterials() {
 	selectedMaterial = -1;
 	nameInput[0] = '\0';
 	selectedTexture = -1;
 	materialCache.clear();
 }
 
-inline void MaterialManager::imGuiRender() {
+void MaterialManager::imGuiRender() {
 
 	const std::vector<const char*> CacheVec = materialCache.getCharVec();
 	if (ImGui::Combo("Select Material", &selectedMaterial, CacheVec.data(), CacheVec.size())) {
