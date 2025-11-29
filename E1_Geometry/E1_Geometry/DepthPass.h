@@ -22,7 +22,6 @@ public:
 		shaderManager(inputData.shaderManager),
 		renderer(inputData.renderer) 
 	{
-		shader = shaderManager->getGeometryShader("DepthShader");
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		numPointLights = 0;
 		numNonPointLights = 0;
@@ -45,7 +44,7 @@ public:
 			maxPointLights *= 2;
 			cubeMapArray.resize(device, maxPointLights);
 		}
-		else if ((numPointLights > 5) && numLights < maxPointLights * shrinkThreshold) {
+		else if ((numPointLights > 5) && numPointLights < maxPointLights * shrinkThreshold) {
 			maxPointLights /= 2;
 			cubeMapArray.resize(device, maxPointLights);
 		}
@@ -54,7 +53,7 @@ public:
 			maxNonPointLights *= 2;
 			shadowMapArray.resize(device, maxNonPointLights);
 		}
-		else if ((maxNonPointLights > 5) && numLights < maxNonPointLights * shrinkThreshold) {
+		else if ((numNonPointLights > 5) && numNonPointLights < maxNonPointLights * shrinkThreshold) {
 			maxNonPointLights /= 2;
 			shadowMapArray.resize(device, maxNonPointLights);
 		}
@@ -68,61 +67,43 @@ public:
 		int pointIndex = 0;
 		int nonPointIndex = 0;
 
+		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
+
+		auto GeometryRenderFunction = [&](const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix) {
+			instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
+				std::shared_ptr<BaseShader> shader = instance->mat->shader->shader;
+				const std::string& shaderType = instance->mat->shader->name;
+				matrixModule->setModuleParamaters(deviceContext, instance, projectionMatrix, viewMatrix);
+				BaseMesh* mesh = instance->mesh->mesh.get();
+				mesh->sendData(deviceContext);
+				shader->setResources(deviceContext);
+				shader->render(deviceContext, mesh->getIndexCount());
+				});
+			};
+
 		instanceManager->forEachLight([&](const size_t& ID, Light* light) {
 			lightTypes lightType = light->getType();
-			XMVECTOR lightPos = light->getGlobalPosition()
 			if (lightType == lightTypes::point) {
 				for (int f = 0; f < 6; f++) {
 					cubeMapArray.BindDsvAndSetNullRenderTarget(deviceContext, pointIndex, f);
-					
-					XMMATRIX view = XMMatrixLookAtLH()
-					view[face] = XMMatrixLookAtLH(
-						position,                       // Camera position
-						position + directions[face],    // Look at direction
-						up[face]                        // Up vector
-					);
-					
-					
-					instanceManager->forEachMesh([&](const size_t& ID, GeometryData& meshData) {
-
-						});
+					GeometryRenderFunction(light->getViewMatrix(f), light->getProjectionMatrix());
 				}
 				++pointIndex;
 			}
 			else {
 				shadowMapArray.BindDsvAndSetNullRenderTarget(deviceContext, nonPointIndex);
-				instanceManager->forEachMesh([&](const size_t& ID, GeometryData& meshData) {
-					XMMATRIX viewMatrix;
-					if (lightType == lightTypes::directional) {
-						viewMatrix = light->getOrthoMatrix();
-					}
-					else {
-						viewMatrix = light->getProjectionMatrix();
-					}
+				instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
+					const std::string& shaderType = instance->mat->shader->name;
+					GeometryRenderFunction(
+						light->getViewMatrix(), 
+						lightType == lightTypes::directional 
+							? light->getOrthoMatrix() 
+							: light->getProjectionMatrix());
 					});
 				++nonPointIndex;
 			}
 			
 		});
-
-		/*
-		textureOutput->setRenderTarget(renderer->getDeviceContext());
-		textureOutput->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
-
-		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
-		instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
-			if (instance->mat.IsValid()) {
-				std::shared_ptr<BaseShader> shader = instance->mat->shader->shader;
-				const std::string& shaderType = instance->mat->shader->name;
-
-				matrixModule->setModuleParamaters(deviceContext, instance, renderer->getProjectionMatrix());
-				BaseMesh* mesh = instance->mesh->mesh.get();
-				mesh->sendData(deviceContext);
-				shader->setResources(deviceContext);
-				shader->render(deviceContext, mesh->getIndexCount());
-			}
-			});
-		*/
 	};
 private:
 	ShadowMapArray shadowMapArray;
@@ -132,7 +113,6 @@ private:
 	ShaderManager* shaderManager;
 	InstanceManager* instanceManager;
 	ModuleInstance matrixDataModule;	//Matrix Data Module;
-	ShaderInstance shader;
 
 	int numPointLights;
 	int numNonPointLights;
@@ -141,22 +121,4 @@ private:
 
 	static constexpr float expandThreshold = 1.0f;   // 100% of capacity
 	static constexpr float shrinkThreshold = 0.25f;  // 25% of capacity
-
-	XMFLOAT3 directions[6] = {
-	{ 1, 0, 0 },
-	{-1, 0, 0 },
-	{ 0, 1, 0 },
-	{ 0,-1, 0 },
-	{ 0, 0, 1 },
-	{ 0, 0,-1 }
-	};
-
-	XMFLOAT3 ups[6] = {
-		{ 0,-1, 0 },
-		{ 0,-1, 0 },
-		{ 0, 0, 1 },
-		{ 0, 0,-1 },
-		{ 0,-1, 0 },
-		{ 0,-1, 0 }
-	};
 };

@@ -21,28 +21,34 @@ Light::Light(lightTypes type) :
 	XMVECTOR directionDown = XMVectorSet(0.f, -1.f, 0.f, 0.f);
 	XMVECTOR target = XMVectorAdd(m_transform.getTranslationVector(), directionDown);
 	m_transform.lookAt(target);
+	if (type == lightTypes::point) {
+		viewMatrixes.resize(6);
+	}
+	else {
+		viewMatrixes.resize(1);
+	}
 }
 
 // create view matrix, based on light position and lookat. Used for shadow mapping.
 void Light::generateViewMatrix()
 {
-	XMFLOAT3 directionFloat = getGlobalDirection();
-	// default up vector
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	if (directionFloat.y == 1 || (directionFloat.x == 0 && directionFloat.z == 0))
-	{
-		up = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0);
+
+	if (type == lightTypes::point) {
+		for (int face = 0; face < 6; ++face)
+		{
+			viewMatrixes[face] = XMMatrixLookAtLH(
+				globalPosition,                       // Camera position
+				globalPosition + directions.forwards[face], // Look at direction
+				directions.ups[face]                     // Up vector
+			);
+		}
 	}
-	else if (directionFloat.y == -1 || (directionFloat.x == 0 && directionFloat.z == 0))
-	{
-		up = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0);
+	else {
+		XMVECTOR dir = m_transform.getWorldForward();
+		XMVECTOR up = m_transform.getWorldUp();
+		// Create the view matrix from the three vectors.
+		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + dir, up);
 	}
-	//XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	XMVECTOR dir = XMVectorSet(directionFloat.x, directionFloat.y, directionFloat.z, 1.0f);
-	XMVECTOR right = XMVector3Cross(dir, up);
-	up = XMVector3Cross(right, dir);
-	// Create the view matrix from the three vectors.
-	viewMatrix = XMMatrixLookAtLH(globalPosition, globalPosition + dir, up);
 }
 
 // Create a projection matrix for the (point) light source. Used in shadow mapping.
@@ -133,9 +139,9 @@ lightTypes Light::getType() const
 	return type;
 }
 
-const XMMATRIX& Light::getViewMatrix() const
+const XMMATRIX& Light::getViewMatrix(int face) const
 {
-	return viewMatrix;
+	return viewMatrixes[face];
 }
 
 const XMMATRIX& Light::getProjectionMatrix() const

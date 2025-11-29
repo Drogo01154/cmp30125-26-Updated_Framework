@@ -61,7 +61,7 @@ public:
 	// Getters
 	const XMFLOAT4& getAttenuation() const;			///< Get attenuation, returns float4
 	const XMFLOAT4& getDiffuseColour() const;		///< Get diffuse colour, returns float4
-	const XMMATRIX& getViewMatrix() const;			///< Get light view matrix for shadow mapping, returns XMMATRIX
+	const XMMATRIX& getViewMatrix(int face = 0) const;			///< Get light view matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getProjectionMatrix() const;	///< Get light projection matrix for shadow mapping, returns XMMATRIX
 	const XMMATRIX& getOrthoMatrix() const;			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
 
@@ -84,7 +84,7 @@ protected:
 	XMFLOAT4 attenuation; // Constant, Linear, Quadratic, Cutoff Distance
 	XMFLOAT4 diffuseColour;
 	float innerCone;
-	XMMATRIX viewMatrix;
+	std::vector<XMMATRIX> viewMatrixes;
 	XMMATRIX projectionMatrix;
 	XMMATRIX orthoMatrix;
 	XMVECTOR lookAt;
@@ -101,6 +101,31 @@ protected:
 		"point",
 		"spot"
 	};
+
+	struct Directions {
+		Directions() {
+			XMFLOAT3 floatDirs[6] = {
+			{ 1, 0, 0 }, {-1, 0, 0 },
+			{ 0, 1, 0 }, { 0,-1, 0 },
+			{ 0, 0, 1 }, { 0, 0,-1 } };
+
+			XMFLOAT3 floatUps[6] = {
+			{ 0,-1, 0 }, { 0,-1, 0 },
+			{ 0, 0, 1 }, { 0, 0,-1 },
+			{ 0,-1, 0 },{ 0,-1, 0 } };
+
+			for (int face = 0; face < 6; ++face) {
+				forwards[face] = XMLoadFloat3(&floatDirs[face]);
+				ups[face] = XMLoadFloat3(&floatUps[face]);
+			}
+
+		}
+
+		XMVECTOR ups[6];
+		XMVECTOR forwards[6];
+	};
+
+	static Directions directions;
 };
 
 namespace nlohmann {
