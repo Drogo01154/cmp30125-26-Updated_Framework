@@ -55,9 +55,6 @@
     <Filter Include="Header Files\ShaderModules\GeometryShaderModules">
       <UniqueIdentifier>{408559b8-34f3-48b9-8abf-7816d18d7ed6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ShaderModules\RenderPassModules">
-      <UniqueIdentifier>{090a945e-e1e1-44fe-ab2d-9b58ec5589ed}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\RenderPasses">
       <UniqueIdentifier>{7a655bd7-3691-4ecc-9f6c-b884fa6e0589}</UniqueIdentifier>
     </Filter>
@@ -103,6 +100,9 @@
     <Filter Include="Header Files\ShaderModules\Lights Modules">
       <UniqueIdentifier>{aadc1cff-fe82-4a20-a4db-3d9928a2fd48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ShaderModules\Lights Modules\RenderPassModules">
+      <UniqueIdentifier>{090a945e-e1e1-44fe-ab2d-9b58ec5589ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -145,7 +145,7 @@
       <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
     <ClCompile Include="KernelDataModule.h">
-      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
+      <Filter>Header Files\ShaderModules\Lights Modules\RenderPassModules</Filter>
     </ClCompile>
     <ClCompile Include="SMDepthShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
@@ -192,6 +192,9 @@
     <ClCompile Include="ShadowMapDataModule.cpp">
       <Filter>Source Files\ShaderModules\LightsModules</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -231,7 +234,7 @@
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
     <ClInclude Include="GreyScaleDataModule.h">
-      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
+      <Filter>Header Files\ShaderModules\Lights Modules\RenderPassModules</Filter>
     </ClInclude>
     <ClInclude Include="HeightMapDataModule.h">
       <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
@@ -249,7 +252,7 @@
       <Filter>Header Files\ShaderModules\Common Modules</Filter>
     </ClInclude>
     <ClInclude Include="MiniMapDataModule.h">
-      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
+      <Filter>Header Files\ShaderModules\Lights Modules\RenderPassModules</Filter>
     </ClInclude>
     <ClInclude Include="MiniMapPass.h">
       <Filter>Header Files\RenderPasses</Filter>
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="ShadowPass.h">
       <Filter>Header Files\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowShader.h">
+      <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,11 +6,12 @@ cbuffer MatrixBuffer : register(b0)
 	matrix projectionMatrix;
 };
 
-cbuffer CameraBuffer : register(b1)
+cbuffer CameraDataBuffer : register(b1)
 {
-    float3 cameraPosition;
-    float padding;
-}
+    float4 ambientLight; // 16
+    float3 cameraPosition; // 12
+    int numberOfLights; // 4
+};
 
 struct InputType
 {

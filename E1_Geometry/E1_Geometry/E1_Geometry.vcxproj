@@ -169,6 +169,7 @@
     <ClCompile Include="CMDepthShader.cpp" />
     <ClCompile Include="PointLightDataModule.cpp" />
     <ClCompile Include="ShadowMapDataModule.cpp" />
+    <ClCompile Include="ShadowShader.cpp" />
     <ClCompile Include="SMDepthShader.cpp" />
     <ClCompile Include="GreyScaleDataModule.cpp" />
     <ClCompile Include="GreyScaleTextureShader.cpp" />
@@ -284,6 +285,7 @@
     <ClInclude Include="PointLightDataModule.h" />
     <ClInclude Include="ShadowMapDataModule.h" />
     <ClInclude Include="ShadowPass.h" />
+    <ClInclude Include="ShadowShader.h" />
     <ClInclude Include="SMDepthShader.h" />
     <ClInclude Include="FinalPass.h" />
     <ClInclude Include="GeometryPass.h" />

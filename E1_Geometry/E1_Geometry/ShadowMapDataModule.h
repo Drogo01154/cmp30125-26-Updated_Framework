@@ -2,7 +2,7 @@
 #include "DXF.h"
 
 class ShadowMapDataModule : public BaseShaderModule {
-
+public:
 	ShadowMapDataModule(ID3D11Device* device, HWND hwnd);
 
 	void setMatrixBuffer();

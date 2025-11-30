@@ -4,12 +4,6 @@
 class TexturedLightShader : public BaseShader
 {
 private:
-
-	struct CameraBufferType
-	{
-		XMFLOAT3 cameraPosition;
-		float padding;
-	};
 public:
 	TexturedLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
 	~TexturedLightShader();

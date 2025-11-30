@@ -150,6 +150,8 @@ public:
 			++nonPointIndex;
 		}
 	};
+	ShadowMapArray* getShadowMapArray() { return &shadowMapArray; }
+	CubeMapArray* getCubeMapArray() { return &cubeMapArray; }
 private:
 	ShadowMapArray shadowMapArray;
 	CubeMapArray cubeMapArray;
