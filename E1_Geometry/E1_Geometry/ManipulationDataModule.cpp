@@ -4,10 +4,6 @@
 
 ManipulationDataModule::ManipulationDataModule(ID3D11Device* device, HWND hwnd) : BaseShaderModule(device, hwnd) {
 	initModule();
-}
-
-void ManipulationDataModule::initModule() {
-
 	D3D11_BUFFER_DESC timeBufferDesc;
 
 	// Setup time buffer 

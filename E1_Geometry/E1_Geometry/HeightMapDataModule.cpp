@@ -1,16 +1,8 @@
 #include "HeightMapDataModule.h"
 
 HeightMapDataModule::HeightMapDataModule(ID3D11Device* device, HWND hwnd) : BaseShaderModule(device, hwnd) {
-	initModule();
-}
-HeightMapDataModule::~HeightMapDataModule() {
-
-}
-
-void HeightMapDataModule::initModule() {
-
 	D3D11_BUFFER_DESC mapDataBufferDesc;
-	
+
 	// Setup the description of the map data constant buffer
 
 	mapDataBufferDesc.Usage = D3D11_USAGE_DYNAMIC;

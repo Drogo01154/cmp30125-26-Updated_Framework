@@ -28,9 +28,8 @@ enum lightTypes {
 		
 class Light
 {
-
 public:
-	Light();
+	Light() {}
 	Light(lightTypes type);
 	
 	void* operator new(size_t i)
@@ -43,9 +42,8 @@ public:
 		_mm_free(p);
 	}
 
-	void generateViewMatrix();																	///< Generates and upto date view matrix, based on current rotation
-	void generateProjectionMatrix(float screenNear, float screenFar);							///< Generate project matrix based on current rotation and provided near & far plane
-	void generateOrthoMatrix(float screenWidth, float screenHeight, float near, float far);		///< Generates orthographic matrix based on supplied screen dimensions and near & far plane.
+	void generateViewMatrix();									///< Generates and upto date view matrix, based on current rotation
+	void generateProjectionMatrix(float aspect);				///< Generate project matrix based on current rotation and provided near & far plane
 
 	// Setters
 	void setType(lightTypes type);
@@ -62,8 +60,7 @@ public:
 	const XMFLOAT4& getAttenuation() const;			///< Get attenuation, returns float4
 	const XMFLOAT4& getDiffuseColour() const;		///< Get diffuse colour, returns float4
 	const XMMATRIX& getViewMatrix(int face = 0) const;			///< Get light view matrix for shadow mapping, returns XMMATRIX
-	const XMMATRIX& getProjectionMatrix() const;	///< Get light projection matrix for shadow mapping, returns XMMATRIX
-	const XMMATRIX& getOrthoMatrix() const;			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
+	const XMMATRIX& getProjectionMatrix() const;	///< Get light projection matrix for shadow/cube mapping, returns XMMATRIX
 
 	void updateGlobals(bool updateTransform = true);	///> Set global values from transform and parent matrix
 	XMFLOAT3 getGlobalPosition() const;					///> Get lights global translation as float3
@@ -75,9 +72,22 @@ public:
 	float getOuterCone() const;						///< Get light Outer cone angle, returns float
 	lightTypes getType() const;						///< Get light type, returns enum
 
-	bool imGuiRender(size_t transformIncrement);
+	bool imGuiRender(size_t transformIncrement, bool& projectionChanged);
 
 	static std::span<const char* const> GetLightTypeStrings();
+
+	void setFar(float inFar);
+	void setNear(float inNear);
+	void setFOV(float fov);
+	void setOrthoWidth(float orthoWidth);
+	void setOrthoHeight(float orthoHeight);
+
+	float getFar() const;
+	float getNear() const;
+	float getFOV() const;
+	float getOrthoWidth() const;
+	float getOrthoHeight() const;
+
 
 	Transform m_transform;
 protected:
@@ -86,13 +96,23 @@ protected:
 	float innerCone;
 	std::vector<XMMATRIX> viewMatrixes;
 	XMMATRIX projectionMatrix;
-	XMMATRIX orthoMatrix;
 	XMVECTOR lookAt;
 	XMVECTOR globalPosition;
 	XMVECTOR globalDirection;
 	
 	float outerCone;
 	lightTypes type;
+
+	float lightNear;
+	float lightFar;
+
+	//Spot light only
+	float FOV;
+
+	//Direction Light only
+	float orthoWidth;
+	float orthoHeight;
+
 	float padding[2]; // pad to 16-byte boundary
 
 	inline static const char* LightTypeStrings[3] =
@@ -132,21 +152,42 @@ namespace nlohmann {
 	template<>
 	struct adl_serializer<Light> {
 		static void to_json(json& j, const Light& l) {
-			j["type"] = l.getType();
+			lightTypes type = l.getType();
+			j["type"] = type;
 			j["attenuation"] = l.getAttenuation();
 			j["diffuseColour"] = l.getDiffuseColour();
 			j["innerCone"] = l.getInnerCone();
 			j["outerCone"] = l.getOuterCone();
 			j["transform"] = l.m_transform;
+			j["far"] = l.getFar();
+			j["near"] = l.getNear();
+			if (type == lightTypes::spot) {
+				j["FOV"] = l.getFOV();
+			}
+			else if (type == lightTypes::directional) {
+				j["orthoWidth"] = l.getOrthoWidth();
+				j["orthoHeight"] = l.getOrthoHeight();
+			}
 		}
 
 		static void from_json(const json& j, Light& l) {
-			l.setType(j.at("type").get<lightTypes>());
+			lightTypes type = j.at("type").get<lightTypes>();
+			l.setType(type);
 			l.setAttenuation(j.at("attenuation").get<XMFLOAT4>());
 			l.setDiffuseColour(j.at("diffuseColour").get<XMFLOAT4>());
 			l.setInnerCone(j.at("innerCone").get<float>());
 			l.setOuterCone(j.at("outerCone").get<float>());
 			l.m_transform = j.at("transform").get<Transform>();
+			l.setFar(j.at("innerCone").get<float>());
+			l.setNear(j.at("outerCone").get<float>());
+
+			if (type == lightTypes::spot) {
+				l.setFOV(j.at("FOV").get<float>());
+			}
+			else if (type == lightTypes::directional) {
+				l.setOrthoWidth(j.at("orthoWidth").get<float>());
+				l.setOrthoHeight(j.at("orthoHeight").get<float>());
+			}
 		}
 	};
 }

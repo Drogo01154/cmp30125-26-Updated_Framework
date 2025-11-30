@@ -4,12 +4,7 @@ LightsDataModule::LightsDataModule(ID3D11Device* device, HWND hwnd, InstanceMana
 	lightBufferSRV = nullptr;
 	lightsBuffer = nullptr;
 	maxLights = 10;
-	initModule();
-}
-
-
-LightsDataModule::~LightsDataModule() {
-
+	setLightsBuffer();
 }
 
 void LightsDataModule::setLightsBuffer() {
@@ -22,8 +17,6 @@ void LightsDataModule::setLightsBuffer() {
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 
 	// Setup light buffer
-	// Setup the description of the light dynamic structured buffer that is in the pixel shader.
-	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	lightBufferDesc.ByteWidth = sizeof(LightBufferType) * maxLights;
 	lightBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -40,11 +33,7 @@ void LightsDataModule::setLightsBuffer() {
 	renderer->CreateShaderResourceView(lightsBuffer.Get(), &srvDesc, lightBufferSRV.GetAddressOf());
 }
 
-void LightsDataModule::initModule() {
-	setLightsBuffer();
-}
-
-void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
+void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, const std::vector<int>* indexes) {
 	
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	int numLights = instanceManager->getNumberOfLights();
@@ -73,6 +62,7 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
 		lightPtr[i].outerCone = cos(light->getOuterCone());
 		lightPtr[i].diffuse = light->getDiffuseColour();
 		lightPtr[i].type = static_cast<int>(light->getType());
+		lightPtr[i].index = (*indexes)[i];
 		i++;
 		});
 

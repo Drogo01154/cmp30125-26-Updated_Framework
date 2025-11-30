@@ -1,15 +1,14 @@
-#include "DepthShader.h"
-#include "Camera.h"
+#include "SMDepthShader.h"
 
 
-DepthShader::DepthShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+SMDepthShader::SMDepthShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
 {
-	initShader(L"depth_vs.cso", L"depth_ps.cso");
+	initShader(L"depthSM_vs.cso", L"depthSM_ps.cso");
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 }
 
 
-DepthShader::~DepthShader()
+SMDepthShader::~SMDepthShader()
 {
 	// Release the layout.
 	if (layout)
@@ -23,7 +22,7 @@ DepthShader::~DepthShader()
 }
 
 
-void DepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
+void SMDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 
@@ -32,7 +31,7 @@ void DepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	loadPixelShader(psFilename);
 }
 
-void DepthShader::setResources(ID3D11DeviceContext* deviceContext) {
+void SMDepthShader::setResources(ID3D11DeviceContext* deviceContext) {
 	//Set vertex shader resources
 	matrixDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
 }

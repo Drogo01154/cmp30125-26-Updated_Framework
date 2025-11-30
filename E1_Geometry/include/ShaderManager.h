@@ -26,8 +26,8 @@ enum class DirtyModuleFlags : uint32_t {
 	NONE = 0,
 	CAMERA = 1 << 0,
 	LIGHTSDATACHANGED = 1 << 1,
-	LIGHTNUMCHANGED = 1 << 2
-
+	LIGHTNUMCHANGED = 1 << 2,
+	LIGHTPROJECTIONCHANGED = 1 << 3
 };
 
 // Bitwise OR
@@ -140,30 +140,11 @@ public:
 
 	ModuleInstance getShaderModuleID(const std::string& name);
 
-	void setDefaultGeometryShader(const std::string& name);
-
-	const std::string& getDefaultGeometryShaderName(); 
-
-	ShaderInstance getDefaultGeometryShader();
-
-	bool selectGeometryShaderImGui(Material* mat);
-
-	void AddHeightMapShaderName(const std::string& shader);
-	void RemoveHeightMapShaderName(const std::string& shader);
-
-	bool isHeightMapShader(const std::string& shader);
 private:
 
 	InstanceCache<std::string, ShaderData> GeometryShaderCache;		 // geometry passes
 	InstanceCache<std::string, ShaderData> PassShaderCache;			 // post-processing, lighting, etc.
 	InstanceCache<std::string, ModuleData> ShaderModuleCache;		 // post-processing, lighting, etc.
-
-	std::unordered_set<std::string> HeightMapShaders;
-
-	int selectedGeometryShader;
-
-	std::string defaultGeometryShader;
-	std::string defaultPassShader;
 
 	DirtyModuleFlags flags;
 };

@@ -10,6 +10,15 @@
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 
+
+/*
+	Array of shadow maps
+	Takes in
+		mWidth - width of a cube map slice
+		mHeight - height of a cube map slice
+		size - number of shadow maps
+		Allows dynaic resizing
+*/
 class ShadowMapArray
 {
 public:

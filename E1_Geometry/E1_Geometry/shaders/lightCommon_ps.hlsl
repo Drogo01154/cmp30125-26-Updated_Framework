@@ -9,7 +9,6 @@ cbuffer CameraDataBuffer : register(b0)
     float4 ambientLight; // 16
     float3 cameraPosition; // 12
     int numberOfLights; // 4
-    
 };
 
 cbuffer MaterialDataBuffer : register(b1)
@@ -29,7 +28,8 @@ struct Light // 80 bytes
     float3 lightPosition;
     float cosLightOuterCone; // cos of outer cone angle
     int type;
-    float3 padding1;
+    int index;
+    float2 padding1;
 };
 
 StructuredBuffer<Light> lights : register(t0);

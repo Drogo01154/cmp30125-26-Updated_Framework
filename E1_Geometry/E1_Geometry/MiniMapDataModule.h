@@ -19,7 +19,6 @@ private:
 public:
 	MiniMapDataModule(ID3D11Device* device, HWND hwnd);
 
-	void initModule();
 	void setModuleParamaters(ID3D11DeviceContext* deviceContext,
 		const XMFLOAT4& playerIconColour,
 		float playerIconRadius,

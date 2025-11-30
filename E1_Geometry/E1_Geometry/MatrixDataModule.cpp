@@ -2,14 +2,6 @@
 
 MatrixDataModule::MatrixDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager) : BaseShaderModule(device, hwnd), instanceManager(instanceManager) {
 	matrixBuffer = nullptr;
-	initModule();
-}
-
-MatrixDataModule::~MatrixDataModule() {
-
-}
-
-void MatrixDataModule::initModule() {
 	D3D11_BUFFER_DESC matrixBufferDesc;
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.

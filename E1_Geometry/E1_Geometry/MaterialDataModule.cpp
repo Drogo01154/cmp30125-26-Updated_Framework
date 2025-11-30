@@ -2,15 +2,6 @@
 
 MaterialDataModule::MaterialDataModule(ID3D11Device* device, HWND hwnd) :
 	BaseShaderModule(device, hwnd) {
-	initModule();
-}
-
-
-MaterialDataModule::~MaterialDataModule() {
-
-}
-
-void MaterialDataModule::initModule() {
 	D3D11_BUFFER_DESC MaterialDataBufferDesc;
 
 	// Setup the description of the dynamic scebe data constant buffer that can be used in different states
@@ -22,7 +13,6 @@ void MaterialDataModule::initModule() {
 	MaterialDataBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&MaterialDataBufferDesc, NULL, MaterialDataBuffer.GetAddressOf());
 }
-
 void MaterialDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, Material* material) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MaterialBufferType* materialPtr;

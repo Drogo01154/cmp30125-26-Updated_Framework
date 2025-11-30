@@ -10,16 +10,6 @@ SamplerDataModule::SamplerDataModule(ID3D11Device* device, HWND hwnd,
 	filter(filter),
 	maxAnisotropy(maxAnisotropy),
 	compFunc(compFunc) {
-	initModule();
-}
-
-
-SamplerDataModule::~SamplerDataModule() {
-
-}
-
-void SamplerDataModule::initModule() {
-
 	D3D11_SAMPLER_DESC samplerDesc;
 
 	// Create a texture sampler state description.
@@ -34,7 +24,6 @@ void SamplerDataModule::initModule() {
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	renderer->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
 }
-
 
 void SamplerDataModule::setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister) {
 	ID3D11SamplerState* sampleStatePtr = samplerState.Get();

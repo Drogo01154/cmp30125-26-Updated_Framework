@@ -20,16 +20,14 @@ private:
 		XMFLOAT3 position;		// 12
 		float outerCone;		// 4
 		int type;				// 4
-		XMFLOAT3 padding;		// 12
+		int index;				// 4
+		XMFLOAT2 padding;		// 8
 	};
 
 public:
 	LightsDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager);
-	~LightsDataModule();
 
-
-	void initModule();
-	void setModuleParamaters(ID3D11DeviceContext* deviceContext);
+	void setModuleParamaters(ID3D11DeviceContext* deviceContext, const std::vector<int>* indexes);
 	void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister);
 
 	void setLightsBuffer();

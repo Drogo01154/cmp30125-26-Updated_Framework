@@ -3,10 +3,6 @@
 KernelDataModule::KernelDataModule(ID3D11Device* device, HWND hwnd, int screenWidth, int screenHeight) {
 	texelWidth = 1.f / screenWidth;
 	texelHeight = 1.f / screenHeight;
-}
-
-void KernelDataModule::initModule() 
-{
 	D3D11_BUFFER_DESC screenDataBufferDesc;
 	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader
 	screenDataBufferDesc.Usage = D3D11_USAGE_DYNAMIC;

@@ -16,6 +16,7 @@ public:
 		renderer(renderer)
 	{
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
+		colourShader = shaderManager->getGeometryShader("ColourShader");
 	}
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
@@ -25,14 +26,12 @@ public:
 		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
 			if (instance->mat.IsValid()) {
-				std::shared_ptr<BaseShader> shader = instance->mat->shader->shader;
-				const std::string& shaderType = instance->mat->shader->name;
 
 				matrixModule->setModuleParamaters(deviceContext, instance, renderer->getProjectionMatrix(), viewMatrix);
 				BaseMesh* mesh = instance->mesh->mesh.get();
 				mesh->sendData(deviceContext);
-				shader->setResources(deviceContext);
-				shader->render(deviceContext, mesh->getIndexCount());
+				colourShader->shader->setResources(deviceContext);
+				colourShader->shader->render(deviceContext, mesh->getIndexCount());
 			}
 		});
 	};
@@ -41,4 +40,5 @@ private:
 	ShaderManager* shaderManager;
 	InstanceManager* instanceManager;
 	ModuleInstance matrixDataModule;	//Matrix Data Module;
+	ShaderInstance colourShader;
 };

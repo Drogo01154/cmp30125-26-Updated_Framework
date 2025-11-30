@@ -16,9 +16,7 @@ private:
 	};
 public:
 	MatrixDataModule(ID3D11Device* device, HWND hwnd, InstanceManager* instanceManager);
-	~MatrixDataModule();
 
-	void initModule();
 	void setModuleParamaters(
 		ID3D11DeviceContext* deviceContext,
 		GeometryData* mesh, const XMMATRIX& projectionMatrix, const XMMATRIX& viewMatrix);

@@ -4,14 +4,6 @@ CameraDataModule::CameraDataModule(ID3D11Device* device, HWND hwnd, InstanceMana
 BaseShaderModule(device, hwnd),
 instanceManager(instanceManager),
 sceneGraph(sceneGraph){
-	initModule();
-}
-
-CameraDataModule::~CameraDataModule() {
-	
-}
-
-void CameraDataModule::initModule() {
 	D3D11_BUFFER_DESC cameraDataBufferDesc;
 	// Setup the description of the dynamic camera data buffer that can be used in different shader stages
 	cameraDataBufferDesc.Usage = D3D11_USAGE_DYNAMIC;

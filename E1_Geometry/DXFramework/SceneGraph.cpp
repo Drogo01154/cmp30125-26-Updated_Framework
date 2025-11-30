@@ -346,7 +346,9 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		if (hasLight) {
 			if (ImGui::TreeNode(("Node: " + node->name + " Light Settings").c_str())) {
 				if (Light* light = node->lightInstance.Get()) {
-					if (light->imGuiRender(3)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED); }
+					bool lightProjectionChanged = false;
+					if (light->imGuiRender(3, lightProjectionChanged)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED); }
+					if (lightProjectionChanged) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTPROJECTIONCHANGED); }
 				}
 				ImGui::TreePop();
 			}

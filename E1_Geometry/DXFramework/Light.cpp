@@ -4,11 +4,8 @@
 
 //Constructor
 
-Light::Light() : Light(lightTypes::directional) {
 
-}
-
-Light::Light(lightTypes type) : 
+Light::Light(lightTypes type) :
 	attenuation(0.05f, 0.01f, 0.001f, 100.f),
 	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
 	innerCone(XMConvertToRadians(20.f)),
@@ -26,6 +23,14 @@ Light::Light(lightTypes type) :
 	}
 	else {
 		viewMatrixes.resize(1);
+	}
+	lightNear = 0.1f;
+	lightFar = 25.0f;
+	if (type == lightTypes::directional) {
+		orthoWidth = 50.f;
+		orthoHeight = 50.f;
+	} else if (type == lightTypes::spot) {
+		FOV = XMConvertToRadians(45.0f); // 45° cone
 	}
 }
 
@@ -51,23 +56,26 @@ void Light::generateViewMatrix()
 	}
 }
 
-// Create a projection matrix for the (point) light source. Used in shadow mapping.
-void Light::generateProjectionMatrix(float screenNear, float screenFar)
+// Create a projection matrix for the light source. Used in shadow mapping.
+void Light::generateProjectionMatrix(float aspect)
 {
-	float fieldOfView, screenAspect;
+	switch (type) {
+	case lightTypes::point:
+	{
+		float fieldOfView = (float)XM_PI / 2.0f;
+		float screenAspect = 1.0f;
+		// Create the projection matrix for the light.
+		projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, lightNear, lightFar);
+	}
+		break;
+	case lightTypes::directional:
+		projectionMatrix = XMMatrixOrthographicLH(orthoWidth, orthoHeight, lightNear, lightFar);
+		break;
 
-	// Setup field of view and screen aspect for a square light source.
-	fieldOfView = (float)XM_PI / 2.0f;
-	screenAspect = 1.0f;
-
-	// Create the projection matrix for the light.
-	projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenFar);
-}
-
-// Create orthomatrix for (directional) light source. Used in shadow mapping.
-void Light::generateOrthoMatrix(float screenWidth, float screenHeight, float near, float far)
-{
-	orthoMatrix = XMMatrixOrthographicLH(screenWidth, screenHeight, near, far);
+	case lightTypes::spot:
+		projectionMatrix = XMMatrixPerspectiveFovLH(FOV, aspect, lightNear, lightFar);
+		break;
+	}
 }
 
 void Light::setType(lightTypes type) 
@@ -149,11 +157,6 @@ const XMMATRIX& Light::getProjectionMatrix() const
 	return projectionMatrix;
 }
 
-const XMMATRIX& Light::getOrthoMatrix() const
-{
-	return orthoMatrix;
-}
-
 void Light::updateGlobals(bool updateTransform)
 {
 	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
@@ -184,7 +187,19 @@ std::span<const char* const> Light::GetLightTypeStrings() {
 	return LightTypeStrings;
 }
 
-bool Light::imGuiRender(size_t transformIncrement) {
+void Light::setFar(float inFar) { lightFar = inFar; }
+void Light::setNear(float inNear) { lightNear = inNear; }
+void Light::setFOV(float fov) { FOV = fov; }
+void Light::setOrthoWidth(float orthoWidth) { this->orthoWidth = orthoWidth; }
+void Light::setOrthoHeight(float orthoHeight) { this->orthoHeight = orthoHeight; }
+
+float Light::getFar() const { return lightFar; }
+float Light::getNear() const { return lightNear; }
+float Light::getFOV() const { return FOV; }
+float Light::getOrthoWidth() const { return orthoWidth; }
+float Light::getOrthoHeight() const { return orthoHeight; }
+
+bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 	bool lightUpdated = false;
 	ImGui::Text(("Light Type: " + std::string(LightTypeStrings[type])).c_str());
 
@@ -215,5 +230,34 @@ bool Light::imGuiRender(size_t transformIncrement) {
 		if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) { lightUpdated = true; }
 		if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) { lightUpdated = true; }
 	}
+
+	if (ImGui::TreeNode("Projection Matrix Settings"))
+	{
+		if (ImGui::SliderFloat("Near", &lightNear, 0.01f, lightFar - 0.01f)) { projectionChanged = true; }
+		if (ImGui::SliderFloat("Far", &lightFar, lightNear + 0.01f, 1000.f)) { projectionChanged = true; }
+
+		if (type == lightTypes::directional)
+		{
+			if (ImGui::SliderFloat("Ortho Width", &orthoWidth, 1.f, 500.f)) { projectionChanged = true; }
+			if (ImGui::SliderFloat("Ortho Height", &orthoHeight, 1.f, 500.f)) { projectionChanged = true; }
+		}
+		else if (type == lightTypes::spot)
+		{
+			if (ImGui::SliderAngle("FOV", &FOV, 5.f, 120.f)) { projectionChanged = true; }
+		}
+		ImGui::TreePop();
+	}
 	return lightUpdated;
 }
+
+
+	
+
+	
+
+	
+	
+
+	
+
+	

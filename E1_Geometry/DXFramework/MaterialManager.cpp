@@ -6,9 +6,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	shaderManager(shaderManager),
 	textureManager(textureManager) {
 	materialCache.addTypeInitialiser([&](Material* mat) {
-		if (!mat->shaderName.empty()) {
-			mat->shader = this->shaderManager->getGeometryShader(mat->shaderName);
-		}
 		if (!mat->textureString.empty()) {
 			mat->texture = this->textureManager->getTexture(mat->textureString);
 		}
@@ -18,9 +15,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	});
 
 	materialCache.addTypeEndHandler([](Material* mat) {
-		if (mat->shader.IsValid()) {
-			mat->shader = ShaderInstance();
-		}
 		if (mat->texture.IsValid()) {
 			mat->texture = TextureInstance();
 		}
@@ -73,7 +67,6 @@ void MaterialManager::createMaterial(const std::string& name) {
 	mat.specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	mat.specularPower = 32.f;
 	mat.textureString = L"";
-	mat.shaderName = shaderManager->getDefaultGeometryShaderName();
 	mat.HeightMapData = nullptr;
 
 	materialCache.emplaceID(name, std::move(mat), false);
@@ -192,14 +185,12 @@ void MaterialManager::imGuiRender() {
 				ImGui::SliderFloat("Specular Power: ## 0", &mat->specularPower, 1.f, 1000.f);
 				ImGui::TreePop();
 			}
-			bool isHeightMapShader = shaderManager->isHeightMapShader(mat->shaderName);
-			if (shaderManager->selectGeometryShaderImGui(mat)) {
-				if (!isHeightMapShader && shaderManager->isHeightMapShader(mat->shaderName)) {
-					mat->HeightMapData = std::make_unique<HeightMapInfo>();
-					mat->HeightMapData->HeightTextureString = L"";
-					mat->HeightMapData->HeightMultiplier = 10.f;
-				}
+			if (mat->HeightMapData == nullptr && ImGui::Button("Make Heightmap")) {
+				mat->HeightMapData = std::make_unique<HeightMapInfo>();
+				mat->HeightMapData->HeightTextureString = L"";
+				mat->HeightMapData->HeightMultiplier = 10.f;
 			}
+			
 			const std::vector<const char*>* imageList = FileHandler::get().getImageList();
 			if (ImGui::Combo("Select Material Texture: ", &selectedTexture, imageList->data(), imageList->size())) {
 
@@ -241,7 +232,6 @@ void MaterialManager::to_json(nlohmann::json& j) {
 	materialCache.forEach([&](const std::string& ID, Material* mat) {
 		nlohmann::json matJson;
 		matJson["Name"] = mat->MaterialName;
-		matJson["Shader"] = mat->shaderName;
 		if (!mat->textureString.empty()) {
 			matJson["Texture"] = Converters::convert_from_wstring(mat->textureString);
 		}
@@ -262,7 +252,6 @@ void MaterialManager::from_json(const nlohmann::json& j) {
 		Material recreatedMat;
 
 		recreatedMat.MaterialName = matJson.at("Name").get<std::string>();
-		recreatedMat.shaderName = matJson.at("Shader").get<std::string>();
 		recreatedMat.textureString = matJson.contains("Texture")
 			? Converters::convert_to_wstring(matJson.at("Texture").get<std::string>())
 			: L"";

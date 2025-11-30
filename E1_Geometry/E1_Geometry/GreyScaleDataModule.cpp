@@ -1,10 +1,6 @@
 #include "GreyScaleDataModule.h"
 
 GreyScaleDataModule::GreyScaleDataModule(ID3D11Device* device, HWND hwnd) {
-	initModule();
-}
-
-void GreyScaleDataModule::initModule() {
 	D3D11_BUFFER_DESC greyScaleBufferDesc;
 
 	// Setup the description of the dynamic camera constant buffer that is used in the vertex shader

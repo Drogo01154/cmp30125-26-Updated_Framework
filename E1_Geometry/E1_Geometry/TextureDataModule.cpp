@@ -1,13 +1,5 @@
 #include "TextureDataModule.h"
 TextureDataModule::TextureDataModule(ID3D11Device* device, HWND hwnd) : BaseShaderModule(device, hwnd) {
-	initModule();
-}
-TextureDataModule::~TextureDataModule() {
-
-}
-
-void TextureDataModule::initModule() {
-
 }
 
 void TextureDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, TextureResource* textureResource) {

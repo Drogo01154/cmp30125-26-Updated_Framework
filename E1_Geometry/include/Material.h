@@ -29,8 +29,6 @@ struct Material
 	XMFLOAT4 baseColour;						///< Colour value of texture;
 	XMFLOAT4 specularColour;					///< Specular colour value
 	float specularPower;						///< Specular power exponent
-	std::string shaderName;
-	ShaderInstance shader;						///< Materials Geometry Shader
 	std::wstring textureString;
 	TextureInstance texture;					///< Materials texture
 	std::unique_ptr<HeightMapInfo> HeightMapData;	///< Ptr to height map data of plane.
