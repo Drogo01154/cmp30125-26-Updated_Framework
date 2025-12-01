@@ -145,7 +145,7 @@ protected:
 		XMVECTOR forwards[6];
 	};
 
-	static Directions directions;
+	inline static Directions directions;
 };
 
 namespace nlohmann {

@@ -4,7 +4,7 @@ TextureShader::TextureShader(ShaderManager* shaderManager, ID3D11Device* device,
 {
 	initShader(L"texture_vs.cso", L"texture_ps.cso");
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
-	samplerStateModule = shaderManager->getShaderModuleID("RenderTextureSampleModule");
+	samplerStateModule = shaderManager->getShaderModuleID("RenderTextureSamplerModule");
 	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
 }
 

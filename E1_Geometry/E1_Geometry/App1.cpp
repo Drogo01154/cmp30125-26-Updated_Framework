@@ -1,121 +1,91 @@
 // Lab1.cpp
 // Lab 1 example, simple coloured triangle mesh
 #include "App1.h"
-
-#include "MatrixDataModule.h"
-#include "ShaderManager.h"
-#include "TextureDataModule.h"
-#include "SamplerDataModule.h"
-#include "LightsDataModule.h"
-
-#include "ColourShader.h"
-#include "TextureShader.h"
-
-
-#include "RenderPass.h"
 #include "FinalPass.h"
-#include "GeometryPass.h"
+#include "ShadowPass.h"
+#include "TextureShader.h"
+#include "ShadowShader.h"
+#include "CMDepthShader.h"
+#include "SMDepthShader.h"
+#include "TexturedLightShader.h"
+#include "LightPass.h"
+
 App1::App1()
 {
 	UIConstants::InitialiseSystem();
+}
+
+void App1::initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight) {
+	//Add modules
+	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+	shaderMgr->AddShaderModule<PointLightDataModule>("PointLightDataModule", renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<CameraDataModule>("CameraDataModule", renderer->getDevice(), hwnd, instanceMgr.get(), sceneGraph.get());
+	shaderMgr->AddShaderModule<ShadowMapDataModule>("ShadowMapDataModule", renderer->getDevice(), hwnd);
+
+
+	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
+	shaderMgr->AddShaderModule<SamplerDataModule>("MaterialTextureSamplerModule", renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<SamplerDataModule>("ShadowMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_MIN_MAG_MIP_POINT);
+	shaderMgr->AddShaderModule<SamplerDataModule>("CubeMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_MIN_MAG_MIP_POINT);
+
+
+	shaderMgr->addGeometryShader<SMDepthShader>("SMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+	shaderMgr->addGeometryShader<CMDepthShader>("CMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+	shaderMgr->addGeometryShader<ShadowShader>("ShadowShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+
+	//Add pass shader
+	shaderMgr->addPassShader<TextureShader>("TextureShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+
+	passMgr->AddPassConstructionFunction<DepthPass>("DepthPass", {}, DepthPassInput(instanceMgr.get(), shaderMgr.get(), renderer, 1024, 1024));
+
+	passMgr->AddPassConstructionFunction<ShadowPass>("ShadowPass", { "DepthPass" }, shaderMgr.get(),
+	instanceMgr.get(), renderer->getDevice(), renderer,
+	RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
+
+
+	passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", { "ShadowPass" }, renderer, shaderMgr.get(), instanceMgr.get(), OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
+
+	passMgr->InitPass("FinalPass");
+}
+void App1::initBasicLights(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight) {
+	//Add modules
+	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+	shaderMgr->AddShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd);
+	shaderMgr->AddShaderModule<CameraDataModule>("CameraDataModule", renderer->getDevice(), hwnd, instanceMgr.get(), sceneGraph.get());
+
+
+	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
+	shaderMgr->AddShaderModule<SamplerDataModule>("MaterialTextureSamplerModule", renderer->getDevice(), hwnd);
+
+	//Add geometry Shader
+	shaderMgr->addGeometryShader<TexturedLightShader>("BasicLightShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+
+	//Add pass shader
+	shaderMgr->addPassShader<TextureShader>("TextureShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+
+	passMgr->AddPassConstructionFunction<LightPass>("LightPass", {}, shaderMgr.get(),
+		instanceMgr.get(), renderer->getDevice(), renderer,
+		RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
+
+
+	passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", { "LightPass" }, renderer, shaderMgr.get(), instanceMgr.get(), OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
+
+	passMgr->InitPass("FinalPass");
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
 {	
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
-
-	//Add modules
-	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd, instanceMgr.get());
-	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd);
-	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSampleModule", DirtyModuleFlags::NONE, renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
-	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", DirtyModuleFlags::LIGHTSDATACHANGED | DirtyModuleFlags::LIGHTNUMCHANGED, renderer->getDevice(), hwnd, instanceMgr.get());
-
-	//Add geometry Shaders
-	shaderMgr->addGeometryShader<ColourShader>("ColourShader", shaderMgr.get(), renderer->getDevice(), hwnd);
-	//Add pass sahders
-	shaderMgr->addPassShader<TextureShader>("TextureShader", shaderMgr.get(), renderer->getDevice(), hwnd);
-
 	passMgr = std::make_unique<RenderPassManager>();
-	passMgr->AddPassConstructionFunction<GeometryPass>("GeometryPass", {}, instanceMgr.get(), shaderMgr.get(), renderer, RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
-	passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", {"GeometryPass"}, renderer, shaderMgr.get(), instanceMgr.get(), OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
-
-	shaderMgr->setDefaultGeometryShader("ColourShader");
-	materialMgr->createMaterial("Default");
-	//materialMgr->createMaterial("Default");	// Must be run for program to function
-
-	passMgr->InitPass("FinalPass");
-
-	ShaderInstance test = shaderMgr->getGeometryShader("ColourShader");
-	std::shared_ptr<ColourShader> testCast = std::dynamic_pointer_cast<ColourShader>(test.Get()->shader);
-
-	//ID3D11Texture3D* test;
-	//D3D11_SHADER_RESOURCE_VIEW_DESC
 	
-	//passMgr->AddPassConstructionFunction<GeometryPass>("GeometryPass", {}, instanceMgr, shaderMgr, renderer, RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
-	//passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", { "GeometryPass" }, renderer, OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
-	//passMgr->InitPass("FinalPass");
-
-
-	//Add matrix data modules
-	//shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
-
-	//Add Sampler modules
-	//shaderMgr->AddShaderModule<SamplerDataModule>("GeometryTextureSampleModule", renderer->getDevice(), hwnd);
-
-	//Add Light data modules
-	//
-
-	
-	//shaderMgr->addShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd);
-	//shaderMgr->addShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr);
-	//shaderMgr->addShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd, instanceMgr, sceneGraph);
-
-	/*
-	// Create Mesh object and shader object
-	// Cube mesh is the geometry in the scene.
-	// Ortho mesh is the geometry we render the result to.
-	cubeMesh = make_shared<CubeMesh>(renderer->getDevice(), renderer->getDeviceContext());
-	sphereMesh = make_shared<SphereMesh>(renderer->getDevice(), renderer->getDeviceContext());
-	orthoMeshTR = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, screenWidth / 2.7f, screenHeight / 2.7f);
-	orthoMeshMain = make_shared<OrthoMesh>(renderer->getDevice(), renderer->getDeviceContext(), screenWidth, screenHeight, 0.0f, 0.0f);
-
-	// Initialise shaders
-	// Lighting for normal rendering
-	// Texture to output the result (we don't need to do lighting again, as it has already be calculated)
-	texturedLightShader = std::make_shared<TexturedLightShader>(renderer->getDevice(), textureMgr, hwnd);
-	textureShader = std::make_shared<TextureShader>(renderer->getDevice(), hwnd);
-	miniMapTextureShader = std::make_shared<MiniMapTextureShader>(renderer->getDevice(), hwnd, screenWidth, screenHeight);
-	*/
-
-	/*
-	// Build RenderTexture, this will be our alternative render target.
-	renderTextureTR = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
-	renderTextureMain = make_shared<RenderTexture>(renderer->getDevice(), screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH);
-
-	shapeMaterial = make_shared<Material>();
-	// Create textured material
-	shapeMaterial->shader = texturedLightShader;
-	shapeMaterial->baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeMaterial->specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-	shapeMaterial->specularPower = 32.f;
-	shapeMaterial->texture = L"brick1";
-
-	// Create light
-	lights.emplace_back(make_shared<Light>(Light(lightTypes::directional)));
-	selectedLight = lights.size() - 1;
-	lights[0]->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
-	lights[0]->m_transform.set
-	lights[0]->setDirection(0.7f, 0.0f, 0.7f);
-
-	//Create second camera
-	miniMapCamera = std::make_shared<Camera>();
-	miniMapCamera->setRotation(90.0f, 0.0f, 0.0f);
-	miniMapCamera->setPosition(0.0f, 10.f, 0.0f);
-	miniMapCamera->update();
-
-	//camera->setPosition(35.f, 20.f, 0.f);
-	*/
+	//initBasicLights(hinstance, hwnd, screenWidth, screenHeight);
+	initShadows(hinstance, hwnd, screenWidth, screenHeight);
 }
 
 
@@ -144,7 +114,7 @@ bool App1::frame()
 	{
 		return false;
 	}
-	shaderMgr->ResetModuleDirtyflags();
+	
 	return true;
 }
 
@@ -155,6 +125,8 @@ bool App1::render()
 
 	passMgr->RenderAll(renderer->getDeviceContext(), renderer->getDevice());
 
+	shaderMgr->ResetModuleDirtyflags();
+
 	// Render GUI
 	gui();
 
@@ -162,98 +134,6 @@ bool App1::render()
 	renderer->endScene();
 	return true;
 }
-/*
-void App1::firstPass()
-{
-	// Set the render target to be the render to terxture and clear it
-	renderTextureTR->setRenderTarget(renderer->getDeviceContext());
-	renderTextureTR->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
-
-	// Get Matrices
-	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX viewMatrix = miniMapCamera->getViewMatrix();
-	XMMATRIX projectionMatrix = miniMapTextureShader->getOrthographicMatrix();
-
-	// Render normal scene, with light shader set.
-	cubeMesh->sendData(renderer->getDeviceContext());
-	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, miniMapCamera.get());
-	texturedLightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
-
-	//worldMatrix *= XMMatrixTranslation(2.0f, 0.0f, 5.0f);
-	worldMatrix = m_transform.AsMatrix();
-
-	sphereMesh->sendData(renderer->getDeviceContext());
-	Camera* c = miniMapCamera.get();
-
-	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, miniMapCamera.get());
-	texturedLightShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	renderer->setBackBufferRenderTarget();
-}
-
-void App1::secondPass()
-{
-	// Set the render target to be the render to terxture and clear it
-	renderTextureMain->setRenderTarget(renderer->getDeviceContext());
-	renderTextureMain->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
-
-	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX viewMatrix = camera->getViewMatrix();
-	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
-
-	// Render normal scene, with light shader set.
-	cubeMesh->sendData(renderer->getDeviceContext());
-	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
-	texturedLightShader->render(renderer->getDeviceContext(), cubeMesh->getIndexCount());
-
-	worldMatrix = m_transform.AsMatrix();
-
-	sphereMesh->sendData(renderer->getDeviceContext());
-	texturedLightShader->setShaderParamaters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, shapeMaterial, lights, ambientLight, camera);
-	texturedLightShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
-
-	// Reset the render target back to the original back buffer and not the render to texture anymore.
-	renderer->setBackBufferRenderTarget();
-	
-}
- 
-VOID App1::finalPass()
-{
-	// Clear the scene. (default blue colour)
-	renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
-	
-
-	// Get matrices
-	camera->update();
-	XMMATRIX worldMatrix = renderer->getWorldMatrix();
-	XMMATRIX viewMatrix = camera->getViewMatrix();
-	XMMATRIX projectionMatrix = renderer->getProjectionMatrix();
-
-	// RENDER THE RENDER TEXTURE SCENE
-	// Requires 2D rendering and an ortho mesh.
-	renderer->setZBuffer(false);
-	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
-	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
-
-
-	orthoMeshMain->sendData(renderer->getDeviceContext());
-	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureMain->getShaderResourceView());
-	textureShader->render(renderer->getDeviceContext(), orthoMeshMain->getIndexCount());
-
-	orthoMeshTR->sendData(renderer->getDeviceContext());
-	miniMapTextureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, orthoViewMatrix, orthoMatrix, renderTextureTR->getShaderResourceView(), camera, miniMapCamera.get());
-	miniMapTextureShader->render(renderer->getDeviceContext(), orthoMeshTR->getIndexCount());
-
-	renderer->setZBuffer(true);
-
-	// Render GUI
-	gui();
-
-	// Present the rendered scene to the screen.
-	renderer->endScene();
-}
-*/
 
 void App1::gui()
 {
@@ -267,14 +147,6 @@ void App1::gui()
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 
 	sceneGraph->imGuiRender();
-	/*
-	if (ImGui::SliderInt("Resolution: ", &resolution, 2, 1000)) {
-		plane.reset(); // Delete Plane
-
-		//Make new plane
-		plane = make_shared<PlaneMesh>(renderer->getDevice(), renderer->getDeviceContext(), resolution);
-	}
-	*/
 
 	// Render UI
 	ImGui::Render();

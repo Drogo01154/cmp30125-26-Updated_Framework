@@ -25,7 +25,7 @@ struct OutputType
     float4 position : SV_POSITION;
     float3 worldPos : TEXCOORD0;
     float3 viewVector : TEXCOORD1;
-    float2 tex : TEXCOORD0;
+    float2 tex : TEXCOORD2;
 	float3 normal : NORMAL;
 };
 

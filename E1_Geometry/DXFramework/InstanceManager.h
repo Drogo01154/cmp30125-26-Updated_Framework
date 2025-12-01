@@ -12,7 +12,7 @@
 
 struct GeometryData {
 
-	Transform m_transform;									// Local Transform
+	Transform m_transform;	// Local Transform
 
 	MeshInstance mesh;		// Base Mesh instance
 	MaterialInstance mat;	// Material Instance

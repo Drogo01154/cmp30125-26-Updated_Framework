@@ -27,6 +27,8 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	selectedMaterial = -1;
 	selectedTexture = -1;
 	selectedHeightMapTexture = -1;
+
+	createMaterial("Default");
 };
 
 //Gets material ID from name
@@ -66,7 +68,7 @@ void MaterialManager::createMaterial(const std::string& name) {
 	mat.baseColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	mat.specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	mat.specularPower = 32.f;
-	mat.textureString = L"";
+	mat.textureString = L"DefaultDiffuse";
 	mat.HeightMapData = nullptr;
 
 	materialCache.emplaceID(name, std::move(mat), false);

@@ -1,10 +1,11 @@
 #include"lightCommon_ps.hlsl"
-StructuredBuffer<float4x4> lightViewProj : register(t2); // lightProjectionMatrix * lightViewMatrix on the CPU
-Texture2DArray shadowMaps : register(t3);
-TextureCubeArray cubeMaps : register(t4);
-Texture2D shaderTexture : register(t5);
-SamplerState ShadowSampler : register(s0);
-SamplerState diffuseSampler : register(s1);
+StructuredBuffer<float4x4> lightViewProj : register(t1); // lightProjectionMatrix * lightViewMatrix on the CPU
+Texture2DArray shadowMaps : register(t2);
+TextureCubeArray cubeMaps : register(t3);
+Texture2D shaderTexture : register(t4);
+SamplerState ShadowMapSampler : register(s0);
+SamplerState CubeMapSampler : register(s1);
+SamplerState diffuseSampler : register(s2);
 
 // Is the gemoetry in our shadow map
 bool hasDepthData(float2 uv)
@@ -70,12 +71,12 @@ float4 main(InputType input) : SV_TARGET
         {
             for (int z = 0; z < 6; z++)
             {   //Get distance from light -> fragment
-                float fragmentDistance = length(input.position.xyz - lights[i].lightPosition);
+                float fragmentDistance = length(input.worldPos - lights[i].lightPosition);
                 
                 //Calculate direction of fragments world position -> light
-                float3 direction = normalize(input.worldPos - lights[i].lightPosition);
+                float3 direction = normalize(lights[i].lightPosition - input.worldPos);
                 //Sample depth value of cubemap - Radial distance from point light -> nearest fragment
-                float depthValue = cubeMaps.Sample(ShadowSampler, float4(direction, cubeMapIndex)).r;
+                float depthValue = cubeMaps.Sample(CubeMapSampler, float4(direction, cubeMapIndex)).r;
                 //if fragment closer than one in map object lit
                 if (fragmentDistance <= (depthValue + shadowMapBias))
                 {
@@ -98,7 +99,7 @@ float4 main(InputType input) : SV_TARGET
             if (hasDepthData(pTexCoord))
             {
                 // Sample the shadow map (get depth of geometry)
-                float depthValue = shadowMaps.Sample(ShadowSampler, float3(pTexCoord, shadowMapIndex)).r;
+                float depthValue = shadowMaps.Sample(ShadowMapSampler, float3(pTexCoord, shadowMapIndex)).r;
                 // Has depth map data
                 if (!isInShadow(depthValue, lightViewPos, shadowMapBias))
                 {
@@ -111,4 +112,5 @@ float4 main(InputType input) : SV_TARGET
             shadowMapIndex++;
         }
     }
+    return saturate(colour);
 }

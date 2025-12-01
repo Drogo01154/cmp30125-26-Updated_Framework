@@ -302,6 +302,9 @@
     <ClInclude Include="ShadowShader.h">
       <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
     </ClInclude>
+    <ClInclude Include="LightPass.h">
+      <Filter>Header Files\RenderPasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">

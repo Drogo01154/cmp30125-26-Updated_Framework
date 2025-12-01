@@ -11,7 +11,7 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 	selectedModel = -1;
 	selectedCreateModel = -1;
 	inputResolution = 20;
-	ambientLight = { 0.0f, 0.0f, 0.0f, 1.f };
+	ambientLight = XMFLOAT4(0.05f, 0.05f, 0.05f, 1.0f);
 
 	createBaseScene();
 }
@@ -30,6 +30,23 @@ void SceneGraph::SceneGraph::createBaseScene() {
 		camera->m_transform.setPosition(0.0f, 0.0f, -10.0f);
 		camera->update();
 		CameraNode->cameraInstance->camera;
+	}
+
+	std::shared_ptr<sceneNode> planeNode = createChild("Ground Plane", root);
+
+	planeNode->meshInstance = instanceManager->createPlaneMeshInstance(planeNode->meshID, inputResolution);
+	GeometryData* mesh = planeNode->meshInstance.Get();
+	mesh->m_transform.setParent(&planeNode->m_transform);
+	mesh->m_transform.computeGlobalMatrix(true);
+
+
+	std::shared_ptr<sceneNode> lightNode = createChild("Spot Light", root);
+	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::spot);
+	if (lightNode->lightInstance.IsValid()) {
+		Light& light = *lightNode->lightInstance;
+		light.m_transform.setParent(&lightNode->m_transform);
+		light.updateGlobals(true);
+		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 	}
 }
 
@@ -144,7 +161,7 @@ void SceneGraph::imGuiMeshCreation(std::shared_ptr<sceneNode> node) {
 
 			)) {
 			}
-			if (selectedCreateModel > 0 && ImGui::Button("Attach Model")) {
+			if (selectedCreateModel >= 0 && ImGui::Button("Attach Model")) {
 				if (createType == MeshType::AMODEL) {
 					node->meshInstance = instanceManager->createAModelInstance(node->meshID, std::string((*modelList)[selectedCreateModel]));
 				}
@@ -226,12 +243,13 @@ void SceneGraph::imGuiLightCreation(std::shared_ptr<sceneNode> node) {
 		3))
 	{
 	}
-	if (selectedCreateLight > 0 && ImGui::Button("Attach Light")) {
+	if (selectedCreateLight >= 0 && ImGui::Button("Attach Light")) {
 		node->lightInstance = instanceManager->createLight(node->lightID, static_cast<lightTypes>(selectedCreateLight));
 		if (node->lightInstance.IsValid()) {
 			Light& light = *node->lightInstance;
 			light.m_transform.setParent(&node->m_transform);
 			light.updateGlobals(true);
+			shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 		}
 	}
 }
@@ -244,7 +262,7 @@ void SceneGraph::imGuiCameraCreation(std::shared_ptr<sceneNode> node) {
 		2
 	)) {
 	}
-	if (selectedCreateCamera > 0 && ImGui::Button("Attach Camera")) {
+	if (selectedCreateCamera >= 0 && ImGui::Button("Attach Camera")) {
 		switch (static_cast<CameraTypes>(selectedCreateCamera))
 		{
 		case CameraTypes::BASIC:
@@ -373,7 +391,19 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 }
 
 void SceneGraph::imGuiRender() {
+	std::shared_ptr<Camera> cam = instanceManager->getActiveCamera()->camera;
+	const XMFLOAT3& cameraPos = cam->getGlobalPosition();
+	const XMFLOAT3& cameraDir = cam->getGlobalDirection();
+	std::string posText = "Camera Position: X: " + std::to_string(cameraPos.x) + " Y: " + std::to_string(cameraPos.y) + " Z: " + std::to_string(cameraPos.z);
+	std::string dirText = "Camera Direction: X: " + std::to_string(cameraDir.x) + " Y: " + std::to_string(cameraDir.y) + " Z: " + std::to_string(cameraDir.z);
+	ImGui::Text(posText.c_str());
+	ImGui::Text(dirText.c_str());
 	nodeIncrement = 0;
+	if (ImGui::CollapsingHeader("Ambeint")) {
+		if (ImGui::ColorPicker4("Ambeint Colour", &ambientLight.x)) {
+			shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
+		}
+	}
 	if (ImGui::CollapsingHeader("SceneGraph")) {
 		graphImGui(root);
 	}

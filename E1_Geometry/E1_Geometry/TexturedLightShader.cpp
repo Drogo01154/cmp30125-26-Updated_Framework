@@ -8,7 +8,7 @@ TexturedLightShader::TexturedLightShader(ShaderManager* shaderManager, ID3D11Dev
 	materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 	cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 
-	sampleStateModule = shaderManager->getShaderModuleID("GeometryTextureSampleModule");
+	sampleStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
 	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
 }
 

@@ -13,7 +13,6 @@ private:
 
 public: 
 	PointLightDataModule(ID3D11Device* device, HWND hwnd);
-	~PointLightDataModule();
 
 	void setModuleParamaters(ID3D11DeviceContext* deviceContext, const XMFLOAT3& lightPosition, float zPlane = 50.f);
 

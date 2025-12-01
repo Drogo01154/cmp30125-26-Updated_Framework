@@ -26,12 +26,15 @@ public:
 		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
 			if (instance->mat.IsValid()) {
-
-				matrixModule->setModuleParamaters(deviceContext, instance, renderer->getProjectionMatrix(), viewMatrix);
-				BaseMesh* mesh = instance->mesh->mesh.get();
-				mesh->sendData(deviceContext);
-				colourShader->shader->setResources(deviceContext);
-				colourShader->shader->render(deviceContext, mesh->getIndexCount());
+				MeshType type = instance->mesh->type;
+				if (type != MeshType::ORTHO || type != MeshType::POINT)
+				{
+					matrixModule->setModuleParamaters(deviceContext, instance, renderer->getProjectionMatrix(), viewMatrix);
+					BaseMesh* mesh = instance->mesh->mesh.get();
+					mesh->sendData(deviceContext);
+					colourShader->shader->setResources(deviceContext);
+					colourShader->shader->render(deviceContext, mesh->getIndexCount());
+				}
 			}
 		});
 	};

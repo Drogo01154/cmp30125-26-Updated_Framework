@@ -39,8 +39,8 @@ public:
 
 	virtual ~Camera() = default;
 
-	XMFLOAT3 getGlobalPosition() const;		///< Get camera's current position
-	XMFLOAT3 getGlobalDirection() const;		///< Get camera's current rotation
+	const XMFLOAT3& getGlobalPosition() const;		///< Get camera's current position
+	const XMFLOAT3& getGlobalDirection() const;		///< Get camera's current rotation
 
 	void updateGlobals(bool updateTransform);
 

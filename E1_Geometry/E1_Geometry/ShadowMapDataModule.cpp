@@ -1,6 +1,7 @@
 #include "ShadowMapDataModule.h"
 
 ShadowMapDataModule::ShadowMapDataModule(ID3D11Device* device, HWND hwnd) : BaseShaderModule(device, hwnd) {
+	maxLights = 10;
 	setMatrixBuffer();
 }
 

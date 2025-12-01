@@ -22,8 +22,8 @@ class ShadowShader : public BaseShader {
 		ModuleInstance materialDataModule;	//Material Data module
 		ModuleInstance shadowMapDataModule;	//Module for shadow maps
 		
-		ModuleInstance textureSamplerStateModule; // Module for texture sampler
-		ModuleInstance shadowMapSamplerStateModule; // Module for shadow map samplet
-		ModuleInstance textureDataModule;		   // Module for texture data
-	};
+		ModuleInstance textureSamplerStateModule;	// Module for texture sampler
+		ModuleInstance shadowMapSamplerStateModule;	// Module for shadow map sampler
+		ModuleInstance cubeMapSamplerStateModule;	// Module for cube map sampler
+		ModuleInstance textureDataModule;			// Module for texture data
 };

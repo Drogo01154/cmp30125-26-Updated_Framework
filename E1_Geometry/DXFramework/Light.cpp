@@ -12,7 +12,7 @@ Light::Light(lightTypes type) :
 	outerCone(XMConvertToRadians(40.f)),
 	type(type) 
 {
-	m_transform.setPosition(35.f, 30.f, 25.f);
+	m_transform.setPosition(10.f, 5, 10.f);
 
 	// create a target point by adding a downward direction to the position
 	XMVECTOR directionDown = XMVectorSet(0.f, -1.f, 0.f, 0.f);
@@ -200,6 +200,13 @@ float Light::getOrthoWidth() const { return orthoWidth; }
 float Light::getOrthoHeight() const { return orthoHeight; }
 
 bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
+
+	XMFLOAT3 lightPos = getGlobalPosition();
+	XMFLOAT3 lightDir = getGlobalDirection();
+	std::string posText = "Light Position: X: " + std::to_string(lightPos.x) + " Y: " + std::to_string(lightPos.y) + " Z: " + std::to_string(lightPos.z);
+	std::string dirText = "Light Direction: X: " + std::to_string(lightDir.x) + " Y: " + std::to_string(lightDir.y) + " Z: " + std::to_string(lightDir.z);
+	ImGui::Text(posText.c_str());
+	ImGui::Text(dirText.c_str());
 	bool lightUpdated = false;
 	ImGui::Text(("Light Type: " + std::string(LightTypeStrings[type])).c_str());
 

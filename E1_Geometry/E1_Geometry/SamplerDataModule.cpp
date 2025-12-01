@@ -4,7 +4,8 @@ SamplerDataModule::SamplerDataModule(ID3D11Device* device, HWND hwnd,
 	D3D11_TEXTURE_ADDRESS_MODE textureMode,
 	D3D11_FILTER filter,
 	UINT maxAnisotropy,
-	D3D11_COMPARISON_FUNC compFunc) :
+	D3D11_COMPARISON_FUNC compFunc,
+	const float* borderColor) :
 	BaseShaderModule(device, hwnd),
 	textureMode(textureMode),
 	filter(filter),
@@ -22,6 +23,16 @@ SamplerDataModule::SamplerDataModule(ID3D11Device* device, HWND hwnd,
 	samplerDesc.ComparisonFunc = compFunc;
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	if (textureMode == D3D11_TEXTURE_ADDRESS_BORDER) {
+		if (borderColor) {
+			memcpy(samplerDesc.BorderColor, borderColor, sizeof(float) * 4);
+		}
+		else {
+			const float defaultBorder[4] = { 1.f, 1.f, 1.f, 1.f };
+			memcpy(samplerDesc.BorderColor, defaultBorder, sizeof(defaultBorder));
+		}
+	}
 	renderer->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
 }
 

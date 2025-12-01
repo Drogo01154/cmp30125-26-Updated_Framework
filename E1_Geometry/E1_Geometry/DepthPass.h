@@ -25,6 +25,9 @@ public:
 	{
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		pointLightDataModule = shaderManager->getShaderModuleID("PointLightDataModule");
+		RegularDepthShader = shaderManager->getGeometryShader("SMDepthShader");
+		PointDepthShader = shaderManager->getGeometryShader("CMDepthShader");
+		
 		numPointLights = 0;
 		numNonPointLights = 0;
 		maxPointLights = 5;
@@ -35,6 +38,12 @@ public:
 	void updateProjectionMatrices() {
 		instanceManager->forEachLight([&](const size_t& ID, Light* light) {
 			light->generateProjectionMatrix(spotLightAspect);
+			});
+	}
+
+	void updateViewMatrices() {
+		instanceManager->forEachLight([](const size_t& ID, Light* light) {
+			light->generateViewMatrix();
 			});
 	}
 
@@ -80,6 +89,9 @@ public:
 		size_t index = 0;
 		int pointIndex = 0;
 		int nonPointIndex = 0;
+		/*
+			Loop over lights and stoe indexes in shadow/cube maps
+		*/
 		instanceManager->forEachLight([&](const size_t& ID, Light* light) {
 			lightTypes lightType = light->getType();
 			switch (lightType) {
@@ -107,10 +119,12 @@ public:
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
 		bool lightNumChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED);
 		bool projectionChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTPROJECTIONCHANGED);
+		bool lightDataChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED);
 		if (lightNumChanged) {
 			updateSizes(device);
 			updateVectors();
 		}
+		if(lightNumChanged || lightDataChanged) { updateViewMatrices(); }
 		if(lightNumChanged || projectionChanged) { updateProjectionMatrices(); }
 
 		int pointIndex = 0;
@@ -121,12 +135,17 @@ public:
 
 		auto GeometryRenderFunction = [&](ShaderInstance& shaderInstance, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix) {
 			instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
-				matrixModule->setModuleParamaters(deviceContext, instance, projectionMatrix, viewMatrix);
-				BaseMesh* mesh = instance->mesh->mesh.get();
-				mesh->sendData(deviceContext);
-				shaderInstance->shader->setResources(deviceContext);
-				shaderInstance->shader->render(deviceContext, mesh->getIndexCount());
-				});
+				MeshType type = instance->mesh->type;
+				if (type != MeshType::ORTHO && type != MeshType::POINT)
+				{
+					matrixModule->setModuleParamaters(deviceContext, instance, projectionMatrix, viewMatrix);
+					BaseMesh* mesh = instance->mesh->mesh.get();
+					mesh->sendData(deviceContext);
+					shaderInstance->shader->setResources(deviceContext);
+					shaderInstance->shader->render(deviceContext, mesh->getIndexCount());
+				}
+			});
+
 		};
 
 		for (std::pair<size_t, Light*> light : pointLights) {

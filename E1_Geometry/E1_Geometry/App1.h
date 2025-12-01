@@ -15,6 +15,9 @@ public:
 	~App1();
 	void init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input* in, bool VSYNC, bool FULL_SCREEN);
 
+	void initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
+	void initBasicLights(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight);
+
 	bool frame();
 
 protected:

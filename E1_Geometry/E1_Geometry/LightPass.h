@@ -1,21 +1,18 @@
 #pragma once
-#include "DepthPass.h"
 #include "RenderToTexturePass.h"
 #include "LightsDataModule.h"
 #include "CameraDataModule.h"
-#include "PointLightDataModule.h"
-#include "ShadowMapDataModule.h"
 #include "SamplerDataModule.h"
 #include "TextureDataModule.h"
 #include "MatrixDataModule.h"
 #include "MaterialDataModule.h"
 
-class ShadowPass : public RenderToTexturePass {
+class LightPass : public RenderToTexturePass {
 public:
-	ShadowPass(
+	LightPass(
 		size_t stage, passDependancies& deps, ShaderManager* shaderManager,
 		InstanceManager* instanceManager, ID3D11Device* device, D3D* renderer,
-		const RenderTextureData& RTData) 
+		const RenderTextureData& RTData)
 		: RenderToTexturePass(stage, deps, shaderManager, device, RTData),
 		instanceManager(instanceManager), shaderManager(shaderManager), renderer(renderer)
 	{
@@ -23,11 +20,8 @@ public:
 		lightDataModule = shaderManager->getShaderModuleID("LightsDataModule");
 		materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 		cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
-		shadowMapDataModule = shaderManager->getShaderModuleID("ShadowMapDataModule");
 		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
-		shader = shaderManager->getGeometryShader("ShadowShader");
-
-		depthPass = std::dynamic_pointer_cast<DepthPass>(deps.begin()->second);
+		shader = shaderManager->getGeometryShader("BasicLightShader");
 	}
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
@@ -43,44 +37,23 @@ public:
 		//Check if light number or data changed
 		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED) ||
 			shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED)) {
-			
+
 			// Update light data module
 			shared_ptr<LightsDataModule> lightsData = std::dynamic_pointer_cast<LightsDataModule>(lightDataModule->module);
-			lightsData->setModuleParamaters(deviceContext, depthPass->getLightIndexes());
-			// Calculate lightViewProj Matrices
-			std::vector<XMMATRIX> lightViewProjMatrices;
-			instanceManager->forEachLight([&](size_t ID, Light* light) {
-				lightTypes type = light->getType();
-				if (type == lightTypes::point) {
-					for (int i = 0; i < 6; ++i) {
-						lightViewProjMatrices.push_back(XMMatrixMultiply(light->getProjectionMatrix(), light->getViewMatrix(i)));
-					}
-				}
-				else {
-					lightViewProjMatrices.push_back(XMMatrixMultiply(light->getProjectionMatrix(), light->getViewMatrix(0)));
-				}
-				
-				});
-			//Update shadow map module
-			shared_ptr<ShadowMapDataModule> shadowMapData = std::dynamic_pointer_cast<ShadowMapDataModule>(shadowMapDataModule->module);
-			shadowMapData->setModuleParamaters(
-				deviceContext, 
-				&lightViewProjMatrices, depthPass->getShadowMapArray()->getDepthMapArraySRV(), 
-				depthPass->getCubeMapArray()->getCubeMapArraySRV());
-		
+			lightsData->setModuleParamaters(deviceContext, nullptr);
 		}
 		size_t lightNum = instanceManager->getNumberOfLights();
 		if (instanceManager->getNumberOfLights() == 0) { return; }
 		std::shared_ptr<MatrixDataModule> matrixData = std::dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		std::shared_ptr<MaterialDataModule> materialData = std::dynamic_pointer_cast<MaterialDataModule>(materialDataModule->module);
 		std::shared_ptr<TextureDataModule> textureData = std::dynamic_pointer_cast<TextureDataModule>(textureDataModule->module);
-		
+
 		XMMATRIX viewMatrix = instanceManager->getActiveCamera()->camera->getViewMatrix();
 		const XMMATRIX& projectionMatrix = renderer->getProjectionMatrix();
 		//Loop over geometry
 		instanceManager->forEachMesh([&](size_t ID, GeometryData* meshInstance) {
 			MeshType type = meshInstance->mesh->type;
-			if(type != MeshType::ORTHO && type != MeshType::POINT) 
+			if (type != MeshType::ORTHO && type != MeshType::POINT)
 			{
 				Material* mat = meshInstance->mat;
 				// Set matrix Data
@@ -103,7 +76,6 @@ private:
 	D3D* renderer;
 	InstanceManager* instanceManager;
 	ShaderManager* shaderManager;
-	std::shared_ptr<DepthPass> depthPass;
 
 	//Vertex Shader Modules
 	ModuleInstance matrixDataModule;	// Shaders Matrix Data
@@ -112,7 +84,5 @@ private:
 	//Pixel Shader Modules
 	ModuleInstance lightDataModule;		//Lights data module
 	ModuleInstance materialDataModule;	//Material Data module
-	ModuleInstance shadowMapDataModule;	//Module for shadow maps
-
 	ModuleInstance textureDataModule;	//Module for materials texture
 };

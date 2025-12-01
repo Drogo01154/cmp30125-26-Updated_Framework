@@ -20,10 +20,10 @@ float Camera::getLookSpeed() const { return lookSpeed; }
 
 void Camera::setLookSpeed(float speed) { this->lookSpeed = speed; }
 
-XMFLOAT3 Camera::getGlobalPosition() const {
+const XMFLOAT3& Camera::getGlobalPosition() const {
 	return globalPosition;
 }
-XMFLOAT3 Camera::getGlobalDirection() const {
+const XMFLOAT3& Camera::getGlobalDirection() const {
 	return globalDirection;
 }
 

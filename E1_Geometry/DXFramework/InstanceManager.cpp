@@ -52,8 +52,8 @@ void InstanceManager::removeCameraInstance(size_t ID) {
 	cameraCache.RemoveID(ID);
 }
 
-size_t InstanceManager::getNumberOfLights() { return geometryCache.size(); }
-size_t InstanceManager::getNumberOfMeshes() { return lightCache.size(); }
+size_t InstanceManager::getNumberOfLights() { return lightCache.size(); }
+size_t InstanceManager::getNumberOfMeshes() { return geometryCache.size(); }
 size_t InstanceManager::getNumberOfCameras() { return cameraCache.size(); }
 
 void InstanceManager::clearGeometry() {

@@ -191,9 +191,15 @@
     <ClCompile Include="MiniMapTextureShader.cpp" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
-    <FxCompile Include="shaders\depthCM_ps.hlsl" />
-    <FxCompile Include="shaders\depthCM_vs.hlsl" />
-    <FxCompile Include="shaders\depthSM_vs.hlsl" />
+    <FxCompile Include="shaders\depthCM_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\depthCM_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\depthSM_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\BoxBlur_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -282,6 +288,7 @@
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="DepthPass.h" />
+    <ClInclude Include="LightPass.h" />
     <ClInclude Include="PointLightDataModule.h" />
     <ClInclude Include="ShadowMapDataModule.h" />
     <ClInclude Include="ShadowPass.h" />
