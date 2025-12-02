@@ -218,6 +218,8 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="PlaneMesh.h" />
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="QuadMesh.h" />
+    <ClInclude Include="RenderPass.h" />
+    <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="SerializationHelpers.h" />

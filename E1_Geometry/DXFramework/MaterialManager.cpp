@@ -154,77 +154,79 @@ void MaterialManager::deleteAllMaterials() {
 
 void MaterialManager::imGuiRender() {
 
-	const std::vector<const char*> CacheVec = materialCache.getCharVec();
-	if (ImGui::Combo("Select Material", &selectedMaterial, CacheVec.data(), CacheVec.size())) {
-		updateSelectedMaterial();
-	}
+	if (ImGui::CollapsingHeader("Material Settings: ")) {
+		const std::vector<const char*> CacheVec = materialCache.getCharVec();
+		if (ImGui::Combo("Select Material", &selectedMaterial, CacheVec.data(), CacheVec.size())) {
+			updateSelectedMaterial();
+		}
 
-	if (selectedMaterial >= 0) {
-		//Get selected materials ID
-		const std::string& matName = materialCache.getCachedName(selectedMaterial);
-		//Get material from ID
-		if (Material* mat = materialCache.tryGetValue(matName)) {
-			//Output materials Name
-			if (ImGui::InputText("Material Name", nameInput, sizeof(nameInput),
-				ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (selectedMaterial >= 0) {
+			//Get selected materials ID
+			const std::string& matName = materialCache.getCachedName(selectedMaterial);
+			//Get material from ID
+			if (Material* mat = materialCache.tryGetValue(matName)) {
+				//Output materials Name
+				if (ImGui::InputText("Material Name", nameInput, sizeof(nameInput),
+					ImGuiInputTextFlags_EnterReturnsTrue)) {
 
-				// This block executes when the user presses Enter
-				std::string newName(nameInput);
-				if (materialCache.changeID(matName, newName)) {
-					mat->MaterialName = newName;
-					return;
-				}
-				else {
-					updateSelectedMaterial();
-				}
-			}
-			if (ImGui::TreeNode("Material: Colour")) {
-				ImGui::ColorPicker4("Material Albedo: ", &mat->baseColour.x);
-				ImGui::TreePop();
-			}
-			if (ImGui::TreeNode("Material: Specular")) {
-				ImGui::ColorPicker4("Material Specular Colour: ", &mat->specularColour.x);
-				ImGui::SliderFloat("Specular Power: ## 0", &mat->specularPower, 1.f, 1000.f);
-				ImGui::TreePop();
-			}
-			if (mat->HeightMapData == nullptr && ImGui::Button("Make Heightmap")) {
-				mat->HeightMapData = std::make_unique<HeightMapInfo>();
-				mat->HeightMapData->HeightTextureString = L"";
-				mat->HeightMapData->HeightMultiplier = 10.f;
-			}
-			
-			const std::vector<const char*>* imageList = FileHandler::get().getImageList();
-			if (ImGui::Combo("Select Material Texture: ", &selectedTexture, imageList->data(), imageList->size())) {
-
-				if (selectedTexture >= 0) {
-					mat->textureString = textureManager->getTextureNameFromIndex(selectedTexture);
-				}
-
-				if (materialCache.hasInstances(matName)) {
-					mat->texture = textureManager->getTexture(mat->textureString);
-				}
-			}
-
-			if (mat->HeightMapData != nullptr) {
-				const std::vector<const char*>* imageList = FileHandler::get().getImageList();
-				if (ImGui::Combo("Select HeightMap Texture: ", &selectedHeightMapTexture, imageList->data(), imageList->size())) {
-					if (selectedHeightMapTexture >= 0) {
-						mat->HeightMapData->HeightTextureString = textureManager->getTextureNameFromIndex(selectedHeightMapTexture);
-						if (materialCache.hasInstances(matName)) {
-							mat->HeightMapData->HeightTexture = textureManager->getTexture(mat->HeightMapData->HeightTextureString);
-						}
+					// This block executes when the user presses Enter
+					std::string newName(nameInput);
+					if (materialCache.changeID(matName, newName)) {
+						mat->MaterialName = newName;
+						return;
 					}
 					else {
-						mat->HeightMapData->HeightTextureString = L"";
-						mat->HeightMapData->HeightTexture = TextureInstance();
+						updateSelectedMaterial();
+					}
+				}
+				if (ImGui::TreeNode("Material: Colour")) {
+					ImGui::ColorPicker4("Material Albedo: ", &mat->baseColour.x);
+					ImGui::TreePop();
+				}
+				if (ImGui::TreeNode("Material: Specular")) {
+					ImGui::ColorPicker4("Material Specular Colour: ", &mat->specularColour.x);
+					ImGui::SliderFloat("Specular Power: ## 0", &mat->specularPower, 1.f, 1000.f);
+					ImGui::TreePop();
+				}
+				if (mat->HeightMapData == nullptr && ImGui::Button("Make Heightmap")) {
+					mat->HeightMapData = std::make_unique<HeightMapInfo>();
+					mat->HeightMapData->HeightTextureString = L"";
+					mat->HeightMapData->HeightMultiplier = 10.f;
+				}
+
+				const std::vector<const char*>* imageList = FileHandler::get().getImageList();
+				if (ImGui::Combo("Select Material Texture: ", &selectedTexture, imageList->data(), imageList->size())) {
+
+					if (selectedTexture >= 0) {
+						mat->textureString = textureManager->getTextureNameFromIndex(selectedTexture);
+					}
+
+					if (materialCache.hasInstances(matName)) {
+						mat->texture = textureManager->getTexture(mat->textureString);
 					}
 				}
 
+				if (mat->HeightMapData != nullptr) {
+					const std::vector<const char*>* imageList = FileHandler::get().getImageList();
+					if (ImGui::Combo("Select HeightMap Texture: ", &selectedHeightMapTexture, imageList->data(), imageList->size())) {
+						if (selectedHeightMapTexture >= 0) {
+							mat->HeightMapData->HeightTextureString = textureManager->getTextureNameFromIndex(selectedHeightMapTexture);
+							if (materialCache.hasInstances(matName)) {
+								mat->HeightMapData->HeightTexture = textureManager->getTexture(mat->HeightMapData->HeightTextureString);
+							}
+						}
+						else {
+							mat->HeightMapData->HeightTextureString = L"";
+							mat->HeightMapData->HeightTexture = TextureInstance();
+						}
+					}
+
+				}
 			}
-		}
-		
-		if (ImGui::Button("Delete Material")) {
-			deleteMaterial(matName);
+
+			if (ImGui::Button("Delete Material")) {
+				deleteMaterial(matName);
+			}
 		}
 	}
 }

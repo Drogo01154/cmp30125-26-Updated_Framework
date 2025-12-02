@@ -1,8 +1,8 @@
 // Light vertex shader
 // Standard issue vertex shader, apply matrices, pass info to pixel shader
 
-Texture2D texture0 : register(t0);
-SamplerState sampler0 : register(s0);
+Texture2D heightMapTexture : register(t0);
+SamplerState textureSampler : register(s0);
 
 cbuffer MatrixBuffer : register(b0)
 {
@@ -11,7 +11,13 @@ cbuffer MatrixBuffer : register(b0)
 	matrix projectionMatrix;
 };
 
-cbuffer mapData : register(b1)
+cbuffer CameraBuffer : register(b1)
+{
+    float3 cameraPosition;
+    float padding;
+}
+
+cbuffer mapData : register(b2)
 {
     float2 offset;
     float heightMultiplier;
@@ -27,17 +33,20 @@ struct InputType
 
 struct OutputType
 {
-	float4 position : SV_POSITION;
-	float2 tex : TEXCOORD0;
-	float3 normal : NORMAL;
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 worldPosition : TEXCOORD1;
+    float3 viewVector : TEXCOORD2;
 };
-
 
 //Shape Deformation
 OutputType main(InputType input)
 {
     OutputType output;
-    input.position.y += texture0.SampleLevel(sampler0, input.tex, 0) * heightMultiplier;
+	
+	//Increase Vertex Y position by heighMultiplier.
+    input.position.y += heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
 	
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
@@ -50,6 +59,11 @@ OutputType main(InputType input)
 	// Calculate the normal vector against the world matrix only and normalise.
     output.normal = mul(input.normal, (float3x3) worldMatrix);
     output.normal = normalize(output.normal);
+    
+    // Calculate the positon of the vertex in the world
+    output.worldPosition = mul(input.position, worldMatrix).xyz;
+    output.viewVector = cameraPosition.xyz - output.worldPosition.xyz;
+    output.viewVector = normalize(output.viewVector);
 
     return output;
 }

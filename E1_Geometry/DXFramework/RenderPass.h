@@ -1,6 +1,13 @@
 #pragma once
 
-#include "DXF.h"
+#ifndef _RENDERPASS_H_
+#define _RENDERPASS_H_
+
+#include <d3d11.h>    
+#include <dxgi.h>    
+#include <d3dcompiler.h> 
+#include <unordered_map>
+#include <memory>
 
 #define passDependancies std::unordered_map<std::string, std::shared_ptr<renderPass>>
 
@@ -15,8 +22,4 @@ private:
 	bool hasImGui;
 };
 
-/*
-	Render pass will require two functions:
-		1: render, renders result of pass to render target or its required data?
-
-*/
+#endif

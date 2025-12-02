@@ -49,9 +49,6 @@
     <Filter Include="Resource Files\Texture Shaders\KernelShaders">
       <UniqueIdentifier>{941fd6ef-9a9b-4ae9-aa01-d3cf16f0055e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Managers">
-      <UniqueIdentifier>{d16629d1-0b23-4751-9648-5b4958ced940}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\ShaderModules\GeometryShaderModules">
       <UniqueIdentifier>{408559b8-34f3-48b9-8abf-7816d18d7ed6}</UniqueIdentifier>
     </Filter>
@@ -224,12 +221,6 @@
     <ClInclude Include="KernelShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
-    <ClInclude Include="RenderPassManager.h">
-      <Filter>Header Files\Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
     <ClInclude Include="ManipulationShader.h">
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
@@ -299,10 +290,10 @@
     <ClInclude Include="ShadowPass.h">
       <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowShader.h">
-      <Filter>Header Files\Shaders\MeshShaders\LightShaders</Filter>
-    </ClInclude>
     <ClInclude Include="LightPass.h">
+      <Filter>Header Files\RenderPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowShader.h">
       <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
   </ItemGroup>
@@ -392,6 +383,12 @@
     </None>
     <None Include="shaders\kernel_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </None>
+    <None Include="shaders\shadowCommon_ps.hlsl">
+      <Filter>Resource Files\Shadow Shaders</Filter>
+    </None>
+    <None Include="shaders\heightMapCommon_ps.hlsl">
+      <Filter>Resource Files\Geometry Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

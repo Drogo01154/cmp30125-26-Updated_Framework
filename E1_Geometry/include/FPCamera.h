@@ -24,7 +24,7 @@ public:
 
 	void update() override;
 
-	void move(float dt);	///< Move camera, handles basic camera movement
+	bool move(float dt);	///< Move camera, handles basic camera movement
 
 private:
 	Input* input;

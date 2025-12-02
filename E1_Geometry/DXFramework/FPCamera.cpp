@@ -12,16 +12,15 @@ FPCamera::FPCamera(Input* in, int width, int height, HWND hnd)
 }
 
 void FPCamera::update() {
-	XMVECTOR worldUp = XMVectorSet(0, 1, 0, 0);         // fixed world up
+	//Calculate yaw rotation around Global up axis
+	XMVECTOR outputRotation = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 0), yaw);
 
-	XMVECTOR yawQ = XMQuaternionRotationAxis(worldUp, yaw);
-	XMVECTOR outputRotation = XMQuaternionMultiply(yawQ, XMQuaternionIdentity());
-
-
-	XMVECTOR localRight = XMVector3Rotate(XMVectorSet(1, 0, 0, 0), outputRotation); // current right
+	//Calculate updated local right vector from previous yaw rotation
+	XMVECTOR localRight = XMVector3Rotate(XMVectorSet(1, 0, 0, 0), outputRotation);
+	//Calculate pitch rotation around local yaw
 	XMVECTOR pitchQ = XMQuaternionRotationAxis(localRight, pitch);
 
-
+	//Multiply yaw and pitch rotation to get result 
 	outputRotation = XMQuaternionMultiply(outputRotation, pitchQ);
 
 	//Normalize before storing
@@ -32,59 +31,70 @@ void FPCamera::update() {
 	Camera::update();
 }
 
-void FPCamera::move(float dt)
+bool FPCamera::move(float dt)
 {
+	bool updatedCamera = false;
 	setFrameTime(dt);
 	// Handle the input.
 	if (input->isKeyDown('W'))
 	{
 		// forward
 		moveForward();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown('S'))
 	{
 		// back
 		moveBackward();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown('A'))
 	{
 		// Strafe Left
 		strafeLeft();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown('D'))
 	{
 		// Strafe Right
 		strafeRight();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown('Q'))
 	{
 		// Down
 		moveDownward();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown('E'))
 	{
 		// Up
 		moveUpward();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown(VK_UP))
 	{
 		// rotate up
 		turnUp();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown(VK_DOWN))
 	{
 		// rotate down
 		turnDown();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown(VK_LEFT))
 	{
 		// rotate left
 		turnLeft();
+		updatedCamera = true;
 	}
 	if (input->isKeyDown(VK_RIGHT))
 	{
 		// rotate right
 		turnRight();
+		updatedCamera = true;
 	}
 
 	if (input->isMouseActive())
@@ -97,6 +107,7 @@ void FPCamera::move(float dt)
 		cursor.y = winHeight / 2;
 		ClientToScreen(wnd, &cursor);
 		SetCursorPos(cursor.x, cursor.y);
+		updatedCamera = true;
 	}
 
 	if (input->isRightMouseDown() && !input->isMouseActive())
@@ -142,4 +153,5 @@ void FPCamera::move(float dt)
 	//	}
 	//}
 	update();
+	return updatedCamera;
 }

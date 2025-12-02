@@ -218,6 +218,12 @@
     <FxCompile Include="shaders\depthSM_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
+    <None Include="shaders\shadowCommon_ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="shaders\heightMapCommon_ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="shaders\shadow_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -306,8 +312,6 @@
     <ClInclude Include="MaterialDataModule.h" />
     <ClInclude Include="MiniMapDataModule.h" />
     <ClInclude Include="MiniMapPass.h" />
-    <ClInclude Include="RenderPass.h" />
-    <ClInclude Include="RenderPassManager.h" />
     <ClInclude Include="RenderToTexturePass.h" />
     <ClInclude Include="SamplerDataModule.h" />
     <ClInclude Include="ShaderInit.h" />

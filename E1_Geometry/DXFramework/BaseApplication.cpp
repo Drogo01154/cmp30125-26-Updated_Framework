@@ -45,6 +45,7 @@ void BaseApplication::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int 
 	geometryMgr = std::make_unique<GeometryManager>(renderer->getDevice(), renderer->getDeviceContext());
 	instanceMgr = std::make_unique<InstanceManager>(shaderMgr.get(), geometryMgr.get(), materialMgr.get(), input, wnd, sWidth, sHeight);
 	sceneGraph = std::make_unique<SceneGraph>(shaderMgr.get(), instanceMgr.get(), geometryMgr.get());
+	passMgr = std::make_unique<RenderPassManager>();
 
 	//textureMgr->loadTexture(L"default", L"res/DefaultDiffuse.png");
 
@@ -98,7 +99,7 @@ void BaseApplication::handleInput(float frameTime)
 	CameraData* camData = instanceMgr->getActiveCamera();
 	if (camData->type == CameraTypes::FPCAMERA) {
 		if (std::shared_ptr<FPCamera> fp = std::dynamic_pointer_cast<FPCamera>(camData->camera)) {
-			fp->move(frameTime);
+			if (fp->move(frameTime)) { shaderMgr->SetModuleDirtyflags(DirtyModuleFlags::CAMERA); }
 		}
 	}
 }

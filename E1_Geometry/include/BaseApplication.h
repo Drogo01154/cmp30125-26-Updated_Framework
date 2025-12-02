@@ -29,6 +29,7 @@ const float SCREEN_NEAR = 0.1f;		//0.1f
 #include "TextureManager.h"
 #include "SceneGraph.h"
 #include "ShaderManager.h"
+#include "RenderPassManager.h"
 
 
 class BaseApplication
@@ -79,6 +80,7 @@ protected:
 	std::unique_ptr<MaterialManager> materialMgr;
 	std::unique_ptr<GeometryManager> geometryMgr;
 	std::unique_ptr<InstanceManager> instanceMgr;
+	std::unique_ptr<RenderPassManager> passMgr;
 	std::unique_ptr<SceneGraph> sceneGraph;
 	bool wireframeToggle;	///< Boolean tracking if wireframe is de/activated
 };

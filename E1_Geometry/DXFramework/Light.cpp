@@ -8,8 +8,8 @@
 Light::Light(lightTypes type) :
 	attenuation(0.05f, 0.01f, 0.001f, 100.f),
 	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
-	innerCone(XMConvertToRadians(20.f)),
-	outerCone(XMConvertToRadians(40.f)),
+	innerCone(XMConvertToRadians(8.f)),
+	outerCone(XMConvertToRadians(20.f)),
 	type(type) 
 {
 	m_transform.setPosition(10.f, 5, 10.f);
@@ -49,10 +49,10 @@ void Light::generateViewMatrix()
 		}
 	}
 	else {
-		XMVECTOR dir = m_transform.getWorldForward();
-		XMVECTOR up = m_transform.getWorldUp();
+		XMVECTOR forward = cleanVector3(m_transform.getWorldForward());
+		XMVECTOR up = cleanVector3(m_transform.getWorldUp());
 		// Create the view matrix from the three vectors.
-		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + dir, up);
+		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + forward, up);
 	}
 }
 

@@ -10,7 +10,43 @@
 
 using namespace DirectX;
 
+inline XMFLOAT2 cleanFloat2(const XMFLOAT2& vec) {
+	XMFLOAT2 returnVec = vec;
+	if (abs(vec.x) < 1e-6) returnVec.x = 0.f;
+	if (abs(vec.y) < 1e-6) returnVec.y = 0.f;
+	return returnVec;
+}
 
+inline XMFLOAT3 cleanFloat3(const XMFLOAT3& vec) {
+	XMFLOAT3 returnVec = vec;
+	if (abs(vec.x) < 1e-6) returnVec.x = 0;
+	if (abs(vec.y) < 1e-6) returnVec.y = 0;
+	if (abs(vec.z) < 1e-6) returnVec.z = 0;
+	return returnVec;
+}
+
+inline XMFLOAT4 cleanFloat4(const XMFLOAT4& vec) {
+	XMFLOAT4 returnVec = vec;
+	if (abs(vec.x) < 1e-6) returnVec.x = 0;
+	if (abs(vec.y) < 1e-6) returnVec.y = 0;
+	if (abs(vec.z) < 1e-6) returnVec.z = 0;
+	if (abs(vec.w) < 1e-6) returnVec.w = 0;
+	return returnVec;
+}
+
+inline XMVECTOR cleanVector3(const XMVECTOR& vec) {
+	XMFLOAT3 inputVec;
+	XMStoreFloat3(&inputVec, vec);
+	XMFLOAT3 outputVec = cleanFloat3(inputVec);
+	return XMLoadFloat3(&outputVec);
+}
+
+inline XMVECTOR cleanVector4(const XMVECTOR& vec) {
+	XMFLOAT4 inputVec;
+	XMStoreFloat4(&inputVec, vec);
+	XMFLOAT4 outputVec = cleanFloat4(inputVec);
+	return XMLoadFloat4(&outputVec);
+}
 
 inline XMFLOAT2 ToRadians(const XMFLOAT2& vec) {
 	return {

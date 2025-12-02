@@ -103,7 +103,7 @@ public:
 			case lightTypes::point:
 				pointLights.push_back({ index, light });
 				lightIndexes.push_back(pointIndex);
-				++pointIndex;
+				++pointIndex * 6;
 				break;
 			case lightTypes::spot:
 				spotLights.push_back({ index, light });
@@ -113,6 +113,7 @@ public:
 			default: 
 				throw std::runtime_error("Error: light type does not exist!");
 			}
+			++index;
 		});
 	}
 
@@ -163,7 +164,7 @@ public:
 			++nonPointIndex;
 		}
 
-		for (std::pair<size_t, Light*> light : pointLights) {
+		for (std::pair<size_t, Light*> light : directionalLights) {
 			shadowMapArray.BindDsvAndSetNullRenderTarget(deviceContext, nonPointIndex);
 			GeometryRenderFunction(RegularDepthShader, light.second->getViewMatrix(), light.second->getProjectionMatrix());
 			++nonPointIndex;

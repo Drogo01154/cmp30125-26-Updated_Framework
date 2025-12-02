@@ -1,7 +1,7 @@
 #include "CubeMapArray.h"
 
 CubeMapArray::CubeMapArray(ID3D11Device* device, int mWidth, int mHeight, int size) {
-	resize(device, mWidth, mHeight, size, true);
+	resize(device, size, mWidth, mHeight, true);
 
 	// Setup the viewport for rendering.
 	viewport.Width = (float)mWidth;

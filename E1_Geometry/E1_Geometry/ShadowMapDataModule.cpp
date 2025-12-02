@@ -44,9 +44,15 @@ void ShadowMapDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext
 	deviceContext->Map(viewProjMatricesBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
 	matrixPtr = (XMMATRIX*)mappedResource.pData;
-
-	for (int i = 0; i < matrixes->size(); ++i) {
-		matrixPtr[i] = XMMatrixTranspose((*matrixes)[i]);
+	 
+	for (int i = 0; i < maxLights; ++i) {
+		if (i < matrixes->size()) {
+			matrixPtr[i] = XMMatrixTranspose((*matrixes)[i]);
+		}
+		else {
+			matrixPtr[i] = XMMatrixIdentity();
+		}
+		
 	}
 
 	deviceContext->Unmap(viewProjMatricesBuffer.Get(), 0);

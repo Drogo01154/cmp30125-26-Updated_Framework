@@ -28,7 +28,7 @@ struct Light // 80 bytes
     float3 lightPosition;
     float cosLightOuterCone; // cos of outer cone angle
     int type;
-    int index;
+    int mapSliceIndex;
     float2 padding1;
 };
 

@@ -82,7 +82,6 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 {	
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
-	passMgr = std::make_unique<RenderPassManager>();
 	
 	//initBasicLights(hinstance, hwnd, screenWidth, screenHeight);
 	initShadows(hinstance, hwnd, screenWidth, screenHeight);
@@ -121,7 +120,9 @@ bool App1::frame()
 bool App1::render()
 {
 	// Get matrices
-	instanceMgr->getActiveCamera()->camera->update();
+	if (shaderMgr->isModuleDirtyflagSet(DirtyModuleFlags::CAMERA)) {
+		instanceMgr->getActiveCamera()->camera->update();
+	}
 
 	passMgr->RenderAll(renderer->getDeviceContext(), renderer->getDevice());
 
@@ -145,6 +146,16 @@ void App1::gui()
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+
+	std::shared_ptr<Camera> cam = instanceMgr->getActiveCamera()->camera;
+	const XMFLOAT3& cameraPos = cam->getGlobalPosition();
+	const XMFLOAT3& cameraDir = cam->getGlobalDirection();
+	std::string posText = "Camera Position: X: " + std::to_string(cameraPos.x) + " Y: " + std::to_string(cameraPos.y) + " Z: " + std::to_string(cameraPos.z);
+	std::string dirText = "Camera Direction: X: " + std::to_string(cameraDir.x) + " Y: " + std::to_string(cameraDir.y) + " Z: " + std::to_string(cameraDir.z);
+	ImGui::Text(posText.c_str());
+	ImGui::Text(dirText.c_str());
+
+	materialMgr->imGuiRender();
 
 	sceneGraph->imGuiRender();
 

@@ -5,7 +5,6 @@
 // Includes
 #include "../DXFramework/DXF.h"
 #include "TexturedLightShader.h"
-#include "RenderPassManager.h"
 
 class App1 : public BaseApplication
 {
@@ -25,8 +24,6 @@ protected:
 	void gui();
 
 private:
-
-	std::unique_ptr<RenderPassManager> passMgr;
 };
 
 #endif

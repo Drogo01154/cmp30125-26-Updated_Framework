@@ -198,6 +198,12 @@
     <ClInclude Include="CubeMapArray.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPassManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPass.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseMesh.cpp">

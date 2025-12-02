@@ -27,7 +27,7 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	if (CameraNode->cameraInstance.IsValid()) {
 		std::shared_ptr<Camera> camera = CameraNode->cameraInstance->camera;
 		camera->m_transform.setParent(&CameraNode->m_transform);
-		camera->m_transform.setPosition(0.0f, 0.0f, -10.0f);
+		camera->m_transform.setPosition(10.0f, 5.0f, -5.0f);
 		camera->update();
 		CameraNode->cameraInstance->camera;
 	}
@@ -39,12 +39,21 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	mesh->m_transform.setParent(&planeNode->m_transform);
 	mesh->m_transform.computeGlobalMatrix(true);
 
+	std::shared_ptr<sceneNode> cubeNode = createChild("Cube", root);
+
+	cubeNode->meshInstance = instanceManager->createCubeMeshInstance(planeNode->meshID, inputResolution);
+	mesh = cubeNode->meshInstance.Get();
+	mesh->m_transform.setParent(&cubeNode->m_transform);
+	mesh->m_transform.setPosition(XMFLOAT3(10.f, 3.f, 10.f), false);
+	mesh->m_transform.computeGlobalMatrix(true);
+
 
 	std::shared_ptr<sceneNode> lightNode = createChild("Spot Light", root);
 	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::spot);
 	if (lightNode->lightInstance.IsValid()) {
 		Light& light = *lightNode->lightInstance;
 		light.m_transform.setParent(&lightNode->m_transform);
+		light.m_transform.setPosition(XMFLOAT3(10.0f, 20.f, 10.0f));
 		light.updateGlobals(true);
 		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 	}
@@ -122,8 +131,6 @@ void SceneGraph::deleteNode(std::shared_ptr<sceneNode> node) {
 		if (node->cameraInstance.IsValid()) { deleteNodeCamera(node); }
 	}
 }
-
-
 
 void SceneGraph::selectNode(std::shared_ptr<sceneNode> node) {
 	selectedNode = node;
@@ -391,20 +398,13 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 }
 
 void SceneGraph::imGuiRender() {
-	std::shared_ptr<Camera> cam = instanceManager->getActiveCamera()->camera;
-	const XMFLOAT3& cameraPos = cam->getGlobalPosition();
-	const XMFLOAT3& cameraDir = cam->getGlobalDirection();
-	std::string posText = "Camera Position: X: " + std::to_string(cameraPos.x) + " Y: " + std::to_string(cameraPos.y) + " Z: " + std::to_string(cameraPos.z);
-	std::string dirText = "Camera Direction: X: " + std::to_string(cameraDir.x) + " Y: " + std::to_string(cameraDir.y) + " Z: " + std::to_string(cameraDir.z);
-	ImGui::Text(posText.c_str());
-	ImGui::Text(dirText.c_str());
-	nodeIncrement = 0;
-	if (ImGui::CollapsingHeader("Ambeint")) {
-		if (ImGui::ColorPicker4("Ambeint Colour", &ambientLight.x)) {
+	if (ImGui::CollapsingHeader("Ambient")) {
+		if (ImGui::ColorPicker4("Ambient Colour", &ambientLight.x)) {
 			shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 		}
 	}
 	if (ImGui::CollapsingHeader("SceneGraph")) {
+		nodeIncrement = 0;
 		graphImGui(root);
 	}
 	

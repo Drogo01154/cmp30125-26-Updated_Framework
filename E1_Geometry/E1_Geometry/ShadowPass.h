@@ -31,6 +31,9 @@ public:
 	}
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
+
+		// Clear the scene. (default blue colour)
+		renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
 		//Return if no lights
 		textureOutput->setRenderTarget(renderer->getDeviceContext());
 		textureOutput->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
@@ -53,14 +56,16 @@ public:
 				lightTypes type = light->getType();
 				if (type == lightTypes::point) {
 					for (int i = 0; i < 6; ++i) {
-						lightViewProjMatrices.push_back(XMMatrixMultiply(light->getProjectionMatrix(), light->getViewMatrix(i)));
+						lightViewProjMatrices.push_back(XMMatrixMultiply(light->getViewMatrix(i), light->getProjectionMatrix()));
 					}
 				}
 				else {
-					lightViewProjMatrices.push_back(XMMatrixMultiply(light->getProjectionMatrix(), light->getViewMatrix(0)));
+					lightViewProjMatrices.push_back(XMMatrixMultiply(light->getViewMatrix(0), light->getProjectionMatrix()));
+
 				}
 				
 				});
+
 			//Update shadow map module
 			shared_ptr<ShadowMapDataModule> shadowMapData = std::dynamic_pointer_cast<ShadowMapDataModule>(shadowMapDataModule->module);
 			shadowMapData->setModuleParamaters(

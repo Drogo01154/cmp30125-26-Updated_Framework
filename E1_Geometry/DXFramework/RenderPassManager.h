@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef _RENDERPASSMANAGER_H_
+#define _RENDERPASSMANAGER_H_
+
 #include "RenderPass.h"
 #include <memory>
 /*
@@ -32,16 +36,18 @@ public:
 
 	std::shared_ptr<renderPass> InitPass(const std::string& name) {
 		//If pass alaready active return it;
-		if (activePassIndexes.contains(name)) { 
-			return activePassList[activePassIndexes[name]].second; } // Break as already in pass list
+		if (activePassIndexes.contains(name)) {
+			return activePassList[activePassIndexes[name]].second;
+		} // Break as already in pass list
 		std::unordered_map<std::string, std::shared_ptr<renderPass>> dependencies;
-		
+
 		PassData& data = potentialPasses.at(name);
 		for (auto pass : data.dependancies) {
 			auto passIndex = activePassIndexes.find(pass);
 			if (passIndex != activePassIndexes.end()) {
 				dependencies.emplace(pass, activePassList[passIndex->second].second);
-			} else {
+			}
+			else {
 				dependencies.emplace(pass, InitPass(pass));
 			}
 		}
@@ -69,9 +75,11 @@ public:
 		// Now store it in your potentialPasses map with empty dependencies by default
 		potentialPasses.emplace(name, PassData(dependancies, std::move(constructionFunction)));
 	}
-	
+
 private:
 	std::unordered_map<std::string, PassData> potentialPasses;
 	std::vector<std::pair<std::string, std::shared_ptr<renderPass>>> activePassList;
 	std::unordered_map<std::string, size_t> activePassIndexes;
 };
+
+#endif

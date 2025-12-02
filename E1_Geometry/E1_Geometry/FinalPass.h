@@ -21,9 +21,6 @@ public:
 		renderer->setBackBufferRenderTarget();
 		renderer->resetViewport();
 
-		// Clear the scene. (default blue colour)
-		renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
-
 		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		std::shared_ptr<TextureDataModule> textureModule = dynamic_pointer_cast<TextureDataModule>(textureDataModule->module);
 		matrixModule->setModuleParamaters(deviceContext, orthoMesh, renderer->getOrthoMatrix(), viewMatrix);
