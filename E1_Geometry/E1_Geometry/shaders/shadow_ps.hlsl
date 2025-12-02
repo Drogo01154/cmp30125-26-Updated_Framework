@@ -11,7 +11,7 @@ struct InputType
 
 float4 main(InputType input) : SV_TARGET
 {
-    float shadowMapBias = 0.005f;
+    float shadowMapBias = 0.001f;
   
     float4 diffuse = shaderTexture.Sample(diffuseSampler, input.tex);
     float4 colour = ambientLight * diffuse;
@@ -22,6 +22,7 @@ float4 main(InputType input) : SV_TARGET
     {
         if (!IsFragmentInShadow(lightViewIndex, i, shadowMapBias, input.worldPos))
         {
+            //colour = float4(1.f, 1.f, 1.f, 1.f);
             colour += calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
         }
     }
