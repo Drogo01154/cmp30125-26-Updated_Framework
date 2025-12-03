@@ -87,10 +87,9 @@ public:
 		spotLights.clear();
 		lightIndexes.clear();
 		size_t index = 0;
-		int pointIndex = 0;
 		int nonPointIndex = 0;
 		/*
-			Loop over lights and stoe indexes in shadow/cube maps
+			Loop over lights and stoe indexes for shadow maps
 		*/
 		instanceManager->forEachLight([&](const size_t& ID, Light* light) {
 			lightTypes lightType = light->getType();
@@ -102,8 +101,6 @@ public:
 				break;
 			case lightTypes::point:
 				pointLights.push_back({ index, light });
-				lightIndexes.push_back(pointIndex);
-				++pointIndex * 6;
 				break;
 			case lightTypes::spot:
 				spotLights.push_back({ index, light });

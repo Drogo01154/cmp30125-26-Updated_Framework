@@ -3,8 +3,8 @@ StructuredBuffer<float4x4> lightViewProjs : register(t1); // lightProjectionMatr
 Texture2DArray shadowMaps : register(t2);
 TextureCubeArray cubeMaps : register(t3);
 Texture2D shaderTexture : register(t4);
-SamplerState ShadowMapSampler : register(s0);
-SamplerState CubeMapSampler : register(s1);
+SamplerComparisonState ShadowMapSampler : register(s0);
+SamplerComparisonState CubeMapSampler : register(s1);
 SamplerState diffuseSampler : register(s2);
 
 // Is the gemoetry in our shadow map
@@ -29,74 +29,72 @@ float2 getProjectiveCoords(float4 lightViewPosition)
     return projTex;
 }
 
-//Think this won't work for cube maps, might need to change
-bool isInShadow(float depthValue, float4 lightViewPosition, float bias)
+float calculateShadow(inout float lightViewIndex, int lightID, float3 worldPos, float3 normal)
 {
-    // Calculate the depth from the light.
-    float lightDepthValue = lightViewPosition.z / lightViewPosition.w;
-    lightDepthValue -= bias;
-
-	// Compare the depth of the shadow map value and the depth of the light to determine whether to shadow or to light this pixel.
-    if (lightDepthValue < depthValue)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool IsFragmentInShadow(inout float lightViewIndex, int lightID, float3 worldPos, float3 normal)
-{
-    
-    
-    bool returnValue = true;
     int lightType = lights[lightID].type;
-    float biasSlope = ((lightType == 0) ? 0.0005 : 0.001);
-    float3 lightDirection = ((lightType == 0) ? -lights[lightViewIndex].lightDirection : lights[lightViewIndex].lightDirection);
+    float3 lightDirection = ((lightType == 0) ? -lights[lightID].lightDirection : lights[lightID].lightDirection);
     
+    // Compute slope-scaled bias
     float ndotl = max(0.0, dot(normal, lightDirection));
     float bias = lights[lightID].constBias + lights[lightID].slopeBias * (1.0 - ndotl);
     
+    float shadow = 1;
     if (lightType == 1) // Point Light
     {
+        // Assuming cubeMaps is a TextureCubeArray
         int cubeMapIndex = lights[lightID].mapSliceIndex;
-        for (int z = 0; z < 6; z++)
-        { //Get distance from light -> fragment
-            float fragmentDistance = length(worldPos - lights[lightID].lightPosition);
-                
-            //Calculate direction of fragments world position -> light
-            float3 direction = normalize(lights[lightID].lightPosition - worldPos);
-            //Sample depth value of cubemap - Radial distance from point light -> nearest fragment
-            float depthValue = cubeMaps.Sample(CubeMapSampler, float4(direction, cubeMapIndex)).r;
-            //if fragment closer than one in map object lit
-            if (fragmentDistance <= (depthValue + bias))
-            {   
-                lightViewIndex += (6 - z);
-                returnValue = false;
-                break;
-            }
-            cubeMapIndex++;
-            lightViewIndex++;
-        }
+        float3 lightPos = lights[lightID].lightPosition;
+
+        // Vector from light to fragment
+        float3 direction = normalize(worldPos - lightPos);
+
+        // Distance from light to fragment
+        float fragmentDistance = length(worldPos - lightPos);
+        
+        //Uses percentage-close filtering to smooth shadows 
+        shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(direction, cubeMapIndex), fragmentDistance - bias);
+        static const float3 offsets[8] =
+        {
+            float3(-0.01, -0.01, 0), float3(0, -0.01, 0), float3(0.01, -0.01, 0),
+            float3(-0.01, 0, 0), float3(0.01, 0, 0),
+            float3(-0.01, 0.01, 0), float3(0, 0.01, 0), float3(0.01, 0.01, 0)
+        };
+        for (int i = 0; i < 8; i++)
+            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(direction + offsets[i], cubeMapIndex), fragmentDistance - bias);
+
+        shadow /= 9.0f;     
     }
     else
     {
         int shadowMapIndex = lights[lightID].mapSliceIndex;
         float4x4 lightViewProj = lightViewProjs[lightViewIndex];
-            //Cacluate the lights view position
+        lightViewIndex++;   // Increment to next matrix as now have enough
+        //Cacluate the lights view position
         float4 lightViewPos = mul(float4(worldPos, 1), lightViewProj);
-            // Calculate the projected texture coordinates.
+        
+        float depth = lightViewPos.z / lightViewPos.w;
+        // Calculate the projected texture coordinates.
         float2 pTexCoord = getProjectiveCoords(lightViewPos);
-            
-        // Shadow test. Is or isn't in shadow
+        
         if (hasDepthData(pTexCoord))
         {
-            // Sample the shadow map (get depth of geometry)
-            float depthValue = shadowMaps.Sample(ShadowMapSampler, float3(pTexCoord, shadowMapIndex)).r;
-            returnValue = isInShadow(depthValue, lightViewPos, bias);
-        }
-            
-        lightViewIndex++;
-    }
-    return returnValue;
+            if (hasDepthData(pTexCoord))
+            {
+                //Uses percentage-close filtering to smooth shadows 
+                shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, shadowMapIndex), depth - bias);
 
+                static const float2 offsets[8] =
+                {
+                    float2(-0.001, -0.001), float2(0, -0.001), float2(0.001, -0.001),
+                    float2(-0.001, 0), float2(0.001, 0),
+                    float2(-0.001, 0.001), float2(0, 0.001), float2(0.001, 0.001)
+                };
+                for (int i = 0; i < 8; i++)
+                    shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i], shadowMapIndex), depth - bias);
+
+                shadow /= 9.0f;
+            }
+        }    
+    }
+    return shadow;
 }

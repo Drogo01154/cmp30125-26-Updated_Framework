@@ -27,8 +27,8 @@ void App1::initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scre
 
 	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
 	shaderMgr->AddShaderModule<SamplerDataModule>("MaterialTextureSamplerModule", renderer->getDevice(), hwnd);
-	shaderMgr->AddShaderModule<SamplerDataModule>("ShadowMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_MIN_MAG_MIP_POINT);
-	shaderMgr->AddShaderModule<SamplerDataModule>("CubeMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_MIN_MAG_MIP_POINT);
+	shaderMgr->AddShaderModule<SamplerDataModule>("ShadowMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, 1, D3D11_COMPARISON_LESS_EQUAL);
+	shaderMgr->AddShaderModule<SamplerDataModule>("CubeMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, 1, D3D11_COMPARISON_LESS_EQUAL);
 
 	shaderMgr->addGeometryShader<SMDepthShader>("SMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
 	shaderMgr->addGeometryShader<CMDepthShader>("CMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);

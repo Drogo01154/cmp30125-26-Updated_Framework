@@ -18,11 +18,10 @@ float4 main(InputType input) : SV_TARGET
         
     for (int i = 0; i < numberOfLights; i++)
     {
-        if (!IsFragmentInShadow(lightViewIndex, i, input.worldPos, input.normal))
-        {
-           // colour = float4(1.f, 1.f, 1.f, 1.f);
-           colour += calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
-        }
+        float shadowScalar = calculateShadow(lightViewIndex, i, input.worldPos, input.normal);
+        float4 lightColour = calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
+        colour += shadowScalar * lightColour;
+
     }
     return saturate(colour);
 }

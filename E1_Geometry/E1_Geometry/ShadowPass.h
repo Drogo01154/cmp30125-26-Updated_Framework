@@ -54,16 +54,9 @@ public:
 			std::vector<XMMATRIX> lightViewProjMatrices;
 			instanceManager->forEachLight([&](size_t ID, Light* light) {
 				lightTypes type = light->getType();
-				if (type == lightTypes::point) {
-					for (int i = 0; i < 6; ++i) {
-						lightViewProjMatrices.push_back(XMMatrixMultiply(light->getViewMatrix(i), light->getProjectionMatrix()));
-					}
-				}
-				else {
+				if (type != lightTypes::point) {
 					lightViewProjMatrices.push_back(XMMatrixMultiply(light->getViewMatrix(0), light->getProjectionMatrix()));
-
 				}
-				
 				});
 
 			//Update shadow map module
