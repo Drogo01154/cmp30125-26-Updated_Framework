@@ -1,14 +1,13 @@
 #pragma once
-#pragma once
 
 #include "DXF.h"
 #include "MatrixDataModule.h"
 
-class HeightMapTexturedLightShader : public BaseShader
+class HeightMapLightShader : public BaseShader
 {
 public:
-	HeightMapTexturedLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
-	~HeightMapTexturedLightShader();
+	HeightMapLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
+	~HeightMapLightShader();
 
 	void setResources(ID3D11DeviceContext* deviceContext);
 
@@ -21,11 +20,10 @@ private:
 	ModuleInstance cameraDataModule;
 	ModuleInstance materialDataModule;
 	ModuleInstance lightDataModule;
-	
+
 	ModuleInstance samplerStateModule;
 	ModuleInstance textureDataModule;
 	ModuleInstance heightMapTextureModule;
-	
+
 	ModuleInstance heightMapDataModule;
 };
-

@@ -1,3 +1,5 @@
+#include "heightMapCommon_ps.hlsl"
+
 cbuffer PointLightDataModule : register(b0)
 {
     float3 lightPosition;

@@ -29,7 +29,8 @@ struct Light // 80 bytes
     float cosLightOuterCone; // cos of outer cone angle
     int type;
     int mapSliceIndex;
-    float2 padding1;
+    float constBias;
+    float slopeBias;
 };
 
 StructuredBuffer<Light> lights : register(t0);
@@ -57,15 +58,15 @@ float4 calculateLight(float4 diffuse, int lightNumber, float3 pixelPosition, flo
     
     float4 returnValue;
     
-    if (lightType == 0) // Directional Light
-    {
-        //Calculate light intensity muiltiplied by diffuse
-        float4 intensity = calculateLightingIntensity(lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
-        //Calculate light specular
-        float4 specular = calcSpecular(lights[lightNumber].lightDirection, normal, viewVector);
-        //Return only intensity and specular
-        returnValue = intensity * diffuse + specular;
-    } 
+        if (lightType == 0) // Directional Light
+        {
+            //Calculate light intensity muiltiplied by diffuse
+            float4 intensity = calculateLightingIntensity(-lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
+            //Calculate light specular
+            float4 specular = calcSpecular(-lights[lightNumber].lightDirection, normal, viewVector);
+            //Return only intensity and specular
+            returnValue = intensity * diffuse + specular;
+        } 
     else
     {
         //Create vector from light to pixel

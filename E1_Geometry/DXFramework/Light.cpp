@@ -18,20 +18,48 @@ Light::Light(lightTypes type) :
 	XMVECTOR directionDown = XMVectorSet(0.f, -1.f, 0.f, 0.f);
 	XMVECTOR target = XMVectorAdd(m_transform.getTranslationVector(), directionDown);
 	m_transform.lookAt(target);
-	if (type == lightTypes::point) {
-		viewMatrixes.resize(6);
-	}
-	else {
-		viewMatrixes.resize(1);
-	}
+
 	lightNear = 0.1f;
 	lightFar = 25.0f;
-	if (type == lightTypes::directional) {
+
+	switch (type) {
+	case lightTypes::point:
+		viewMatrixes.resize(6);
+
+		minConstBias = 0.0002f;
+		maxConstBias = 0.003f;
+
+		minSlopeBias = 0.1f;
+		maxSlopeBias = 1.0f;
+		break;
+
+	case lightTypes::directional:
+		viewMatrixes.resize(1);
 		orthoWidth = 50.f;
 		orthoHeight = 50.f;
-	} else if (type == lightTypes::spot) {
+
+		minConstBias = 0.0001f;   // tiny, just to avoid acne
+		maxConstBias = 0.002f;    // small enough to avoid floating shadows
+
+		minSlopeBias = 0.05f;     // shallow slopes
+		maxSlopeBias = 0.5f;      // steep slopes
+		break;
+	case lightTypes::spot:
+		viewMatrixes.resize(1);
 		FOV = XMConvertToRadians(45.0f); // 45° cone
+
+		minConstBias = 0.0001;
+		maxConstBias = 0.001;
+
+		minSlopeBias = 0.05;
+		maxSlopeBias = 0.5f;
+		break;
+	default:
+		throw std::runtime_error("Error: Light type does not exist!");
 	}
+
+	constBias = minConstBias;
+	slopeBias = minSlopeBias;
 }
 
 // create view matrix, based on light position and lookat. Used for shadow mapping.
@@ -192,12 +220,17 @@ void Light::setNear(float inNear) { lightNear = inNear; }
 void Light::setFOV(float fov) { FOV = fov; }
 void Light::setOrthoWidth(float orthoWidth) { this->orthoWidth = orthoWidth; }
 void Light::setOrthoHeight(float orthoHeight) { this->orthoHeight = orthoHeight; }
+void Light::setConstBias(float constBias) { this->constBias = constBias; }
+void Light::setSlopeBias(float slopeBias) { this->slopeBias; }
 
 float Light::getFar() const { return lightFar; }
 float Light::getNear() const { return lightNear; }
 float Light::getFOV() const { return FOV; }
 float Light::getOrthoWidth() const { return orthoWidth; }
 float Light::getOrthoHeight() const { return orthoHeight; }
+float Light::getConstBias() const { return constBias; }
+float Light::getSlopeBias() const { return slopeBias; }
+
 
 bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 
@@ -216,7 +249,7 @@ bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 		ImGui::TreePop();
 	}
 
-	if (m_transform.imGuiRender("Light Transform: ", transformIncrement, type != lightTypes::directional, type != lightTypes::point, false))
+	if (m_transform.imGuiRender("Light Transform: ", transformIncrement, true, type != lightTypes::point, false))
 	{
 		updateGlobals(true);
 		lightUpdated = true;
@@ -237,23 +270,28 @@ bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 		if (ImGui::SliderAngle("Inner Cone: ", &innerCone, 0.f, 90.f)) { lightUpdated = true; }
 		if (ImGui::SliderAngle("Outer Cone: ", &outerCone, 0.f, 90.f)) { lightUpdated = true; }
 	}
-
-	if (ImGui::TreeNode("Projection Matrix Settings"))
-	{
-		if (ImGui::SliderFloat("Near", &lightNear, 0.01f, lightFar - 0.01f)) { projectionChanged = true; }
-		if (ImGui::SliderFloat("Far", &lightFar, lightNear + 0.01f, 1000.f)) { projectionChanged = true; }
-
-		if (type == lightTypes::directional)
+	if (ImGui::TreeNode("Shadow Map Settings")) {
+		if (ImGui::TreeNode("Projection Matrix Settings"))
 		{
-			if (ImGui::SliderFloat("Ortho Width", &orthoWidth, 1.f, 500.f)) { projectionChanged = true; }
-			if (ImGui::SliderFloat("Ortho Height", &orthoHeight, 1.f, 500.f)) { projectionChanged = true; }
+			if (ImGui::SliderFloat("Near", &lightNear, 0.01f, lightFar - 0.01f)) { projectionChanged = true; }
+			if (ImGui::SliderFloat("Far", &lightFar, lightNear + 0.01f, 1000.f)) { projectionChanged = true; }
+
+			if (type == lightTypes::directional)
+			{
+				if (ImGui::SliderFloat("Ortho Width", &orthoWidth, 1.f, 500.f)) { projectionChanged = true; }
+				if (ImGui::SliderFloat("Ortho Height", &orthoHeight, 1.f, 500.f)) { projectionChanged = true; }
+			}
+			else if (type == lightTypes::spot)
+			{
+				if (ImGui::SliderAngle("FOV", &FOV, 5.f, 120.f)) { projectionChanged = true; }
+			}
+			ImGui::TreePop();
 		}
-		else if (type == lightTypes::spot)
-		{
-			if (ImGui::SliderAngle("FOV", &FOV, 5.f, 120.f)) { projectionChanged = true; }
-		}
+		if (ImGui::SliderFloat("Constant Bias: ", &constBias, minConstBias, maxConstBias)) { lightUpdated = true; }
+		if (ImGui::SliderFloat("Slope Bias: ", &slopeBias, minSlopeBias, maxSlopeBias)) { lightUpdated = true; }
 		ImGui::TreePop();
 	}
+	
 	return lightUpdated;
 }
 

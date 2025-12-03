@@ -127,7 +127,7 @@ public:
 
 	inline void setEulerAngles(float x, float y, float z, bool updateMatrixes = true)
 	{ 
-		rotation = XMQuaternionRotationRollPitchYaw(x, y, z); 
+		rotation = XMQuaternionRotationRollPitchYaw(x, y, z);
 		if (updateMatrixes) { computeGlobalMatrix(true); }
 	}
 

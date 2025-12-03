@@ -44,11 +44,18 @@ bool isInShadow(float depthValue, float4 lightViewPosition, float bias)
     return true;
 }
 
-bool IsFragmentInShadow(inout float lightViewIndex, int lightID, float shadowMapBias, float3 worldPos)
+bool IsFragmentInShadow(inout float lightViewIndex, int lightID, float3 worldPos, float3 normal)
 {
+    
+    
     bool returnValue = true;
-        
     int lightType = lights[lightID].type;
+    float biasSlope = ((lightType == 0) ? 0.0005 : 0.001);
+    float3 lightDirection = ((lightType == 0) ? -lights[lightViewIndex].lightDirection : lights[lightViewIndex].lightDirection);
+    
+    float ndotl = max(0.0, dot(normal, lightDirection));
+    float bias = lights[lightID].constBias + lights[lightID].slopeBias * (1.0 - ndotl);
+    
     if (lightType == 1) // Point Light
     {
         int cubeMapIndex = lights[lightID].mapSliceIndex;
@@ -61,7 +68,7 @@ bool IsFragmentInShadow(inout float lightViewIndex, int lightID, float shadowMap
             //Sample depth value of cubemap - Radial distance from point light -> nearest fragment
             float depthValue = cubeMaps.Sample(CubeMapSampler, float4(direction, cubeMapIndex)).r;
             //if fragment closer than one in map object lit
-            if (fragmentDistance <= (depthValue + shadowMapBias))
+            if (fragmentDistance <= (depthValue + bias))
             {   
                 lightViewIndex += (6 - z);
                 returnValue = false;
@@ -70,8 +77,6 @@ bool IsFragmentInShadow(inout float lightViewIndex, int lightID, float shadowMap
             cubeMapIndex++;
             lightViewIndex++;
         }
-
-        
     }
     else
     {
@@ -87,7 +92,7 @@ bool IsFragmentInShadow(inout float lightViewIndex, int lightID, float shadowMap
         {
             // Sample the shadow map (get depth of geometry)
             float depthValue = shadowMaps.Sample(ShadowMapSampler, float3(pTexCoord, shadowMapIndex)).r;
-            returnValue = isInShadow(depthValue, lightViewPos, shadowMapBias);
+            returnValue = isInShadow(depthValue, lightViewPos, bias);
         }
             
         lightViewIndex++;

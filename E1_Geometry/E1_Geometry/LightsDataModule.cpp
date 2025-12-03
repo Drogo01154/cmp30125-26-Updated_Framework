@@ -62,6 +62,8 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, c
 		lightPtr[i].outerCone = cos(light->getOuterCone());
 		lightPtr[i].diffuse = light->getDiffuseColour();
 		lightPtr[i].type = static_cast<int>(light->getType());
+		lightPtr[i].constBias = light->getSlopeBias();
+		lightPtr[i].slopeBias = light->getSlopeBias();
 		if(indexes != nullptr) { lightPtr[i].index = (*indexes)[i]; }
 		i++;
 		});

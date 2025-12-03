@@ -1,5 +1,3 @@
-// Colour shader.h
-// Simple shader example.
 #pragma once
 
 #ifndef _SMDEPTHSHADER_H_

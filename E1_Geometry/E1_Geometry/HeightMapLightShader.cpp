@@ -1,6 +1,6 @@
-#include "HeightMapShader.h"
+#include "HeightMapLightShader.h"
 
-HeightMapTexturedLightShader::HeightMapTexturedLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd) {
+HeightMapLightShader::HeightMapLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd) {
 	initShader(L"heightMap_vs.cso", L"heightMap_ps.cso");
 
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
@@ -15,7 +15,7 @@ HeightMapTexturedLightShader::HeightMapTexturedLightShader(ShaderManager* shader
 }
 
 
-HeightMapTexturedLightShader::~HeightMapTexturedLightShader()
+HeightMapLightShader::~HeightMapLightShader()
 {
 	// Release the layout.
 	if (layout)
@@ -28,14 +28,14 @@ HeightMapTexturedLightShader::~HeightMapTexturedLightShader()
 	BaseShader::~BaseShader();
 }
 
-void HeightMapTexturedLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
+void HeightMapLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
 }
 
-void HeightMapTexturedLightShader::setResources(ID3D11DeviceContext* deviceContext) {
+void HeightMapLightShader::setResources(ID3D11DeviceContext* deviceContext) {
 	//Set vertex shader resources
 	matrixDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
 

@@ -81,12 +81,16 @@ public:
 	void setFOV(float fov);
 	void setOrthoWidth(float orthoWidth);
 	void setOrthoHeight(float orthoHeight);
+	void setConstBias(float constBias);
+	void setSlopeBias(float slopeBias);
 
 	float getFar() const;
 	float getNear() const;
 	float getFOV() const;
 	float getOrthoWidth() const;
 	float getOrthoHeight() const;
+	float getConstBias() const;
+	float getSlopeBias() const;
 
 
 	Transform m_transform;
@@ -108,6 +112,14 @@ protected:
 
 	//Spot light only
 	float FOV;
+
+	float minConstBias;
+	float maxConstBias;
+	float constBias;
+
+	float minSlopeBias;
+	float maxSlopeBias;
+	float slopeBias;
 
 	//Direction Light only
 	float orthoWidth;
@@ -161,6 +173,8 @@ namespace nlohmann {
 			j["transform"] = l.m_transform;
 			j["far"] = l.getFar();
 			j["near"] = l.getNear();
+			j["constBias"] = l.getConstBias();
+			j["slopeBias"] = l.getSlopeBias();
 			if (type == lightTypes::spot) {
 				j["FOV"] = l.getFOV();
 			}
@@ -180,7 +194,8 @@ namespace nlohmann {
 			l.m_transform = j.at("transform").get<Transform>();
 			l.setFar(j.at("innerCone").get<float>());
 			l.setNear(j.at("outerCone").get<float>());
-
+			l.setConstBias(j.at("constBias").get<float>());
+			l.setSlopeBias(j.at("slopeBias").get<float>());
 			if (type == lightTypes::spot) {
 				l.setFOV(j.at("FOV").get<float>());
 			}

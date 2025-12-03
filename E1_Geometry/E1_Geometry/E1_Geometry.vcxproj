@@ -167,6 +167,8 @@
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="CameraDataModule.cpp" />
     <ClCompile Include="CMDepthShader.cpp" />
+    <ClCompile Include="CMHeightDepthShader.cpp" />
+    <ClCompile Include="HeightMapLightShader.h" />
     <ClCompile Include="PointLightDataModule.cpp" />
     <ClCompile Include="ShadowMapDataModule.cpp" />
     <ClCompile Include="ShadowShader.cpp" />
@@ -175,7 +177,7 @@
     <ClCompile Include="GreyScaleTextureShader.cpp" />
     <ClCompile Include="GreyScaleTextureShader.h" />
     <ClCompile Include="HeightMapDataModule.cpp" />
-    <ClCompile Include="HeightMapShader.cpp" />
+    <ClCompile Include="HeightMapLightShader.cpp" />
     <ClCompile Include="AlbedoLightShader.cpp" />
     <ClCompile Include="KernelDataModule.cpp" />
     <ClCompile Include="KernelDataModule.h" />
@@ -184,6 +186,7 @@
     <ClCompile Include="MaterialDataModule.cpp" />
     <ClCompile Include="MiniMapDataModule.cpp" />
     <ClCompile Include="SamplerDataModule.cpp" />
+    <ClCompile Include="SMHeightDepthShader.cpp" />
     <ClCompile Include="TextureDataModule.cpp" />
     <ClCompile Include="TexturedLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
@@ -195,6 +198,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\depthCM_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\depthHeightmapCM_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\depthHeightmapSM_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\depthSM_vs.hlsl">
@@ -291,6 +300,7 @@
     <ClInclude Include="App1.h" />
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="CMDepthShader.h" />
+    <ClInclude Include="CMHeightDepthShader.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="DepthPass.h" />
@@ -304,7 +314,6 @@
     <ClInclude Include="GeometryPass.h" />
     <ClInclude Include="GreyScaleDataModule.h" />
     <ClInclude Include="HeightMapDataModule.h" />
-    <ClInclude Include="HeightMapShader.h" />
     <ClInclude Include="AlbedoLightShader.h" />
     <ClInclude Include="KernelShader.h" />
     <ClInclude Include="LightsDataModule.h" />
@@ -315,6 +324,7 @@
     <ClInclude Include="RenderToTexturePass.h" />
     <ClInclude Include="SamplerDataModule.h" />
     <ClInclude Include="ShaderInit.h" />
+    <ClInclude Include="SMHeightDepthShader.h" />
     <ClInclude Include="TextureDataModule.h" />
     <ClInclude Include="TexturedLightShader.h" />
     <ClInclude Include="ManipulationShader.h" />

@@ -19,9 +19,11 @@ private:
 
 		XMFLOAT3 position;		// 12
 		float outerCone;		// 4
+
 		int type;				// 4
 		int index;				// 4
-		XMFLOAT2 padding;		// 8
+		float constBias;		// 4
+		float slopeBias;		// 4
 	};
 
 public:

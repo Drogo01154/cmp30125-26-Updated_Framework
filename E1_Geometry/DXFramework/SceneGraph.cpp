@@ -39,21 +39,22 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	mesh->m_transform.setParent(&planeNode->m_transform);
 	mesh->m_transform.computeGlobalMatrix(true);
 
-	std::shared_ptr<sceneNode> cubeNode = createChild("Cube", root);
+	std::shared_ptr<sceneNode> sphereNode = createChild("Sphere", root);
 
-	cubeNode->meshInstance = instanceManager->createCubeMeshInstance(planeNode->meshID, inputResolution);
-	mesh = cubeNode->meshInstance.Get();
-	mesh->m_transform.setParent(&cubeNode->m_transform);
+	sphereNode->meshInstance = instanceManager->createSphereMeshInstance(planeNode->meshID, inputResolution);
+	mesh = sphereNode->meshInstance.Get();
+	mesh->m_transform.setParent(&sphereNode->m_transform);
 	mesh->m_transform.setPosition(XMFLOAT3(10.f, 3.f, 10.f), false);
 	mesh->m_transform.computeGlobalMatrix(true);
 
 
-	std::shared_ptr<sceneNode> lightNode = createChild("Spot Light", root);
-	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::spot);
+	std::shared_ptr<sceneNode> lightNode = createChild("Directional Light", root);
+	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::directional);
 	if (lightNode->lightInstance.IsValid()) {
 		Light& light = *lightNode->lightInstance;
 		light.m_transform.setParent(&lightNode->m_transform);
 		light.m_transform.setPosition(XMFLOAT3(10.0f, 20.f, 10.0f));
+		light.m_transform.setEulerX(XMConvertToRadians(50.f));
 		light.updateGlobals(true);
 		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 	}
@@ -68,6 +69,7 @@ std::shared_ptr<sceneNode> SceneGraph::createChild(const std::string& name, std:
 	parent->children.push_back(newNode);
 	return newNode;
 }
+
 void SceneGraph::graphImGui(std::shared_ptr<sceneNode> node)
 {
 	nodeIncrement++;
@@ -334,7 +336,7 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		if (hasMesh) {
 			if (ImGui::TreeNode(("Node: " + node->name + " Mesh Settings:").c_str())) {
 				if (GeometryData* mesh = node->meshInstance.Get()) {
-					if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, false)) {
+					if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, true)) {
 						mesh->m_transform.computeGlobalMatrix(true);
 					}
 				}

@@ -10,9 +10,7 @@ struct InputType
 };
 
 float4 main(InputType input) : SV_TARGET
-{
-    float shadowMapBias = 0.001f;
-  
+{ 
     float4 diffuse = shaderTexture.Sample(diffuseSampler, input.tex);
     float4 colour = ambientLight * diffuse;
     
@@ -20,10 +18,10 @@ float4 main(InputType input) : SV_TARGET
         
     for (int i = 0; i < numberOfLights; i++)
     {
-        if (!IsFragmentInShadow(lightViewIndex, i, shadowMapBias, input.worldPos))
+        if (!IsFragmentInShadow(lightViewIndex, i, input.worldPos, input.normal))
         {
-            //colour = float4(1.f, 1.f, 1.f, 1.f);
-            colour += calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
+           // colour = float4(1.f, 1.f, 1.f, 1.f);
+           colour += calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
         }
     }
     return saturate(colour);

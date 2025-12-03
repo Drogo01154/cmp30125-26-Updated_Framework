@@ -25,12 +25,10 @@ void App1::initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scre
 	shaderMgr->AddShaderModule<CameraDataModule>("CameraDataModule", renderer->getDevice(), hwnd, instanceMgr.get(), sceneGraph.get());
 	shaderMgr->AddShaderModule<ShadowMapDataModule>("ShadowMapDataModule", renderer->getDevice(), hwnd);
 
-
 	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
 	shaderMgr->AddShaderModule<SamplerDataModule>("MaterialTextureSamplerModule", renderer->getDevice(), hwnd);
 	shaderMgr->AddShaderModule<SamplerDataModule>("ShadowMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_MIN_MAG_MIP_POINT);
 	shaderMgr->AddShaderModule<SamplerDataModule>("CubeMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_MIN_MAG_MIP_POINT);
-
 
 	shaderMgr->addGeometryShader<SMDepthShader>("SMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
 	shaderMgr->addGeometryShader<CMDepthShader>("CMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
@@ -39,12 +37,11 @@ void App1::initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scre
 	//Add pass shader
 	shaderMgr->addPassShader<TextureShader>("TextureShader", shaderMgr.get(), renderer->getDevice(), hwnd);
 
-	passMgr->AddPassConstructionFunction<DepthPass>("DepthPass", {}, DepthPassInput(instanceMgr.get(), shaderMgr.get(), renderer, 1024, 1024));
+	passMgr->AddPassConstructionFunction<DepthPass>("DepthPass", {}, DepthPassInput(instanceMgr.get(), shaderMgr.get(), renderer, 2048, 2048));
 
 	passMgr->AddPassConstructionFunction<ShadowPass>("ShadowPass", { "DepthPass" }, shaderMgr.get(),
 	instanceMgr.get(), renderer->getDevice(), renderer,
 	RenderTextureData(screenWidth, screenHeight, SCREEN_NEAR, SCREEN_DEPTH));
-
 
 	passMgr->AddPassConstructionFunction<FinalRenderPass>("FinalPass", { "ShadowPass" }, renderer, shaderMgr.get(), instanceMgr.get(), OrthoMeshData(screenWidth, screenHeight, 0.0f, 0.0f));
 
