@@ -12,7 +12,9 @@ struct InputType
 
 float4 main(InputType input) : SV_TARGET
 { 
-    float4 diffuse = shaderTexture.Sample(diffuseSampler, input.tex);
+    input.normal = calculateNormal(input.tex);
+    
+    float4 diffuse = shaderTexture.Sample(textureSampler, input.tex);
     float4 colour = ambientLight * diffuse;
     
     int lightViewIndex = 0;

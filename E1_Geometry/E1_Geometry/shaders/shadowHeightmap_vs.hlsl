@@ -1,3 +1,6 @@
+Texture2D heightMapTexture : register(t0);
+SamplerState textureSampler : register(s0);
+
 cbuffer MatrixBuffer : register(b0)
 {
 	matrix worldMatrix;
@@ -11,6 +14,13 @@ cbuffer CameraDataBuffer : register(b1)
     float3 cameraPosition; // 12
     int numberOfLights; // 4
 };
+
+cbuffer mapData : register(b2)
+{
+    float2 offset;
+    float heightMultiplier;
+    int resolution;
+}
 
 struct InputType
 {
@@ -32,6 +42,9 @@ struct OutputType
 OutputType main(InputType input)
 {
     OutputType output;
+    
+    //Increase Vertex Y position by heighMultiplier.
+    input.position.y += heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);

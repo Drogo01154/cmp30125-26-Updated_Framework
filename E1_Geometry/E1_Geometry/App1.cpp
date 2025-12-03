@@ -7,6 +7,8 @@
 #include "ShadowShader.h"
 #include "CMDepthShader.h"
 #include "SMDepthShader.h"
+#include "CMHeightDepthShader.h"
+#include "SMHeightDepthShader.h"
 #include "TexturedLightShader.h"
 #include "LightPass.h"
 
@@ -17,21 +19,42 @@ App1::App1()
 
 void App1::initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight) {
 	//Add modules
-	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
-	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", renderer->getDevice(), hwnd);
-	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
-	shaderMgr->AddShaderModule<PointLightDataModule>("PointLightDataModule", renderer->getDevice(), hwnd);
-	shaderMgr->AddShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd);
-	shaderMgr->AddShaderModule<CameraDataModule>("CameraDataModule", renderer->getDevice(), hwnd, instanceMgr.get(), sceneGraph.get());
-	shaderMgr->AddShaderModule<ShadowMapDataModule>("ShadowMapDataModule", renderer->getDevice(), hwnd);
 
+	//Matrix data module to send matrix data to vertex shader
+	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+
+	//Texture data module to send albedo colour to shaders
+	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule", renderer->getDevice(), hwnd);
+	//Texture data module to send height map texture to shaders
+	shaderMgr->AddShaderModule<TextureDataModule>("HeightMapTextureDataModule", renderer->getDevice(), hwnd);
+	//Lights data module to send light information to shaders
+	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", renderer->getDevice(), hwnd, instanceMgr.get());
+	//Another light module to send  point light specific data to shaders
+	shaderMgr->AddShaderModule<PointLightDataModule>("PointLightDataModule", renderer->getDevice(), hwnd);
+	//Material module to send material data to shaders
+	shaderMgr->AddShaderModule<MaterialDataModule>("MaterialDataModule", renderer->getDevice(), hwnd);
+	//Camera module to send camera and world data to shaders
+	shaderMgr->AddShaderModule<CameraDataModule>("CameraDataModule", renderer->getDevice(), hwnd, instanceMgr.get(), sceneGraph.get());
+	//Shadow map module to send shadow and cube maps as well as viewProj matrices to shaders
+	shaderMgr->AddShaderModule<ShadowMapDataModule>("ShadowMapDataModule", renderer->getDevice(), hwnd);
+	//Height map data module to send height map data to shaders
+	shaderMgr->AddShaderModule<HeightMapDataModule>("HeightMapDataModule", renderer->getDevice(), hwnd);
+
+	//Sampler specifically for sampling render textures
 	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
+	//Sampler specifically for sampling material and heightmap textures
 	shaderMgr->AddShaderModule<SamplerDataModule>("MaterialTextureSamplerModule", renderer->getDevice(), hwnd);
+	//Samplers for sampling cube and shadow maps
 	shaderMgr->AddShaderModule<SamplerDataModule>("ShadowMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, 1, D3D11_COMPARISON_LESS_EQUAL);
 	shaderMgr->AddShaderModule<SamplerDataModule>("CubeMapSamplerModule", renderer->getDevice(), hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, 1, D3D11_COMPARISON_LESS_EQUAL);
 
+	//Depth shaders
 	shaderMgr->addGeometryShader<SMDepthShader>("SMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
 	shaderMgr->addGeometryShader<CMDepthShader>("CMDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+	shaderMgr->addGeometryShader<SMHeightDepthShader>("SMHeightDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+	shaderMgr->addGeometryShader<CMHeightDepthShader>("CMHeightDepthShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+
+	//Shadow map shaders
 	shaderMgr->addGeometryShader<ShadowShader>("ShadowShader", shaderMgr.get(), renderer->getDevice(), hwnd);
 
 	//Add pass shader

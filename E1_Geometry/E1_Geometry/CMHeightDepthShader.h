@@ -19,6 +19,8 @@ private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 	ModuleInstance matrixDataModule;
 	ModuleInstance pointLightDataModule;
+	ModuleInstance textureDataModule;
+	ModuleInstance samplerStateModule;
 	ModuleInstance heightMapDataModule;
 };
 

@@ -2,6 +2,7 @@
 #include "RenderPass.h"
 #include "MatrixDataModule.h"
 #include "PointLightDataModule.h"
+#include "HeightMapDataModule.h"
 
 struct DepthPassInput {
 	InstanceManager* instanceManager;
@@ -25,8 +26,14 @@ public:
 	{
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		pointLightDataModule = shaderManager->getShaderModuleID("PointLightDataModule");
-		RegularDepthShader = shaderManager->getGeometryShader("SMDepthShader");
+		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
+		heightMapTextureModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+
+		NonPointDepthShader = shaderManager->getGeometryShader("SMDepthShader");
 		PointDepthShader = shaderManager->getGeometryShader("CMDepthShader");
+		NonPointHeightMapDepthShader = shaderManager->getGeometryShader("SMHeightDepthShader");
+		PointHeightMapDepthShader = shaderManager->getGeometryShader("CMHeightDepthShader");
+
 		
 		numPointLights = 0;
 		numNonPointLights = 0;
@@ -131,16 +138,35 @@ public:
 		std::shared_ptr<MatrixDataModule> matrixModule = dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		std::shared_ptr<PointLightDataModule> pointLightModule = dynamic_pointer_cast<PointLightDataModule>(pointLightDataModule->module);
 
-		auto GeometryRenderFunction = [&](ShaderInstance& shaderInstance, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix) {
+		auto GeometryRenderFunction = [&](bool isPointLight, const XMMATRIX& viewMatrix, const XMMATRIX& projectionMatrix) {
 			instanceManager->forEachMesh([&](const size_t& ID, GeometryData* instance) {
 				MeshType type = instance->mesh->type;
 				if (type != MeshType::ORTHO && type != MeshType::POINT)
 				{
+					Material* mat = instance->mat;
+					std::shared_ptr<BaseShader> shader;
+					if (mat->HeightMapData) {
+						std::shared_ptr<HeightMapDataModule> mapDataModule 
+							= std::dynamic_pointer_cast<HeightMapDataModule>(heightMapDataModule->module);
+						std::shared_ptr<TextureDataModule> textureModule 
+							= std::dynamic_pointer_cast<TextureDataModule>(heightMapTextureModule->module);
+						mapDataModule->setModuleParamaters(deviceContext, mat, instance);
+						textureModule->setModuleParamaters(deviceContext, mat->HeightMapData->HeightTexture);
+
+						shader = (isPointLight 
+							? this->PointHeightMapDepthShader->shader 
+							: this->NonPointHeightMapDepthShader->shader);
+					}
+					else {
+						shader = (isPointLight 
+							? this->PointDepthShader->shader 
+							: this->NonPointDepthShader->shader);
+					}
 					matrixModule->setModuleParamaters(deviceContext, instance, projectionMatrix, viewMatrix);
 					BaseMesh* mesh = instance->mesh->mesh.get();
 					mesh->sendData(deviceContext);
-					shaderInstance->shader->setResources(deviceContext);
-					shaderInstance->shader->render(deviceContext, mesh->getIndexCount());
+					shader->setResources(deviceContext);
+					shader->render(deviceContext, mesh->getIndexCount());
 				}
 			});
 
@@ -150,20 +176,20 @@ public:
 			pointLightModule->setModuleParamaters(deviceContext, light.second->getGlobalPosition(), 50.f);
 			for (int f = 0; f < 6; f++) {
 				cubeMapArray.BindDsvAndSetNullRenderTarget(deviceContext, pointIndex, f);
-				GeometryRenderFunction(PointDepthShader, light.second->getViewMatrix(f), light.second->getProjectionMatrix());
+				GeometryRenderFunction(true, light.second->getViewMatrix(f), light.second->getProjectionMatrix());
 			}
 			++pointIndex;
 		}
 
 		for (std::pair<size_t, Light*> light : spotLights) {
 			shadowMapArray.BindDsvAndSetNullRenderTarget(deviceContext, nonPointIndex);
-			GeometryRenderFunction(RegularDepthShader, light.second->getViewMatrix(), light.second->getProjectionMatrix());
+			GeometryRenderFunction(false, light.second->getViewMatrix(), light.second->getProjectionMatrix());
 			++nonPointIndex;
 		}
 
 		for (std::pair<size_t, Light*> light : directionalLights) {
 			shadowMapArray.BindDsvAndSetNullRenderTarget(deviceContext, nonPointIndex);
-			GeometryRenderFunction(RegularDepthShader, light.second->getViewMatrix(), light.second->getProjectionMatrix());
+			GeometryRenderFunction(false, light.second->getViewMatrix(), light.second->getProjectionMatrix());
 			++nonPointIndex;
 		}
 	};
@@ -184,9 +210,13 @@ private:
 	InstanceManager* instanceManager;
 	ModuleInstance matrixDataModule;	//Matrix Data Module
 	ModuleInstance pointLightDataModule; //Point light module
+	ModuleInstance heightMapDataModule;
+	ModuleInstance heightMapTextureModule;
 
-	ShaderInstance RegularDepthShader;
+	ShaderInstance NonPointDepthShader;
+	ShaderInstance NonPointHeightMapDepthShader;
 	ShaderInstance PointDepthShader;
+	ShaderInstance PointHeightMapDepthShader;
 
 	int numPointLights;
 	int numNonPointLights;

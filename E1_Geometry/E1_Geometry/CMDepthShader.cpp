@@ -34,5 +34,7 @@ void CMDepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilen
 void CMDepthShader::setResources(ID3D11DeviceContext* deviceContext) {
 	//Set vertex shader resources
 	matrixDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
+
+	//Set Pixel Shader resources
 	pointLightDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);
 }

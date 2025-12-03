@@ -6,6 +6,11 @@ CMHeightDepthShader::CMHeightDepthShader(ShaderManager* shaderManager, ID3D11Dev
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	pointLightDataModule = shaderManager->getShaderModuleID("PointLightDataModule");
 	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+	samplerStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
+	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+
+
 }
 
 
@@ -34,5 +39,9 @@ void CMHeightDepthShader::setResources(ID3D11DeviceContext* deviceContext) {
 	//Set vertex shader resources
 	matrixDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
 	heightMapDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 1);
+	samplerStateModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
+	textureDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
+
+	//Set pixel shader resources
 	pointLightDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);
 }
