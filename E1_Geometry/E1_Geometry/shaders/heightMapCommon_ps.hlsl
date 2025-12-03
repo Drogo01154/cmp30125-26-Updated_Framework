@@ -1,10 +1,10 @@
 // Light pixel shader
 // Calculate diffuse lighting for a single directional light (also texturing)
 
-Texture2D heightMapTexture : register(t1);
-SamplerState textureSampler : register(s0);
+Texture2D heightMapTexture : register(t5);
+SamplerState textureSampler : register(s3);
 
-cbuffer mapData : register(b3)
+cbuffer mapData : register(b2)
 {
     float2 offset;
     float  heightMultiplier;

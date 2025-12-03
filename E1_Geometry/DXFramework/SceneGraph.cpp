@@ -48,13 +48,13 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	mesh->m_transform.computeGlobalMatrix(true);
 
 
-	std::shared_ptr<sceneNode> lightNode = createChild("Directional Light", root);
-	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::directional);
+	std::shared_ptr<sceneNode> lightNode = createChild("Point Light", root);
+	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::point);
 	if (lightNode->lightInstance.IsValid()) {
 		Light& light = *lightNode->lightInstance;
 		light.m_transform.setParent(&lightNode->m_transform);
 		light.m_transform.setPosition(XMFLOAT3(10.0f, 20.f, 10.0f));
-		light.m_transform.setEulerX(XMConvertToRadians(50.f));
+		//light.m_transform.setEulerX(XMConvertToRadians(50.f));
 		light.updateGlobals(true);
 		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 	}

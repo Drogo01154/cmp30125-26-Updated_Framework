@@ -26,11 +26,10 @@ Light::Light(lightTypes type) :
 	case lightTypes::point:
 		viewMatrixes.resize(6);
 
-		minConstBias = 0.0002f;
-		maxConstBias = 0.003f;
-
-		minSlopeBias = 0.1f;
-		maxSlopeBias = 1.0f;
+		minConstBias = 0.003f;   // slider minimum
+		maxConstBias = 0.005f;   // slider maximum
+		minSlopeBias = 0.5f;    // slider minimum
+		maxSlopeBias = 1.0f;    // slider maximum
 		break;
 
 	case lightTypes::directional:
@@ -52,7 +51,7 @@ Light::Light(lightTypes type) :
 		maxConstBias = 0.001;
 
 		minSlopeBias = 0.05;
-		maxSlopeBias = 0.5f;
+		maxSlopeBias = 1.0f;
 		break;
 	default:
 		throw std::runtime_error("Error: Light type does not exist!");

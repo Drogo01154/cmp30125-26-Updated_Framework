@@ -61,10 +61,12 @@ public:
 
 			//Update shadow map module
 			shared_ptr<ShadowMapDataModule> shadowMapData = std::dynamic_pointer_cast<ShadowMapDataModule>(shadowMapDataModule->module);
+			ShadowMapArray* shadowMapArray = depthPass->getShadowMapArray();
+			CubeMapArray* cubeMapArray = depthPass->getCubeMapArray();
 			shadowMapData->setModuleParamaters(
 				deviceContext, 
-				&lightViewProjMatrices, depthPass->getShadowMapArray()->getDepthMapArraySRV(), 
-				depthPass->getCubeMapArray()->getCubeMapArraySRV());
+				&lightViewProjMatrices, shadowMapArray->getDepthMapArraySRV(),
+				cubeMapArray->getCubeMapArraySRV());
 		
 		}
 		size_t lightNum = instanceManager->getNumberOfLights();

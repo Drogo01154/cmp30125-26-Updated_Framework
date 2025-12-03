@@ -151,8 +151,8 @@ public:
 			for (int f = 0; f < 6; f++) {
 				cubeMapArray.BindDsvAndSetNullRenderTarget(deviceContext, pointIndex, f);
 				GeometryRenderFunction(PointDepthShader, light.second->getViewMatrix(f), light.second->getProjectionMatrix());
-				++pointIndex;
 			}
+			++pointIndex;
 		}
 
 		for (std::pair<size_t, Light*> light : spotLights) {

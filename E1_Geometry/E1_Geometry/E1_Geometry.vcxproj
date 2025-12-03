@@ -233,6 +233,8 @@
     <None Include="shaders\heightMapCommon_ps.hlsl">
       <FileType>Document</FileType>
     </None>
+    <FxCompile Include="shaders\shadowHeightmap_ps.hlsl" />
+    <FxCompile Include="shaders\shadowHeightmap_vs.hlsl" />
     <FxCompile Include="shaders\shadow_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>

@@ -36,7 +36,7 @@ void CubeMapArray::resize(ID3D11Device* device, std::optional<int> newSize, std:
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	texDesc.CPUAccessFlags = 0;
-	texDesc.MiscFlags = 0;
+	texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 	//ID3D11Texture2D* depthMap = 0;
 	device->CreateTexture2D(&texDesc, 0, depthMapArray.GetAddressOf());
@@ -58,7 +58,7 @@ void CubeMapArray::resize(ID3D11Device* device, std::optional<int> newSize, std:
 		}
 	}
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
 	srvDesc.TextureCubeArray.MipLevels = texDesc.MipLevels;
