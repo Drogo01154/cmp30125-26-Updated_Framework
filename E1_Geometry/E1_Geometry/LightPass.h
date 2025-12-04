@@ -72,7 +72,6 @@ public:
 			});
 	};
 private:
-
 	D3D* renderer;
 	InstanceManager* instanceManager;
 	ShaderManager* shaderManager;

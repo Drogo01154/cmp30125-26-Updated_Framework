@@ -10,6 +10,8 @@ cbuffer CameraDataBuffer : register(b0)
     float4 ambientLight; // 16
     float3 cameraPosition; // 12
     int numberOfLights; // 4
+    float2 shadowMapTexelSize;  // 8
+    float2 padding;            // 8
 };
 
 cbuffer MaterialDataBuffer : register(b1)
@@ -17,7 +19,7 @@ cbuffer MaterialDataBuffer : register(b1)
     float4 baseColour; // 16
     float4 specularColour; // 16
     float specularPower; // 4
-    float3 padding; // 12
+    float3 padding1; // 12
 };
 
 struct Light // 80 bytes

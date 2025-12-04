@@ -7,15 +7,17 @@ SamplerComparisonState ShadowMapSampler : register(s0);
 SamplerComparisonState CubeMapSampler : register(s1);
 SamplerState diffuseSampler : register(s2);
 
-float4 Guassean3X3(float2 pos, int mapIndex, float depthVal, float2 texelSize)
+static const float kernelWeights[9] =
 {
-    static const float kernelWeights[9] =
-    {
-        1.f / 16.f, 2.f / 16.f, 1.f / 16.f,
+    1.f / 16.f, 2.f / 16.f, 1.f / 16.f,
         2.f / 16.f, 4.f / 16.f, 2.f / 16.f,
         1.f / 16.f, 2.f / 16.f, 1.f / 16.f
-    };
-    float4 colour = 0;
+};
+
+float Guassean3X3Normal(float2 pos, int mapIndex, float depthVal)
+{
+    
+    float shadow = 0;
     [unroll]
     for (int y = -1; y < 2; y++)
     {
@@ -25,14 +27,39 @@ float4 Guassean3X3(float2 pos, int mapIndex, float depthVal, float2 texelSize)
             //Calculate kernel index
             int index = (y + 1) * 3 + x + 1;
             //Calculate sample offset
-            float2 offset = { x * texelSize.x, y * texelSize.y };
+            float2 offset = { x * shadowMapTexelSize.x, y * shadowMapTexelSize.y };
             //Accumulate weighted sample
-            colour += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pos + offset, mapIndex), depthVal) * kernelWeights[index];
+            shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pos + offset, mapIndex), depthVal).r * kernelWeights[index];
         }
     }
-    colour.rgb = saturate(colour.rgb);
-    colour.a = 1;
-    return colour;
+    shadow = saturate(shadow);
+    return shadow;
+}
+
+float Guassean3X3Point(float3 lightDirection, int mapIndex, float depthVal)
+{
+    float3 sampleOffsets[8] =
+    {
+        float3(0.01, 0.01, 0), float3(-0.01, 0.01, 0), float3(0.01, -0.01, 0), float3(-0.01, -0.01, 0),
+    float3(0.0, 0.01, 0.01), float3(0.0, -0.01, 0.01), float3(0.01, 0.0, -0.01), float3(-0.01, 0.0, -0.01)
+    };
+    float shadow = 0;
+    [unroll]
+    for (int y = -1; y < 2; y++)
+    {
+        [unroll]
+        for (int x = -1; x < 2; x++)
+        {
+            //Calculate kernel index
+            int index = (y + 1) * 3 + x + 1;
+            //Calculate sample offset
+            float2 offset = { x * shadowMapTexelSize.x, y * shadowMapTexelSize.y };
+            float3 sampleDir = normalize(lightDirection + float3(offset * shadowMapTexelSize, 0));
+            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), depthVal);
+        }
+    }
+    shadow = saturate(shadow);
+    return shadow;
 }
 
 // Is the gemoetry in our shadow map
@@ -59,6 +86,12 @@ float2 getProjectiveCoords(float4 lightViewPosition)
 
 float calculateShadow(int lightID, float3 worldPos, float3 normal)
 {
+    static const float2 offsets[8] =
+    {
+        float2(-1, -1), float2(0, -1), float2(1, -1),
+        float2(-1, 0), float2(1, 0),
+        float2(-1, 1), float2(0, 1), float2(1, 1)
+    };
     int lightType = lights[lightID].type;
     
     float constBias = lights[lightID].constBias;
@@ -82,24 +115,19 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         // Distance from light to fragment
         float fragmentDistance = length(worldPos - lightPos) / farPlane;
         
-        //float sampledDepth = cubeMaps.SampleLevel(CubeMapSampler, float4(lightDirection., mapIndex), 0).r;
-        
-        
+        /*
         //Uses percentage-close filtering to smooth shadows 
         shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(lightDirection, mapIndex), fragmentDistance - bias);
-        static const float3 offsets[8] =
-        {
-            float3(-0.01, -0.01, 0), float3(0, -0.01, 0), float3(0.01, -0.01, 0),
-            float3(-0.01, 0, 0), float3(0.01, 0, 0),
-            float3(-0.01, 0.01, 0), float3(0, 0.01, 0), float3(0.01, 0.01, 0)
-        };
         for (int i = 0; i < 8; i++)
         {
-            float3 sampleDir = normalize(lightDirection + offsets[i]);
+            float3 sampleDir = normalize(lightDirection + float3(offsets[i] * shadowMapTexelSize, 0) );
             shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), fragmentDistance - bias);
         }
 
         shadow /= 9.0f;     
+        */
+        shadow = Guassean3X3Point(lightDirection, mapIndex, fragmentDistance - bias);
+
     }
     else    // Spot or directional light
     {
@@ -120,24 +148,20 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         
         if (hasDepthData(pTexCoord))
         {
-            /*
 
             //Uses percentage-close filtering to smooth shadows 
-            //shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, mapIndex), depth - bias);
+            
+            shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, mapIndex), depth - bias);
 
-            static const float2 offsets[8] =
-            {
-                float2(-0.001, -0.001), float2(0, -0.001), float2(0.001, -0.001),
-                float2(-0.001, 0), float2(0.001, 0),
-                float2(-0.001, 0.001), float2(0, 0.001), float2(0.001, 0.001)
-            };
+           
 
             for (int i = 0; i < 8; i++)
-                    shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i], mapIndex), depth - bias);
+                shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i] * shadowMapTexelSize, mapIndex), depth - bias);
             
             shadow /= 9.0f;
-            */
-            shadow = Guassean3X3(pTexCoord, mapIndex, depth - bias);
+        
+            
+            //shadow = Guassean3X3(pTexCoord, mapIndex, depth - bias);
            
         }    
     }

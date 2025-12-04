@@ -24,6 +24,8 @@ public:
 		shaderManager(inputData.shaderManager),
 		renderer(inputData.renderer) 
 	{
+		texelSize = XMFLOAT2(1.f / static_cast<float>(inputData.sWidth), 1.f / static_cast<float>(inputData.sHeight));
+
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		pointLightDataModule = shaderManager->getShaderModuleID("PointLightDataModule");
 		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
@@ -195,6 +197,7 @@ public:
 	};
 	ShadowMapArray* getShadowMapArray() { return &shadowMapArray; }
 	CubeMapArray* getCubeMapArray() { return &cubeMapArray; }
+	const XMFLOAT2* getTexelSize() { return &texelSize; }
 private:
 	ShadowMapArray shadowMapArray;
 	CubeMapArray cubeMapArray;
@@ -224,6 +227,8 @@ private:
 	int maxNonPointLights;
 
 	float spotLightAspect;
+
+	XMFLOAT2 texelSize;
 
 	static constexpr float expandThreshold = 1.0f;   // 100% of capacity
 	static constexpr float shrinkThreshold = 0.25f;  // 25% of capacity

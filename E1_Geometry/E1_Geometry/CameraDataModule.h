@@ -15,12 +15,14 @@ private:
 		XMFLOAT4 ambient;
 		XMFLOAT3 cameraPosition;
 		int numLights;
+		XMFLOAT2 texelSize;
+		XMFLOAT2 padding;
 	};
 
 public:
 	CameraDataModule(ID3D11Device * device, HWND hwnd, InstanceManager* instanceManager, SceneGraph* sceneGraph);
 
-	void setModuleParamaters(ID3D11DeviceContext* deviceContext);
+	void setModuleParamaters(ID3D11DeviceContext* deviceContext, const XMFLOAT2& texelSize = XMFLOAT2(0.f, 0.f));
 
 	void setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister);
 

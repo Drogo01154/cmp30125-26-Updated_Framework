@@ -41,7 +41,7 @@ public:
 		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::CAMERA)) {
 			//Update camera Data module
 			shared_ptr<CameraDataModule> cameraData = std::dynamic_pointer_cast<CameraDataModule>(cameraDataModule->module);
-			cameraData->setModuleParamaters(deviceContext);
+			cameraData->setModuleParamaters(deviceContext, *depthPass->getTexelSize());
 		}
 		//Check if light number or data changed
 		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED) ||

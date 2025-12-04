@@ -15,7 +15,7 @@ sceneGraph(sceneGraph){
 	renderer->CreateBuffer(&cameraDataBufferDesc, NULL, cameraDataBuffer.GetAddressOf());
 }
 
-void CameraDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
+void CameraDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, const XMFLOAT2& texelSize) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	// Send world data to buffer
 	CameraBufferType* cameraPtr;
@@ -25,6 +25,7 @@ void CameraDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext) {
 	cameraPtr->ambient = sceneGraph->getAmbientLight();
 	cameraPtr->cameraPosition = instanceManager->getActiveCamera()->camera->getGlobalPosition();
 	cameraPtr->numLights = instanceManager->getNumberOfLights();
+	cameraPtr->texelSize = texelSize;
 
 	deviceContext->Unmap(cameraDataBuffer.Get(), 0);
 }

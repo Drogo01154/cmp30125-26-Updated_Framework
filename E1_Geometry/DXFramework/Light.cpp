@@ -21,7 +21,7 @@ Light::Light(lightTypes type) :
 
 		minConstBias = 0.001f;   // slider minimum
 		maxConstBias = 0.005f;   // slider maximum
-		minSlopeBias = 0.001f;   // slider minimum
+		minSlopeBias = 0.004f;   // slider minimum
 		maxSlopeBias = 0.01f;    // slider maximum
 		break;
 
