@@ -16,14 +16,14 @@ PointLightDataModule::PointLightDataModule(ID3D11Device* device, HWND hwnd) : Ba
 	if (FAILED(timeResult)) { assert(false); }
 }
 
-void PointLightDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, const XMFLOAT3& lightPosition, float zPlane) {
+void PointLightDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, const XMFLOAT3& lightPosition, float farPlane) {
 	PointLightBufferType* pointLightPtr;
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	deviceContext->Map(PointLightBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	pointLightPtr = (PointLightBufferType*)mappedResource.pData;
 	pointLightPtr->lightPosition = lightPosition;
-	pointLightPtr->zPlane = zPlane;
+	pointLightPtr->farPlane = farPlane;
 	deviceContext->Unmap(PointLightBuffer.Get(), 0);
 }
 

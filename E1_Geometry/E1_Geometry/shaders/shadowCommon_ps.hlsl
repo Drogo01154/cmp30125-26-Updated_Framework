@@ -7,6 +7,34 @@ SamplerComparisonState ShadowMapSampler : register(s0);
 SamplerComparisonState CubeMapSampler : register(s1);
 SamplerState diffuseSampler : register(s2);
 
+float4 Guassean3X3(float2 pos, int mapIndex, float depthVal, float2 texelSize)
+{
+    static const float kernelWeights[9] =
+    {
+        1.f / 16.f, 2.f / 16.f, 1.f / 16.f,
+        2.f / 16.f, 4.f / 16.f, 2.f / 16.f,
+        1.f / 16.f, 2.f / 16.f, 1.f / 16.f
+    };
+    float4 colour = 0;
+    [unroll]
+    for (int y = -1; y < 2; y++)
+    {
+        [unroll]
+        for (int x = -1; x < 2; x++)
+        {
+            //Calculate kernel index
+            int index = (y + 1) * 3 + x + 1;
+            //Calculate sample offset
+            float2 offset = { x * texelSize.x, y * texelSize.y };
+            //Accumulate weighted sample
+            colour += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pos + offset, mapIndex), depthVal) * kernelWeights[index];
+        }
+    }
+    colour.rgb = saturate(colour.rgb);
+    colour.a = 1;
+    return colour;
+}
+
 // Is the gemoetry in our shadow map
 bool hasDepthData(float2 uv)
 {
@@ -54,6 +82,9 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         // Distance from light to fragment
         float fragmentDistance = length(worldPos - lightPos) / farPlane;
         
+        //float sampledDepth = cubeMaps.SampleLevel(CubeMapSampler, float4(lightDirection., mapIndex), 0).r;
+        
+        
         //Uses percentage-close filtering to smooth shadows 
         shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(lightDirection, mapIndex), fragmentDistance - bias);
         static const float3 offsets[8] =
@@ -89,8 +120,10 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         
         if (hasDepthData(pTexCoord))
         {
+            /*
+
             //Uses percentage-close filtering to smooth shadows 
-            shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, mapIndex), depth - bias);
+            //shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, mapIndex), depth - bias);
 
             static const float2 offsets[8] =
             {
@@ -98,10 +131,14 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
                 float2(-0.001, 0), float2(0.001, 0),
                 float2(-0.001, 0.001), float2(0, 0.001), float2(0.001, 0.001)
             };
-            for (int i = 0; i < 8; i++)
-                shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i], mapIndex), depth - bias);
 
+            for (int i = 0; i < 8; i++)
+                    shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i], mapIndex), depth - bias);
+            
             shadow /= 9.0f;
+            */
+            shadow = Guassean3X3(pTexCoord, mapIndex, depth - bias);
+           
         }    
     }
     return shadow;

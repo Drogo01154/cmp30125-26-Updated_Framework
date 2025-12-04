@@ -173,7 +173,7 @@ public:
 		};
 
 		for (std::pair<size_t, Light*> light : pointLights) {
-			pointLightModule->setModuleParamaters(deviceContext, light.second->getGlobalPosition(), 50.f);
+			pointLightModule->setModuleParamaters(deviceContext, light.second->getGlobalPosition(), light.second->getFar());
 			for (int f = 0; f < 6; f++) {
 				cubeMapArray.BindDsvAndSetNullRenderTarget(deviceContext, pointIndex, f);
 				GeometryRenderFunction(true, light.second->getViewMatrix(f), light.second->getProjectionMatrix());

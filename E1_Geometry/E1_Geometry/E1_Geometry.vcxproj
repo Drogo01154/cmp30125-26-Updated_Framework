@@ -210,9 +210,10 @@
     <FxCompile Include="shaders\depthSM_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\BoxBlur_ps.hlsl">
+    <None Include="shaders\BoxBlur_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="shaders\colourGradient_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -246,21 +247,25 @@
     <FxCompile Include="shaders\shadow_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\Sharpen_ps.hlsl">
+    <None Include="shaders\Sharpen_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
+      <FileType>Document</FileType>
+    </None>
     <None Include="shaders\kernel_ps.hlsl">
       <FileType>Document</FileType>
     </None>
-    <FxCompile Include="shaders\EdgeDetection_ps.hlsl">
+    <None Include="shaders\EdgeDetection_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\Gaussian3X3_ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="shaders\Gaussian3X3_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\Gaussian5X5_ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="shaders\Gaussian5X5_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="shaders\heightMap_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>

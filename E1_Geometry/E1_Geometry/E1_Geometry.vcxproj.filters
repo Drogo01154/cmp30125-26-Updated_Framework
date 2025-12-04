@@ -358,21 +358,6 @@
     <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
       <Filter>Resource Files\Texture Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\BoxBlur_ps.hlsl">
-      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\Gaussian3X3_ps.hlsl">
-      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\Gaussian5X5_ps.hlsl">
-      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\EdgeDetection_ps.hlsl">
-      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\Sharpen_ps.hlsl">
-      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
-    </FxCompile>
     <FxCompile Include="shaders\depthSM_ps.hlsl">
       <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
@@ -416,6 +401,21 @@
     </None>
     <None Include="shaders\heightMapCommon_ps.hlsl">
       <Filter>Resource Files\Geometry Shaders</Filter>
+    </None>
+    <None Include="shaders\BoxBlur_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </None>
+    <None Include="shaders\EdgeDetection_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </None>
+    <None Include="shaders\Gaussian3X3_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </None>
+    <None Include="shaders\Gaussian5X5_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
+    </None>
+    <None Include="shaders\Sharpen_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -18,6 +18,7 @@ float4 main(InputType input) : SV_TARGET
     for (int i = 0; i < numberOfLights; i++)
     {
         float shadowScalar = calculateShadow(i, input.worldPos, input.normal);
+        //float4  lightColour = float4(1.f, 1.f, 1.f, 1.f);
         float4 lightColour = calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
         colour += shadowScalar * lightColour;
 

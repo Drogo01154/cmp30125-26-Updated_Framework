@@ -10,8 +10,8 @@ struct InputType
     float4 worldPos : TEXCOORD0;
 };
 
-float4 main(InputType input) : SV_TARGET
+float main(InputType input) : SV_Depth
 {
-    float depthValue = length(input.worldPos.xyz - lightPosition) / farPlane;
-    return float4(depthValue, depthValue, depthValue, 1.0);
+    float depth = length(input.worldPos.xyz - lightPosition) / farPlane;
+    return saturate(depth);
 }
