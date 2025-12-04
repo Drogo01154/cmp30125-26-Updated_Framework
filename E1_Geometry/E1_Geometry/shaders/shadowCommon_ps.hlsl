@@ -29,30 +29,33 @@ float2 getProjectiveCoords(float4 lightViewPosition)
     return projTex;
 }
 
-float calculateShadow(inout float lightViewIndex, int lightID, float3 worldPos, float3 normal)
+float calculateShadow(int lightID, float3 worldPos, float3 normal)
 {
     int lightType = lights[lightID].type;
-    float3 lightDirection = ((lightType == 0) ? -lights[lightID].lightDirection : lights[lightID].lightDirection);
     
-    // Compute slope-scaled bias
-    float ndotl = max(0.0, dot(normal, lightDirection));
-    float bias = lights[lightID].constBias + lights[lightID].slopeBias * (1.0 - ndotl);
+    float constBias = lights[lightID].constBias;
+    float slopeBias = lights[lightID].slopeBias;
+    
+    int mapIndex = lights[lightID].mapSliceIndex;
     
     float shadow = 1;
     if (lightType == 1) // Point Light
     {
-        // Assuming cubeMaps is a TextureCubeArray
-        int cubeMapIndex = lights[lightID].mapSliceIndex;
         float3 lightPos = lights[lightID].lightPosition;
+        
+        float3 lightDirection = normalize(worldPos - lightPos);
+    
+        // Compute slope-scaled bias
+        float ndotl = max(0.0, dot(normal, lightDirection));
+        float bias = constBias + slopeBias * (1.0 - ndotl);
 
-        // Vector from light to fragment
-        float3 direction = normalize(worldPos - lightPos);
-
+        float farPlane = lights[lightID].innerConeOrFarPlane;
+        
         // Distance from light to fragment
-        float fragmentDistance = length(worldPos - lightPos);
+        float fragmentDistance = length(worldPos - lightPos) / farPlane;
         
         //Uses percentage-close filtering to smooth shadows 
-        shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(direction, cubeMapIndex), fragmentDistance - bias);
+        shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(lightDirection, mapIndex), fragmentDistance - bias);
         static const float3 offsets[8] =
         {
             float3(-0.01, -0.01, 0), float3(0, -0.01, 0), float3(0.01, -0.01, 0),
@@ -60,15 +63,23 @@ float calculateShadow(inout float lightViewIndex, int lightID, float3 worldPos, 
             float3(-0.01, 0.01, 0), float3(0, 0.01, 0), float3(0.01, 0.01, 0)
         };
         for (int i = 0; i < 8; i++)
-            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(direction + offsets[i], cubeMapIndex), fragmentDistance - bias);
+        {
+            float3 sampleDir = normalize(lightDirection + offsets[i]);
+            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), fragmentDistance - bias);
+        }
 
         shadow /= 9.0f;     
     }
-    else
+    else    // Spot or directional light
     {
-        int shadowMapIndex = lights[lightID].mapSliceIndex;
-        float4x4 lightViewProj = lightViewProjs[lightViewIndex];
-        lightViewIndex++;   // Increment to next matrix as now have enough
+        float3 lightDirection = -lights[lightID].lightDirection;
+    
+        // Compute slope-scaled bias
+        float ndotl = max(0.0, dot(normal, lightDirection));
+        float bias = constBias + slopeBias * (1.0 - ndotl);
+        
+        //Structured buffer of light view proj mapped the same as shadow maps
+        float4x4 lightViewProj = lightViewProjs[mapIndex];
         //Cacluate the lights view position
         float4 lightViewPos = mul(float4(worldPos, 1), lightViewProj);
         
@@ -78,22 +89,19 @@ float calculateShadow(inout float lightViewIndex, int lightID, float3 worldPos, 
         
         if (hasDepthData(pTexCoord))
         {
-            if (hasDepthData(pTexCoord))
+            //Uses percentage-close filtering to smooth shadows 
+            shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, mapIndex), depth - bias);
+
+            static const float2 offsets[8] =
             {
-                //Uses percentage-close filtering to smooth shadows 
-                shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, shadowMapIndex), depth - bias);
+                float2(-0.001, -0.001), float2(0, -0.001), float2(0.001, -0.001),
+                float2(-0.001, 0), float2(0.001, 0),
+                float2(-0.001, 0.001), float2(0, 0.001), float2(0.001, 0.001)
+            };
+            for (int i = 0; i < 8; i++)
+                shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i], mapIndex), depth - bias);
 
-                static const float2 offsets[8] =
-                {
-                    float2(-0.001, -0.001), float2(0, -0.001), float2(0.001, -0.001),
-                    float2(-0.001, 0), float2(0.001, 0),
-                    float2(-0.001, 0.001), float2(0, 0.001), float2(0.001, 0.001)
-                };
-                for (int i = 0; i < 8; i++)
-                    shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i], shadowMapIndex), depth - bias);
-
-                shadow /= 9.0f;
-            }
+            shadow /= 9.0f;
         }    
     }
     return shadow;

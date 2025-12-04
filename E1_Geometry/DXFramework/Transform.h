@@ -218,7 +218,10 @@ public:
 	inline bool imGuiRender(const std::string& label, int menuNum = 0, bool editTranslation = true, bool editRotation = true, bool editScale = true) {
 		bool transformUpdated = false;
 		if (editTranslation && ImGuiDragXMVECTOR3((label + " Translation: ## " + std::to_string(menuNum)).c_str(), translation)) { transformUpdated = true; }
-		if (editRotation && ImGuiQuatEulerSlider3Degrees((label + " Rotation: ## " + std::to_string(menuNum)).c_str(), rotation)) { transformUpdated = true; }
+		if (editRotation && ImGuiQuatEulerSlider3Degrees((label + " Rotation: ## " + std::to_string(menuNum)).c_str(), rotation)) 
+		{ 
+			transformUpdated = true; 
+		}
 		if (editScale && ImGuiDragXMVECTOR3((label + " Scale: ## " + std::to_string(menuNum)).c_str(), scale)) { transformUpdated = true; }
 		return transformUpdated;
 	}

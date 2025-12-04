@@ -103,6 +103,7 @@ protected:
 	XMVECTOR lookAt;
 	XMVECTOR globalPosition;
 	XMVECTOR globalDirection;
+	XMFLOAT3 globalRotation;
 	
 	float outerCone;
 	lightTypes type;
@@ -137,9 +138,9 @@ protected:
 	struct Directions {
 		Directions() {
 			XMFLOAT3 floatDirs[6] = {
-			{ 1, 0, 0 }, {-1, 0, 0 },
-			{ 0, 1, 0 }, { 0,-1, 0 },
-			{ 0, 0, 1 }, { 0, 0,-1 } };
+			{ 1, 0, 0 }, {-1, 0, 0 },	// +X, -X
+			{ 0, 1, 0 }, { 0,-1, 0 },	// +Y, -Y
+			{ 0, 0, 1 }, { 0, 0,-1 } };	// +Z, -Z
 
 			XMFLOAT3 floatUps[6] = {
 			{ 0,-1, 0 }, { 0,-1, 0 },

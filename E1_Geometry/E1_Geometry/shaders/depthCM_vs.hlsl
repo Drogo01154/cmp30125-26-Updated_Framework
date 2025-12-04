@@ -14,13 +14,20 @@ struct InputType
 
 struct OutputType
 {
+    float4 position : SV_POSITION;
     float4 worldPos : TEXCOORD0;
 };
 
 OutputType main(InputType input)
 {
     OutputType output;
+    
     // Calculate the position of the vertex against the world, view, and projection matrices.
-    output.worldPos = mul(input.position, worldMatrix);
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    output.worldPos = mul(input.position, worldMatrix); // optional if needed for shadow calculations
+
     return output;
 }

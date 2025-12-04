@@ -45,16 +45,17 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	mesh = sphereNode->meshInstance.Get();
 	mesh->m_transform.setParent(&sphereNode->m_transform);
 	mesh->m_transform.setPosition(XMFLOAT3(10.f, 3.f, 10.f), false);
+	mesh->m_transform.setEulerZ(XMConvertToRadians(90.f));
 	mesh->m_transform.computeGlobalMatrix(true);
 
 
 	std::shared_ptr<sceneNode> lightNode = createChild("Point Light", root);
-	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::point);
+	lightNode->lightInstance = instanceManager->createLight(lightNode->lightID, lightTypes::spot);
 	if (lightNode->lightInstance.IsValid()) {
 		Light& light = *lightNode->lightInstance;
 		light.m_transform.setParent(&lightNode->m_transform);
 		light.m_transform.setPosition(XMFLOAT3(10.0f, 20.f, 10.0f));
-		//light.m_transform.setEulerX(XMConvertToRadians(50.f));
+		light.m_transform.setEulerX(XMConvertToRadians(90.f));
 		light.updateGlobals(true);
 		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 	}

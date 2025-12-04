@@ -12,13 +12,6 @@ Light::Light(lightTypes type) :
 	outerCone(XMConvertToRadians(20.f)),
 	type(type) 
 {
-	m_transform.setPosition(10.f, 5, 10.f);
-
-	// create a target point by adding a downward direction to the position
-	XMVECTOR directionDown = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-	XMVECTOR target = XMVectorAdd(m_transform.getTranslationVector(), directionDown);
-	m_transform.lookAt(target);
-
 	lightNear = 0.1f;
 	lightFar = 25.0f;
 
@@ -26,10 +19,10 @@ Light::Light(lightTypes type) :
 	case lightTypes::point:
 		viewMatrixes.resize(6);
 
-		minConstBias = 0.003f;   // slider minimum
+		minConstBias = 0.001f;   // slider minimum
 		maxConstBias = 0.005f;   // slider maximum
-		minSlopeBias = 0.5f;    // slider minimum
-		maxSlopeBias = 1.0f;    // slider maximum
+		minSlopeBias = 0.001f;   // slider minimum
+		maxSlopeBias = 0.01f;    // slider maximum
 		break;
 
 	case lightTypes::directional:
@@ -47,11 +40,11 @@ Light::Light(lightTypes type) :
 		viewMatrixes.resize(1);
 		FOV = XMConvertToRadians(45.0f); // 45° cone
 
-		minConstBias = 0.0001;
-		maxConstBias = 0.001;
+		minConstBias = 0.001f;   // small offset to avoid acne
+		maxConstBias = 0.005f;
 
-		minSlopeBias = 0.05;
-		maxSlopeBias = 1.0f;
+		minSlopeBias = 0.001f;   // tiny slope bias
+		maxSlopeBias = 0.01f;    // small enough for steep slopes
 		break;
 	default:
 		throw std::runtime_error("Error: Light type does not exist!");
@@ -192,7 +185,10 @@ void Light::updateGlobals(bool updateTransform)
 	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
 
 	globalPosition = outTranslation;
-	globalDirection = m_transform.getWorldForward();
+
+	globalRotation = QuaternionToEuler(outRotation);
+	globalDirection = XMVector3Normalize(XMVector3Rotate(XMVectorSet(0, 0, 1, 0), XMQuaternionNormalize(outRotation)));
+
 }
 XMFLOAT3 Light::getGlobalPosition() const 
 {
@@ -235,9 +231,12 @@ bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 
 	XMFLOAT3 lightPos = getGlobalPosition();
 	XMFLOAT3 lightDir = getGlobalDirection();
+	XMFLOAT3 lightRot = ToDegrees(globalRotation);
 	std::string posText = "Light Position: X: " + std::to_string(lightPos.x) + " Y: " + std::to_string(lightPos.y) + " Z: " + std::to_string(lightPos.z);
+	std::string rotText = "Light Rotation: X: " + std::to_string(lightRot.x) + " Y: " + std::to_string(lightRot.y) + " Z: " + std::to_string(lightRot.z);
 	std::string dirText = "Light Direction: X: " + std::to_string(lightDir.x) + " Y: " + std::to_string(lightDir.y) + " Z: " + std::to_string(lightDir.z);
 	ImGui::Text(posText.c_str());
+	ImGui::Text(rotText.c_str());
 	ImGui::Text(dirText.c_str());
 	bool lightUpdated = false;
 	ImGui::Text(("Light Type: " + std::string(LightTypeStrings[type])).c_str());

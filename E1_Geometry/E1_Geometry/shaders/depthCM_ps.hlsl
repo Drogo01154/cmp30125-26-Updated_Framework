@@ -1,5 +1,3 @@
-#include "heightMapCommon_ps.hlsl"
-
 cbuffer PointLightDataModule : register(b0)
 {
     float3 lightPosition;
@@ -8,6 +6,7 @@ cbuffer PointLightDataModule : register(b0)
 
 struct InputType
 {
+    float4 position : SV_POSITION;
     float4 worldPos : TEXCOORD0;
 };
 

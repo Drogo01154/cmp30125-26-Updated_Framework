@@ -7,9 +7,15 @@
 #include <math.h>
 #include <cmath>
 #include <directxmath.h>
+#include <stdexcept>
+#include <algorithm>
 
 using namespace DirectX;
 
+inline float cleanFloat(float val) {
+    return (fabs(val) < 1e-6f) ? 0.0f : val;
+}
+ 
 inline XMFLOAT2 cleanFloat2(const XMFLOAT2& vec) {
 	XMFLOAT2 returnVec = vec;
 	if (abs(vec.x) < 1e-6) returnVec.x = 0.f;
@@ -95,33 +101,158 @@ inline XMFLOAT4 ToDegrees(const XMFLOAT4& vec) {
 		XMConvertToDegrees(vec.w)
 	};
 }
-inline XMFLOAT3 QuaternionToEuler(const XMVECTOR& quat)
+
+
+///////////////////////////////
+// Quaternion to Euler
+///////////////////////////////
+// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#cite_note-2
+enum RotSeq { zyx, zyz, zxy, zxz, yxz, yxy, yzx, yzy, xyz, xyx, xzy, xzx };
+
+inline void twoaxisrot(double r11, double r12, double r21, double r31, double r32, double res[]) {
+    r21 = std::clamp(r21, -1.0, 1.0);
+    res[0] = atan2(r11, r12);
+    res[1] = acos(r21);
+    res[2] = atan2(r31, r32);
+}
+
+inline void threeaxisrot(double r11, double r12, double r21, double r31, double r32, double res[]) {
+    r21 = std::clamp(r21, -1.0, 1.0);
+    res[0] = atan2(r31, r32);
+    res[1] = asin(r21);
+    res[2] = atan2(r11, r12);
+}
+
+inline XMFLOAT3 QuaternionToEuler(const XMVECTOR& quat, RotSeq rotSeq = RotSeq::zxy)
 {
-	float x = XMVectorGetX(quat);
-	float y = XMVectorGetY(quat);
-	float z = XMVectorGetZ(quat);
-	float w = XMVectorGetW(quat);
+    XMVECTOR normalizedQuat = XMQuaternionNormalize(quat);
 
-	XMFLOAT3 angles;
+    XMFLOAT4 q = {
+    XMVectorGetX(normalizedQuat),
+    XMVectorGetY(normalizedQuat),
+    XMVectorGetZ(normalizedQuat),
+    XMVectorGetW(normalizedQuat)
+    };
 
-	// pitch (X-axis rotation)
-	double sinp = 2.0 * (w * x - y * z);
-	if (std::fabs(sinp) >= 1)
-		angles.x = std::copysign(M_PI / 2, sinp); // clamp to 90° if out of range
-	else
-		angles.x = std::asin(sinp);
+    double res[3];
+    switch (rotSeq) {
+    case zyx:
+        threeaxisrot(2 * (q.x * q.y + q.w * q.z),
+            q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+            -2 * (q.x * q.z - q.w * q.y),
+            2 * (q.y * q.z + q.w * q.x),
+            q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+            res);
+        break;
 
-	// yaw (Y-axis rotation)
-	double siny_cosp = 2.0 * (w * y + z * x);
-	double cosy_cosp = 1.0 - 2.0 * (x * x + y * y);
-	angles.y = std::atan2(siny_cosp, cosy_cosp);
+    case zyz:
+        twoaxisrot(2 * (q.y * q.z - q.w * q.x),
+            2 * (q.x * q.z + q.w * q.y),
+            q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+            2 * (q.y * q.z + q.w * q.x),
+            -2 * (q.x * q.z - q.w * q.y),
+            res);
+        break;
 
-	// roll (Z-axis rotation)
-	double sinr_cosp = 2.0 * (w * z + x * y);
-	double cosr_cosp = 1.0 - 2.0 * (y * y + z * z);
-	angles.z = std::atan2(sinr_cosp, cosr_cosp);
+    case zxy:
+        threeaxisrot(-2 * (q.x * q.y - q.w * q.z),
+            q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+            2 * (q.y * q.z + q.w * q.x),
+            -2 * (q.x * q.z - q.w * q.y),
+            q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+            res);
+        break;
 
-	return angles;
+    case zxz:
+        twoaxisrot(2 * (q.x * q.z + q.w * q.y),
+            -2 * (q.y * q.z - q.w * q.x),
+            q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+            2 * (q.x * q.z - q.w * q.y),
+            2 * (q.y * q.z + q.w * q.x),
+            res);
+        break;
+
+    case yxz:
+        threeaxisrot(2 * (q.x * q.z + q.w * q.y),
+            q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+            -2 * (q.y * q.z - q.w * q.x),
+            2 * (q.x * q.y + q.w * q.z),
+            q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+            res);
+        break;
+
+    case yxy:
+        twoaxisrot(2 * (q.x * q.y - q.w * q.z),
+            2 * (q.y * q.z + q.w * q.x),
+            q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+            2 * (q.x * q.y + q.w * q.z),
+            -2 * (q.y * q.z - q.w * q.x),
+            res);
+        break;
+
+    case yzx:
+        threeaxisrot(-2 * (q.x * q.z - q.w * q.y),
+            q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+            2 * (q.x * q.y + q.w * q.z),
+            -2 * (q.y * q.z - q.w * q.x),
+            q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+            res);
+        break;
+
+    case yzy:
+        twoaxisrot(2 * (q.y * q.z + q.w * q.x),
+            -2 * (q.x * q.y - q.w * q.z),
+            q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+            2 * (q.y * q.z - q.w * q.x),
+            2 * (q.x * q.y + q.w * q.z),
+            res);
+        break;
+
+    case xyz:
+        threeaxisrot(-2 * (q.y * q.z - q.w * q.x),
+            q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z,
+            2 * (q.x * q.z + q.w * q.y),
+            -2 * (q.x * q.y - q.w * q.z),
+            q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+            res);
+        break;
+
+    case xyx:
+        twoaxisrot(2 * (q.x * q.y + q.w * q.z),
+            -2 * (q.x * q.z - q.w * q.y),
+            q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+            2 * (q.x * q.y - q.w * q.z),
+            2 * (q.x * q.z + q.w * q.y),
+            res);
+        break;
+
+    case xzy:
+        threeaxisrot(2 * (q.y * q.z + q.w * q.x),
+            q.w * q.w - q.x * q.x + q.y * q.y - q.z * q.z,
+            -2 * (q.x * q.y - q.w * q.z),
+            2 * (q.x * q.z + q.w * q.y),
+            q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+            res);
+        break;
+
+    case xzx:
+        twoaxisrot(2 * (q.x * q.z - q.w * q.y),
+            2 * (q.x * q.y + q.w * q.z),
+            q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z,
+            2 * (q.x * q.z + q.w * q.y),
+            -2 * (q.x * q.y - q.w * q.z),
+            res);
+        break;
+    default:
+        throw std::runtime_error("Unknown rotation sequence");
+        break;
+    }
+
+    return XMFLOAT3(
+        cleanFloat(static_cast<float>(res[0])),
+        cleanFloat(static_cast<float>(res[1])),
+        cleanFloat(static_cast<float>(res[2]))
+        );
 }
 
 inline XMVECTOR QuatLookAtLH(const XMVECTOR& forwardVector, const XMVECTOR& upVector) {

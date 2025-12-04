@@ -169,6 +169,7 @@
     <ClCompile Include="CMDepthShader.cpp" />
     <ClCompile Include="CMHeightDepthShader.cpp" />
     <ClCompile Include="HeightMapLightShader.h" />
+    <ClCompile Include="HeightMapShadowShader.cpp" />
     <ClCompile Include="PointLightDataModule.cpp" />
     <ClCompile Include="ShadowMapDataModule.cpp" />
     <ClCompile Include="ShadowShader.cpp" />

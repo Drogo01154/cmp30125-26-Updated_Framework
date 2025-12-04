@@ -54,20 +54,27 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, c
 	lightPtr = (LightBufferType*)mappedResource.pData;
 
 	int i = 0;
-	int lightViewIndex = 0;
+	int pointIndex = 0;
+	int nonPointIndex = 0;
 	instanceManager->forEachLight([&](const size_t& ID, Light* light) {
 		lightTypes type = light->getType();
 		lightPtr[i].attenuation = light->getAttenuation();
 		lightPtr[i].position = light->getGlobalPosition();
 		lightPtr[i].direction = light->getGlobalDirection();
-		lightPtr[i].innerCone = cos(light->getInnerCone());
+		lightPtr[i].innerConerOrFarPlane = (type == lightTypes::point) ? light->getFar() : cos(light->getInnerCone());
 		lightPtr[i].outerCone = cos(light->getOuterCone());
 		lightPtr[i].diffuse = light->getDiffuseColour();
 		lightPtr[i].type = static_cast<int>(type);
-		lightPtr[i].constBias = light->getSlopeBias();
+		lightPtr[i].constBias = light->getConstBias();
 		lightPtr[i].slopeBias = light->getSlopeBias();
-		if (indexes != nullptr && type != lightTypes::point) { lightPtr[i].index = (*indexes)[i]; ++lightViewIndex; }
-		else { lightPtr[i].index = -1; }
+		if (type != lightTypes::point) 
+		{ 
+			lightPtr[i].index = (*indexes)[nonPointIndex]; ++nonPointIndex;
+		}
+		else 
+		{ 
+			lightPtr[i].index = pointIndex; ++pointIndex;
+		}
 		i++;
 		});
 

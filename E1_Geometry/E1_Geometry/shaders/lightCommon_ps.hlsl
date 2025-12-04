@@ -1,3 +1,4 @@
+
 // Light pixel shader
 // Calculate diffuse lighting for a single spot light (also texturing)
 
@@ -24,9 +25,9 @@ struct Light // 80 bytes
     float4 lightAttenuation;
     float4 lightDiffuse;
     float3 lightDirection;
-    float cosLightInnerCone; // cos of inner cone angle
+    float innerConeOrFarPlane; // cos of inner cone angle or far plane for point lights
     float3 lightPosition;
-    float cosLightOuterCone; // cos of outer cone angle
+    float outerCone; // cos of outer cone angle
     int type;
     int mapSliceIndex;
     float constBias;
@@ -95,7 +96,7 @@ float4 calculateLight(float4 diffuse, int lightNumber, float3 pixelPosition, flo
             else if (lightType == 2) //  Spot Light
             {
                 float cosTheta = dot(pixelToLightVec, normalize(-lights[lightNumber].lightDirection));
-                float spotFactor = saturate((cosTheta - lights[lightNumber].cosLightOuterCone) / (lights[lightNumber].cosLightInnerCone - lights[lightNumber].cosLightOuterCone));
+                float spotFactor = saturate((cosTheta - lights[lightNumber].outerCone) / (lights[lightNumber].innerConeOrFarPlane - lights[lightNumber].outerCone));
                 returnValue = (intensity + specular) * attenuation * spotFactor;
             }
         }

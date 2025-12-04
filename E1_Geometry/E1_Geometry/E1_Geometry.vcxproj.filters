@@ -201,6 +201,9 @@
     <ClCompile Include="SMHeightDepthShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClCompile>
+    <ClCompile Include="HeightMapShadowShader.cpp">
+      <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">

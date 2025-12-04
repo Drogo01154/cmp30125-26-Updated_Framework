@@ -24,6 +24,7 @@ struct InputType
 
 struct OutputType
 {
+    float4 position : SV_POSITION;
     float4 worldPos : TEXCOORD0;
 };
 
@@ -33,7 +34,9 @@ OutputType main(InputType input)
     
     //Increase Vertex Y position by heighMultiplier.
     input.position.y += heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
-    // Calculate the position of the vertex against the world, view, and projection matrices.
+     // Calculate the position of the vertex against the world, view, and projection matrices.
     output.worldPos = mul(input.position, worldMatrix);
+    output.position = mul(output.worldPos, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
     return output;
 }

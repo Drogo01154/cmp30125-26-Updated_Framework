@@ -15,7 +15,7 @@ private:
 		XMFLOAT4 diffuse;		// 16
 
 		XMFLOAT3 direction;		// 12
-		float innerCone;		// 4
+		float innerConerOrFarPlane;	// 4
 
 		XMFLOAT3 position;		// 12
 		float outerCone;		// 4

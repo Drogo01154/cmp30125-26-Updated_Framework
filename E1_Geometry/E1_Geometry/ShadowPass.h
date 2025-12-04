@@ -45,17 +45,22 @@ public:
 		}
 		//Check if light number or data changed
 		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED) ||
-			shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED)) {
+			shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED) || shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTPROJECTIONCHANGED)) {
 			
+			const std::vector<int>* shadowMapIndexes = depthPass->getLightIndexes();
 			// Update light data module
 			shared_ptr<LightsDataModule> lightsData = std::dynamic_pointer_cast<LightsDataModule>(lightDataModule->module);
 			lightsData->setModuleParamaters(deviceContext, depthPass->getLightIndexes());
 			// Calculate lightViewProj Matrices
 			std::vector<XMMATRIX> lightViewProjMatrices;
+			lightViewProjMatrices.resize(shadowMapIndexes->size());
+			int index = 0;
 			instanceManager->forEachLight([&](size_t ID, Light* light) {
 				lightTypes type = light->getType();
 				if (type != lightTypes::point) {
-					lightViewProjMatrices.push_back(XMMatrixMultiply(light->getViewMatrix(0), light->getProjectionMatrix()));
+					int shadowMapIndex = (*shadowMapIndexes)[index];
+					lightViewProjMatrices[shadowMapIndex] = XMMatrixMultiply(light->getViewMatrix(0), light->getProjectionMatrix());
+					index++;
 				}
 				});
 
