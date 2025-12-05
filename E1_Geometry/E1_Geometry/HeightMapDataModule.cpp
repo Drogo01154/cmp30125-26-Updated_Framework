@@ -48,7 +48,9 @@ void HeightMapDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext
 	deviceContext->Map(heightMapBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	heightMapPtr = (MapBufferType*)mappedResource.pData;
 	heightMapPtr->heightMultiplier = material->HeightMapData->HeightMultiplier;
-	heightMapPtr->resolution = std::get<int>(plane->mesh->params["resolution"]);
+	int resolution = std::get<int>(plane->mesh->params["resolution"]);
+	heightMapPtr->resolution = resolution;
+	heightMapPtr->pixelOffset = pixelOffset;
 	deviceContext->Unmap(heightMapBuffer.Get(), 0);
 
 }

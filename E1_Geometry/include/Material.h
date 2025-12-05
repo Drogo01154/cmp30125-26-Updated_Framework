@@ -18,6 +18,7 @@ enum shaderTypes {
 class BaseShader;
 
 struct HeightMapInfo {
+	HeightMapInfo() : HeightTextureString(L"height"), HeightMultiplier(10.f) {}
 	std::wstring HeightTextureString;
 	TextureInstance HeightTexture;
 	float HeightMultiplier;

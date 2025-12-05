@@ -42,14 +42,14 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	mesh->m_transform.computeGlobalMatrix(true);
 
 	std::shared_ptr<sceneNode> sphereNode = createChild("Sphere", root);
-	/*
+	
 	sphereNode->meshInstance = instanceManager->createSphereMeshInstance(planeNode->meshID, inputResolution);
 	mesh = sphereNode->meshInstance.Get();
 	mesh->m_transform.setParent(&sphereNode->m_transform);
 	mesh->m_transform.setPosition(XMFLOAT3(10.f, 3.f, 10.f), false);
 	mesh->m_transform.setEulerZ(XMConvertToRadians(90.f));
 	mesh->m_transform.computeGlobalMatrix(true);
-	*/
+	
 
 
 	std::shared_ptr<sceneNode> lightNode = createChild("Point Light", root);

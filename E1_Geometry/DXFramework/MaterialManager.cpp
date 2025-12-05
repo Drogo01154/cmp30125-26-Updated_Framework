@@ -29,6 +29,8 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	selectedHeightMapTexture = -1;
 
 	createMaterial("Default");
+	//Material& mat = materialCache.getValue("Default");
+	//mat.HeightMapData = std::make_unique<HeightMapInfo>();
 };
 
 //Gets material ID from name
@@ -209,10 +211,6 @@ void MaterialManager::imGuiRender() {
 				if (mat->HeightMapData == nullptr && ImGui::Button("Make Heightmap")) {
 					mat->HeightMapData = std::make_unique<HeightMapInfo>();
 					HeightMapInfo* mapInfo = mat->HeightMapData.get();
-
-					mapInfo->HeightTextureString = L"height";
-					mapInfo->HeightMultiplier = 10.f;
-
 					if (materialCache.hasInstances(matName)) {
 						mapInfo->HeightTexture = textureManager->getTexture(mapInfo->HeightTextureString);
 					}
@@ -263,7 +261,10 @@ void MaterialManager::imGuiRender() {
 						}
 					}
 					if(ImGui::SliderFloat("Height Multiplier", &mapInfo->HeightMultiplier, 1.f, 1000.f)) {}
-
+					if (ImGui::Button("Delete Height Map")) {
+						mat->HeightMapData.reset();
+						selectedHeightMapTexture = -1;
+					}
 				}
 			}
 

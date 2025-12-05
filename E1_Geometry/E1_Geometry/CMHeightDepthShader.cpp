@@ -8,9 +8,6 @@ CMHeightDepthShader::CMHeightDepthShader(ShaderManager* shaderManager, ID3D11Dev
 	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
 	textureDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
 	samplerStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
-	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
-
-
 }
 
 

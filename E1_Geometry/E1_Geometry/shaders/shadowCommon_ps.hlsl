@@ -24,9 +24,9 @@ static const float kernelWeights[9] =
 
 float3 calcCubeOffsetDirection(float3 direction, float2 offset)
 {
-    float3 up = (abs(direction.y) < 0.999) ?
-    float3(0, 1, 0):
-    float3(1, 0, 0);
+    float3 up = (abs(direction.y) > 0.999) ?
+    float3(1, 0, 0) :
+    float3(0, 1, 0);
     
     float3 right = normalize(cross(up, direction));
     up = normalize(cross(direction, right));
@@ -68,8 +68,9 @@ float Guassean3X3Point(float3 lightDirection, int mapIndex, float depthVal)
         [unroll]
         for (int x = -1; x < 2; x++)
         {
+            int index = (y + 1) * 3 + x + 1;
             float3 sampleDir = calcCubeOffsetDirection(lightDirection, float2(x, y));
-            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), depthVal);
+            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), depthVal) * kernelWeights[index];
         }
     }
     shadow = saturate(shadow);
@@ -128,17 +129,18 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         
         // Distance from light to fragment
         float fragmentDistance = length(worldPos - lightPos) / farPlane;
-        
-        
+         
         //Uses percentage-close filtering to smooth shadows 
         shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(lightDirection, mapIndex), fragmentDistance - bias);
-                for (int i = 0; i < 8; i++)
+        /*
+````````for (int i = 0; i < 8; i++)
         {
             float3 sampleDir = calcCubeOffsetDirection(lightDirection, offsets[i]);
             shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), fragmentDistance - bias);
         }
 
         shadow /= 9.0f;    
+        */
         
         //shadow = Guassean3X3Point(lightDirection, mapIndex, fragmentDistance - bias);
 
