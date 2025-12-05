@@ -208,36 +208,61 @@ void MaterialManager::imGuiRender() {
 				}
 				if (mat->HeightMapData == nullptr && ImGui::Button("Make Heightmap")) {
 					mat->HeightMapData = std::make_unique<HeightMapInfo>();
-					mat->HeightMapData->HeightTextureString = L"";
-					mat->HeightMapData->HeightMultiplier = 10.f;
+					HeightMapInfo* mapInfo = mat->HeightMapData.get();
+
+					mapInfo->HeightTextureString = L"height";
+					mapInfo->HeightMultiplier = 10.f;
+
+					if (materialCache.hasInstances(matName)) {
+						mapInfo->HeightTexture = textureManager->getTexture(mapInfo->HeightTextureString);
+					}
+
+					const auto& imageList = *FileHandler::get().getImageList();
+					std::string textureName = Converters::convert_from_wstring(mapInfo->HeightTextureString);
+
+					// Find matching texture
+					for (int i = 0; i < imageList.size(); i++) {
+						if (textureName == imageList[i]) {
+							selectedHeightMapTexture = i;
+							break;
+						}
+					}
 				}
 
 				const std::vector<const char*>* imageList = FileHandler::get().getImageList();
 				if (ImGui::Combo("Select Material Texture: ", &selectedTexture, imageList->data(), imageList->size())) {
-
+					bool setTexture = false;
 					if (selectedTexture >= 0) {
-						mat->textureString = textureManager->getTextureNameFromIndex(selectedTexture);
+						std::string inputString = std::string((*imageList)[selectedTexture]);
+						std::wstring inputWString = Converters::convert_to_wstring(inputString);
+						mat->textureString = inputWString;
+						mat->texture = materialCache.hasInstances(matName)
+							? textureManager->getTexture(mat->textureString)
+							: TextureInstance();
 					}
-
-					if (materialCache.hasInstances(matName)) {
-						mat->texture = textureManager->getTexture(mat->textureString);
+					else {
+						mat->textureString = L"";
+						mat->texture = TextureInstance();
 					}
 				}
 
 				if (mat->HeightMapData != nullptr) {
-					const std::vector<const char*>* imageList = FileHandler::get().getImageList();
+					HeightMapInfo* mapInfo = mat->HeightMapData.get();
 					if (ImGui::Combo("Select HeightMap Texture: ", &selectedHeightMapTexture, imageList->data(), imageList->size())) {
 						if (selectedHeightMapTexture >= 0) {
-							mat->HeightMapData->HeightTextureString = textureManager->getTextureNameFromIndex(selectedHeightMapTexture);
-							if (materialCache.hasInstances(matName)) {
-								mat->HeightMapData->HeightTexture = textureManager->getTexture(mat->HeightMapData->HeightTextureString);
-							}
+						std:string inputString = std::string((*imageList)[selectedHeightMapTexture]);
+							std::wstring inputWstring = Converters::convert_to_wstring(inputString);
+							mapInfo->HeightTextureString = inputWstring;
+							mapInfo->HeightTexture = materialCache.hasInstances(matName)
+								? textureManager->getTexture(mat->textureString)
+								: TextureInstance();
 						}
 						else {
-							mat->HeightMapData->HeightTextureString = L"";
-							mat->HeightMapData->HeightTexture = TextureInstance();
+							mapInfo->HeightTextureString = L"";
+							mapInfo->HeightTexture = TextureInstance();
 						}
 					}
+					if(ImGui::SliderFloat("Height Multiplier", &mapInfo->HeightMultiplier, 1.f, 1000.f)) {}
 
 				}
 			}

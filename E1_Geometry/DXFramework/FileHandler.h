@@ -15,15 +15,6 @@
 
 namespace fs = std::filesystem;
 class FileHandler {
-	std::vector<std::wstring> supportedObjectExtensions;
-
-	std::unordered_map<std::string, std::wstring> models;
-	std::unordered_map<std::wstring, std::wstring> images;
-	std::unordered_map<std::string, std::pair<std::string, bool>> scenes;
-
-	std::vector<const char*> imageList;
-	std::vector<const char*> modelList;
-	std::vector<const char*> sceneList;
 	//inline static std::unordered_map<std::string, bool> scenes;
 
 	FileHandler() {
@@ -33,6 +24,35 @@ class FileHandler {
 			fs::create_directory(folder);
 		}
 		LocateFiles(L"res/");
+
+		updateVectors();
+	}
+
+	void updateVectors(bool onlyUpdateScene = false) {
+		if (!onlyUpdateScene) {
+			size_t imageNum = images.size();
+			size_t modelNum = models.size();
+			imageStringList.resize(imageNum);
+			imageCharList.resize(imageNum);
+			modelCharList.resize(modelNum);
+			size_t index = 0;
+			for (auto it : images) {
+				imageStringList[index] = Converters::convert_from_wstring(it.first);
+				imageCharList[index] = imageStringList[index].c_str();
+				++index;
+			}
+			index = 0;
+			for (auto it : models) {
+				modelCharList[index] = it.first.c_str();
+				++index;
+			}
+		}
+		size_t sceneNum = scenes.size();
+		sceneCharList.resize(sceneNum);
+		int index = 0;
+		for (auto it : scenes) {
+			sceneCharList[index] = it.first.c_str();
+		}
 	}
 
 	~FileHandler() {
@@ -110,7 +130,6 @@ class FileHandler {
 							std::filesystem::path relativePath = fs::relative(path, _DirectoryPath).parent_path();
 							std::wstring inputPath = std::wstring(_DirectoryPath) + relativePath.wstring() + L"/";
 							models.emplace(stringName, inputPath);
-							modelList.push_back(stringName.c_str());
 						}
 						found = true;
 						break;
@@ -127,7 +146,7 @@ class FileHandler {
 							std::wstring inputPath = std::wstring(_DirectoryPath) + relativePath.wstring() + L"/";
 							inputPath = path.wstring();
 							images.emplace(wstringName, inputPath);
-							imageList.push_back(stringName.c_str());
+							imageStringList.push_back(stringName);
 						}
 						break;
 					}
@@ -148,9 +167,9 @@ public:
 	FileHandler& operator=(const FileHandler&) = delete;
 	FileHandler& operator=(FileHandler&&) = delete;
 
-	const std::vector<const char*>* getImageList() const { return &imageList; }
-	const std::vector<const char*>* getModelList() const { return &modelList; }
-	const std::vector<const char*>* getSceneList() const { return &sceneList; }
+	const std::vector<const char*>* getImageList() const { return &imageCharList; }
+	const std::vector<const char*>* getModelList() const { return &modelCharList; }
+	const std::vector<const char*>* getSceneList() const { return &sceneCharList; }
 
 	inline bool loadSceneJson(const std::string& sceneName, nlohmann::json& json) {
 		auto it = scenes.find(sceneName);
@@ -236,6 +255,18 @@ public:
 		}
 		return nullptr;
 	}
+private:
+	std::vector<std::wstring> supportedObjectExtensions;
+
+	std::unordered_map<std::string, std::wstring> models;
+	std::unordered_map<std::wstring, std::wstring> images;
+	std::unordered_map<std::string, std::pair<std::string, bool>> scenes;
+
+	std::vector<std::string> imageStringList;
+
+	std::vector<const char*> imageCharList;
+	std::vector<const char*> modelCharList;
+	std::vector<const char*> sceneCharList;
 };
 
 #endif

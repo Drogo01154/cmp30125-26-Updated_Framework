@@ -76,10 +76,6 @@ TextureInstance TextureManager::loadTexture(const std::wstring& uid, const std::
 // Release resource.
 TextureManager::~TextureManager() {}
 
-std::wstring TextureManager::getTextureNameFromIndex(size_t index) {
-	return Converters::convert_to_wstring(textureCache.getCachedName(index));
-}
-
 // Return texture as a shader resource.
 TextureInstance TextureManager::getTexture(const std::wstring& uid)
 {
