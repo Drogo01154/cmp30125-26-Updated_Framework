@@ -27,6 +27,10 @@ public:
 
 	void deleteAllMaterials();
 
+	const std::vector<std::string>* getMaterialStrings();
+	const std::vector<const char*>* getMatrialsChars();
+
+
 	void imGuiRender();
 
 	void to_json(nlohmann::json& j);
@@ -41,7 +45,8 @@ private:
 	int selectedMaterial;
 	int selectedTexture;
 	int selectedHeightMapTexture;
-	char nameInput[256] = "";
+	char newNameInput[256] = "";
+	char existingNameInput[256] = "";
 };
 
 #endif

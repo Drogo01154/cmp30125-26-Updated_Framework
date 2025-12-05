@@ -9,6 +9,7 @@
 #include "TextureDataModule.h"
 #include "MatrixDataModule.h"
 #include "MaterialDataModule.h"
+#include "HeightMapDataModule.h"
 
 class ShadowPass : public RenderToTexturePass {
 public:
@@ -25,7 +26,11 @@ public:
 		cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 		shadowMapDataModule = shaderManager->getShaderModuleID("ShadowMapDataModule");
 		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+		heightMapTextureModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
+
 		shader = shaderManager->getGeometryShader("ShadowShader");
+		heightMapShader = shaderManager->getGeometryShader("HeightMapShadowShader");
 
 		depthPass = std::dynamic_pointer_cast<DepthPass>(deps.begin()->second);
 	}
@@ -97,9 +102,26 @@ public:
 
 				//Send Geometry Data
 				std::shared_ptr<BaseMesh> mesh = meshInstance->mesh->mesh;
-				mesh->sendData(deviceContext);
-				shader->shader->setResources(deviceContext);
-				shader->shader->render(deviceContext, mesh->getIndexCount());
+
+				if (mat->HeightMapData) {
+					std::shared_ptr<TextureDataModule> heightMapData = std::dynamic_pointer_cast<TextureDataModule>(heightMapTextureModule->module);
+					std::shared_ptr<HeightMapDataModule> heightData = std::dynamic_pointer_cast<HeightMapDataModule>(heightMapDataModule->module);
+
+					heightMapData->setModuleParamaters(deviceContext, mat->HeightMapData->HeightTexture->texture.Get());
+					heightData->setModuleParamaters(deviceContext, mat, meshInstance);
+
+					mesh->sendData(deviceContext);
+					heightMapShader->shader->setResources(deviceContext);
+					heightMapShader->shader->render(deviceContext, mesh->getIndexCount());
+				}
+				else {
+					mesh->sendData(deviceContext);
+					shader->shader->setResources(deviceContext);
+					shader->shader->render(deviceContext, mesh->getIndexCount());
+				}
+
+				
+				
 			}
 			});
 	};
@@ -120,4 +142,9 @@ private:
 	ModuleInstance shadowMapDataModule;	//Module for shadow maps
 
 	ModuleInstance textureDataModule;	//Module for materials texture
+
+	ModuleInstance heightMapDataModule;
+	ModuleInstance heightMapTextureModule;
+
+	ShaderInstance heightMapShader;
 };

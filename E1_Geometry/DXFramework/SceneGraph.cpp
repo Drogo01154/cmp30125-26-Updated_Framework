@@ -1,15 +1,17 @@
 #include "SceneGraph.h"
 
-SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager) : 
+SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager, MaterialManager* materialManager) : 
 	shaderManager(shaderManager), 
 	instanceManager(instanceManager), 
-	geometryManager(geometryManager)
+	geometryManager(geometryManager),
+	materialManager(materialManager)
 {
 	selectedCreateCamera = -1;
 	selectedCreateLight = -1;
 	selectedCreateMesh = -1;
 	selectedModel = -1;
 	selectedCreateModel = -1;
+	meshSelectedMaterial = -1;
 	inputResolution = 20;
 	ambientLight = XMFLOAT4(0.05f, 0.05f, 0.05f, 1.0f);
 
@@ -40,13 +42,14 @@ void SceneGraph::SceneGraph::createBaseScene() {
 	mesh->m_transform.computeGlobalMatrix(true);
 
 	std::shared_ptr<sceneNode> sphereNode = createChild("Sphere", root);
-
+	/*
 	sphereNode->meshInstance = instanceManager->createSphereMeshInstance(planeNode->meshID, inputResolution);
 	mesh = sphereNode->meshInstance.Get();
 	mesh->m_transform.setParent(&sphereNode->m_transform);
 	mesh->m_transform.setPosition(XMFLOAT3(10.f, 3.f, 10.f), false);
 	mesh->m_transform.setEulerZ(XMConvertToRadians(90.f));
 	mesh->m_transform.computeGlobalMatrix(true);
+	*/
 
 
 	std::shared_ptr<sceneNode> lightNode = createChild("Point Light", root);
@@ -140,6 +143,18 @@ void SceneGraph::selectNode(std::shared_ptr<sceneNode> node) {
 	strncpy_s(nodeNameBuffer, node->name.c_str(), sizeof(nodeNameBuffer));
 	nodeNameBuffer[sizeof(nodeNameBuffer) - 1] = '\0'; // ensure null-terminated
 	childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+
+	if (node->meshInstance.IsValid()) {
+		const std::string& materialName = node->meshInstance->mat->MaterialName;
+		const std::vector<std::string>* materialVec = materialManager->getMaterialStrings();
+		meshSelectedMaterial = -1;
+		for (int i = 0; i < materialVec->size(); ++i) {
+			if (materialVec->at(i) == materialName) {
+				meshSelectedMaterial = i;
+				break;
+			}
+		}
+	}
 }
 
 //ImGui function for attaching mesh to scene node
@@ -315,88 +330,93 @@ void SceneGraph::updateNodeGlobals(std::shared_ptr<sceneNode> node, bool updateL
 }
 
 void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
-	if (ImGui::TreeNode(("Node: " + node->name + ": Details:").c_str()))
-	{
-		if (ImGui::InputText("Node Name", nodeNameBuffer, sizeof(nodeNameBuffer))) {
-			node->name = nodeNameBuffer; // update the node name if user types
+	ImGui::Text(("Node: " + node->name + ": Details: ").c_str());
+	if (ImGui::InputText("Node Name", nodeNameBuffer, sizeof(nodeNameBuffer))) {
+		node->name = nodeNameBuffer; // update the node name if user types
+	}
+
+	bool hasLight = node->lightInstance.IsValid();
+	bool hasCamera = node->cameraInstance.IsValid();
+	bool hasMesh = node->meshInstance.IsValid();
+
+	//Nodes Transform Settings
+	if (ImGui::TreeNode("Transform Settings: ")) {
+		if (node->m_transform.imGuiRender("Node Transform: ", 0, true, true, true)) {
+			updateNodeGlobals(node, true);
 		}
+		ImGui::TreePop();
+	}
 
-		bool hasLight = node->lightInstance.IsValid();
-		bool hasCamera = node->cameraInstance.IsValid();
-		bool hasMesh = node->meshInstance.IsValid();
+	//Mesh manipulation
+	if (hasMesh) {
+		if (ImGui::TreeNode(("Node: " + node->name + " Mesh Settings:").c_str())) {
+			if (GeometryData* mesh = node->meshInstance.Get()) {
+				if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, true)) {
+					mesh->m_transform.computeGlobalMatrix(true);
+				}
+				const std::vector<const char*>* materialCharVec = materialManager->getMatrialsChars();
+				if (ImGui::Combo("Mesh Material: ", &meshSelectedMaterial, materialCharVec->data(), materialCharVec->size())) {
+					if (meshSelectedMaterial >= 0) {
+						const std::vector<std::string>* materialStringVec = materialManager->getMaterialStrings();
+						mesh->mat = materialManager->getMaterialInstance((*materialStringVec)[meshSelectedMaterial]);
+					}
+				}
+			}
+				
+			ImGui::TreePop();
+		}
+		if (ImGui::Button("Delete Mesh")) { deleteNodeMesh(node); }
 
-		//Nodes Transform Settings
-		if (ImGui::TreeNode("Transform Settings: ")) {
-			if (node->m_transform.imGuiRender("Node Transform: ", 0, true, true, true)) {
-				updateNodeGlobals(node, true);
+	}
+	else {
+		if (ImGui::TreeNode("Attach Mesh")) {
+			imGuiMeshCreation(node);
+			ImGui::TreePop();
+		}
+	}
+
+	//Camera manipulation
+	if (hasCamera)
+	{
+		if (ImGui::TreeNode(("Node: " + node->name + " Camera Settings").c_str())) {
+			if (CameraData* cameraInstance = node->cameraInstance.Get()) {
+				if (cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA); }
 			}
 			ImGui::TreePop();
 		}
-
-		//Mesh manipulation
-		if (hasMesh) {
-			if (ImGui::TreeNode(("Node: " + node->name + " Mesh Settings:").c_str())) {
-				if (GeometryData* mesh = node->meshInstance.Get()) {
-					if (mesh->m_transform.imGuiRender("Mesh Transform", 1, true, true, true)) {
-						mesh->m_transform.computeGlobalMatrix(true);
-					}
-				}
-				ImGui::TreePop();
+		if (ImGui::Button("Delete Camera")) { deleteNodeCamera(node); }
+	}
+	else {
+		if (ImGui::TreeNode("Attach Camera")) {
+			imGuiCameraCreation(node);
+			ImGui::TreePop();
+		}
+	}
+	//Light manipulation
+	if (hasLight) {
+		if (ImGui::TreeNode(("Node: " + node->name + " Light Settings").c_str())) {
+			if (Light* light = node->lightInstance.Get()) {
+				bool lightProjectionChanged = false;
+				if (light->imGuiRender(3, lightProjectionChanged)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED); }
+				if (lightProjectionChanged) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTPROJECTIONCHANGED); }
 			}
-			if (ImGui::Button("Delete Mesh")) { deleteNodeMesh(node); }
-
+			ImGui::TreePop();
 		}
-		else {
-			if (ImGui::TreeNode("Attach Mesh")) {
-				imGuiMeshCreation(node);
-				ImGui::TreePop();
-			}
+		if (ImGui::Button("Delete Light")) { deleteNodeLight(node); }
+	}
+	else {
+		if (ImGui::TreeNode("Attach Light")) {
+			imGuiLightCreation(node);
+			ImGui::TreePop();
 		}
-
-		//Camera manipulation
-		if (hasCamera)
-		{
-			if (ImGui::TreeNode(("Node: " + node->name + " Camera Settings").c_str())) {
-				if (CameraData* cameraInstance = node->cameraInstance.Get()) {
-					if (cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA); }
-				}
-				ImGui::TreePop();
-			}
-			if (ImGui::Button("Delete Camera")) { deleteNodeCamera(node); }
-		}
-		else {
-			if (ImGui::TreeNode("Attach Camera")) {
-				imGuiCameraCreation(node);
-				ImGui::TreePop();
-			}
-		}
-		//Light manipulation
-		if (hasLight) {
-			if (ImGui::TreeNode(("Node: " + node->name + " Light Settings").c_str())) {
-				if (Light* light = node->lightInstance.Get()) {
-					bool lightProjectionChanged = false;
-					if (light->imGuiRender(3, lightProjectionChanged)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED); }
-					if (lightProjectionChanged) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTPROJECTIONCHANGED); }
-				}
-				ImGui::TreePop();
-			}
-			if (ImGui::Button("Delete Light")) { deleteNodeLight(node); }
-		}
-		else {
-			if (ImGui::TreeNode("Attach Light")) {
-				imGuiLightCreation(node);
-				ImGui::TreePop();
-			}
-		}
-		if (ImGui::InputText("New Child Name", childNameBuffer, sizeof(childNameBuffer))) {
-		}
-		if (ImGui::Button("AttachChild")) {
-			createChild(childNameBuffer, node);
-		}
-		if (ImGui::Button("Delete Node")) {
-			deleteNode(node);
-		}
-		ImGui::TreePop();
+	}
+	if (ImGui::InputText("New Child Name", childNameBuffer, sizeof(childNameBuffer))) {
+	}
+	if (ImGui::Button("AttachChild")) {
+		createChild(childNameBuffer, node);
+	}
+	if (ImGui::Button("Delete Node")) {
+		deleteNode(node);
 	}
 }
 

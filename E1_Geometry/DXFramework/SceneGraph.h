@@ -27,7 +27,7 @@ struct sceneNode {
 class SceneGraph {
 public:
 	SceneGraph() = delete;
-	SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager);
+	SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager, MaterialManager* materialManager);
 
 
 	void createBaseScene();
@@ -66,6 +66,7 @@ private:
 	ShaderManager* shaderManager;
 	GeometryManager* geometryManager;
 	InstanceManager* instanceManager;
+	MaterialManager* materialManager;
 	std::shared_ptr<sceneNode> root;
 	std::shared_ptr<sceneNode> selectedNode;
 	size_t nodeIncrement;
@@ -90,6 +91,7 @@ private:
 	int selectedCreateMesh;
 	int selectedCreateModel;
 	int inputResolution;
+	int meshSelectedMaterial;
 
 	char childNameBuffer[128];
 	char nodeNameBuffer[128];

@@ -44,7 +44,7 @@ void BaseApplication::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int 
 	materialMgr = std::make_unique<MaterialManager>(shaderMgr.get(), textureMgr.get());
 	geometryMgr = std::make_unique<GeometryManager>(renderer->getDevice(), renderer->getDeviceContext());
 	instanceMgr = std::make_unique<InstanceManager>(shaderMgr.get(), geometryMgr.get(), materialMgr.get(), input, wnd, sWidth, sHeight);
-	sceneGraph = std::make_unique<SceneGraph>(shaderMgr.get(), instanceMgr.get(), geometryMgr.get());
+	sceneGraph = std::make_unique<SceneGraph>(shaderMgr.get(), instanceMgr.get(), geometryMgr.get(), materialMgr.get());
 	passMgr = std::make_unique<RenderPassManager>();
 
 	//textureMgr->loadTexture(L"default", L"res/DefaultDiffuse.png");

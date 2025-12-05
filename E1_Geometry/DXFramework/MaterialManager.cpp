@@ -77,7 +77,7 @@ void MaterialManager::createMaterial(const std::string& name) {
 void MaterialManager::updateSelectedMaterial() {
 
 	// Reset state by default
-	nameInput[0] = '\0';
+	existingNameInput[0] = '\0';
 	selectedTexture = -1;
 	selectedHeightMapTexture = -1;
 
@@ -99,7 +99,7 @@ void MaterialManager::updateSelectedMaterial() {
 	}
 
 	// Update name buffer
-	strncpy_s(nameInput, mat->MaterialName.c_str(), sizeof(nameInput));
+	strncpy_s(existingNameInput, mat->MaterialName.c_str(), sizeof(existingNameInput));
 
 	// Texture handling
 	if (!mat->textureString.empty()) {
@@ -138,7 +138,7 @@ bool MaterialManager::deleteMaterial(const std::string& name) {
 	bool deleted = materialCache.RemoveID(name);
 	if (deleted and selectedName) {
 		selectedMaterial = -1;
-		nameInput[0] = '\0';
+		existingNameInput[0] = '\0';
 		selectedTexture = -1;
 		selectedHeightMapTexture = -1;
 	}
@@ -147,14 +147,32 @@ bool MaterialManager::deleteMaterial(const std::string& name) {
 
 void MaterialManager::deleteAllMaterials() {
 	selectedMaterial = -1;
-	nameInput[0] = '\0';
+	newNameInput[0] = '\0';
+	existingNameInput[0] = '\0';
 	selectedTexture = -1;
 	materialCache.clear();
+}
+
+const std::vector<std::string>* MaterialManager::getMaterialStrings() {
+	return &materialCache.getCachedStringVec();
+}
+const std::vector<const char*>* MaterialManager::getMatrialsChars() {
+	return &materialCache.getCharVec();
 }
 
 void MaterialManager::imGuiRender() {
 
 	if (ImGui::CollapsingHeader("Material Settings: ")) {
+
+		ImGui::InputText("New Material Name", newNameInput, sizeof(newNameInput));
+		if (ImGui::Button("Create Material")) {
+			std::string newMaterialName(newNameInput);
+			if (!newMaterialName.empty()) {
+				createMaterial(newMaterialName);
+				selectedMaterial = materialCache.size() - 1;
+				updateSelectedMaterial();
+			}
+		}
 		const std::vector<const char*> CacheVec = materialCache.getCharVec();
 		if (ImGui::Combo("Select Material", &selectedMaterial, CacheVec.data(), CacheVec.size())) {
 			updateSelectedMaterial();
@@ -166,11 +184,11 @@ void MaterialManager::imGuiRender() {
 			//Get material from ID
 			if (Material* mat = materialCache.tryGetValue(matName)) {
 				//Output materials Name
-				if (ImGui::InputText("Material Name", nameInput, sizeof(nameInput),
+				if (ImGui::InputText("Material Name", existingNameInput, sizeof(existingNameInput),
 					ImGuiInputTextFlags_EnterReturnsTrue)) {
 
 					// This block executes when the user presses Enter
-					std::string newName(nameInput);
+					std::string newName(existingNameInput);
 					if (materialCache.changeID(matName, newName)) {
 						mat->MaterialName = newName;
 						return;
