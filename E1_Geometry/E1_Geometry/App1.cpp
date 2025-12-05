@@ -11,6 +11,7 @@
 #include "SMHeightDepthShader.h"
 #include "TexturedLightShader.h"
 #include "LightPass.h"
+#include "HeightMapShadowShader.h"
 
 App1::App1()
 {
@@ -56,6 +57,7 @@ void App1::initShadows(HINSTANCE hinstance, HWND hwnd, int screenWidth, int scre
 
 	//Shadow map shaders
 	shaderMgr->addGeometryShader<ShadowShader>("ShadowShader", shaderMgr.get(), renderer->getDevice(), hwnd);
+	shaderMgr->addGeometryShader<HeightMapShadowShader>("HeightMapShadowShader", shaderMgr.get(), renderer->getDevice(), hwnd);
 
 	//Add pass shader
 	shaderMgr->addPassShader<TextureShader>("TextureShader", shaderMgr.get(), renderer->getDevice(), hwnd);

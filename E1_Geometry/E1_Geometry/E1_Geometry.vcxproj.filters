@@ -302,14 +302,17 @@
     <ClInclude Include="LightPass.h">
       <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowShader.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
     <ClInclude Include="CMHeightDepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClInclude>
     <ClInclude Include="SMHeightDepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapShadowShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowShader.h">
+      <Filter>Header Files\Shaders\MeshShaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

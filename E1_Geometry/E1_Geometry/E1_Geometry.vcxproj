@@ -316,6 +316,7 @@
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="DepthPass.h" />
+    <ClInclude Include="HeightMapShadowShader.h" />
     <ClInclude Include="LightPass.h" />
     <ClInclude Include="PointLightDataModule.h" />
     <ClInclude Include="ShadowMapDataModule.h" />
