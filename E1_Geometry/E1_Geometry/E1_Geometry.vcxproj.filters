@@ -100,6 +100,9 @@
     <Filter Include="Header Files\ShaderModules\Lights Modules\RenderPassModules">
       <UniqueIdentifier>{090a945e-e1e1-44fe-ab2d-9b58ec5589ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ShaderModules\PostProcessingModules">
+      <UniqueIdentifier>{1a50f3aa-0b57-453c-bf7a-f5d86e426757}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp">
@@ -314,6 +317,12 @@
     <ClInclude Include="ShadowShader.h">
       <Filter>Header Files\Shaders\MeshShaders</Filter>
     </ClInclude>
+    <ClInclude Include="GenericShader.h">
+      <Filter>Source Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="BloomModule.h">
+      <Filter>Header Files\ShaderModules\PostProcessingModules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shaders\colour_ps.hlsl">
@@ -364,9 +373,6 @@
     <FxCompile Include="shaders\depthSM_ps.hlsl">
       <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\depthSM_vs.hlsl">
-      <Filter>Resource Files\Depth Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="shaders\shadow_ps.hlsl">
       <Filter>Resource Files\Shadow Shaders</Filter>
     </FxCompile>
@@ -390,6 +396,9 @@
     </FxCompile>
     <FxCompile Include="shaders\shadowHeightmap_vs.hlsl">
       <Filter>Resource Files\Shadow Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\depthSM_vs.hlsl">
+      <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

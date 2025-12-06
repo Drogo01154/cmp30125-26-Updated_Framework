@@ -310,12 +310,14 @@
   <ItemGroup>
     <ClInclude Include="..\DXFramework\Material.h" />
     <ClInclude Include="App1.h" />
+    <ClInclude Include="BloomModule.h" />
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="CMDepthShader.h" />
     <ClInclude Include="CMHeightDepthShader.h" />
     <ClInclude Include="ColourShader.h" />
     <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="DepthPass.h" />
+    <ClInclude Include="GenericShader.h" />
     <ClInclude Include="HeightMapShadowShader.h" />
     <ClInclude Include="LightPass.h" />
     <ClInclude Include="PointLightDataModule.h" />

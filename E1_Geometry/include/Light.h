@@ -143,9 +143,10 @@ protected:
 			{ 0, 0, 1 }, { 0, 0,-1 } };	// +Z, -Z
 
 			XMFLOAT3 floatUps[6] = {
-			{ 0,-1, 0 }, { 0,-1, 0 },
-			{ 0, 0, 1 }, { 0, 0,-1 },
-			{ 0,-1, 0 },{ 0,-1, 0 } };
+			{ 0, 1, 0 },   { 0, 1, 0 },   // +X, -X
+			{ 0, 0, -1 },  { 0, 0, 1 },   // +Y, -Y
+			{ 0, 1, 0 },   { 0, 1, 0 }    // +Z, -Z
+			};
 
 			for (int face = 0; face < 6; ++face) {
 				forwards[face] = XMLoadFloat3(&floatDirs[face]);
