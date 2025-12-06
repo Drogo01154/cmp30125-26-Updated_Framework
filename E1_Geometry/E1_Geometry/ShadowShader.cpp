@@ -11,7 +11,7 @@ ShadowShader::ShadowShader(ShaderManager* shaderManager, ID3D11Device* device, H
 	textureSamplerStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
 	shadowMapSamplerStateModule = shaderManager->getShaderModuleID("ShadowMapSamplerModule");
 	cubeMapSamplerStateModule = shaderManager->getShaderModuleID("CubeMapSamplerModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 }
 
 ShadowShader::~ShadowShader() {

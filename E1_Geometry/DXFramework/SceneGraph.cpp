@@ -15,6 +15,9 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 	inputResolution = 20;
 	ambientLight = XMFLOAT4(0.05f, 0.05f, 0.05f, 1.0f);
 
+	childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+	nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+
 	createBaseScene();
 }
 
@@ -446,6 +449,7 @@ const XMFLOAT4& SceneGraph::getAmbientLight() {
 
 void SceneGraph::to_json(nlohmann::json& j) {
 
+	j["Ambient"] = ambientLight;
 	instanceManager->to_json(j["Instances"]);
 
 	std::queue<std::pair <nlohmann::json*, std::shared_ptr<sceneNode>>> nodeQueue;
@@ -498,6 +502,8 @@ void SceneGraph::from_json(const nlohmann::json& j) {
 	};
 
 	instanceManager->setDestroyNoInstances(false);
+
+	ambientLight = j.at("Ambient").get<XMFLOAT4>();
 
 	std::queue<nodeData> nodeQueue;
 	root = std::make_shared<sceneNode>();

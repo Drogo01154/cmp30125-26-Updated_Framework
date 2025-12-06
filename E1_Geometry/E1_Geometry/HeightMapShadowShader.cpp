@@ -11,8 +11,8 @@ HeightMapShadowShader::HeightMapShadowShader(ShaderManager* shaderManager, ID3D1
 	textureSamplerStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
 	shadowMapSamplerStateModule = shaderManager->getShaderModuleID("ShadowMapSamplerModule");
 	cubeMapSamplerStateModule = shaderManager->getShaderModuleID("CubeMapSamplerModule");
-	albedoTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
-	heightMapTextureDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+	albedoTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
+	heightMapTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule2");
 	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
 }
 

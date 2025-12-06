@@ -23,7 +23,7 @@ KernelShader::KernelShader(ShaderManager* shaderManager, ID3D11Device* device, H
 
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	samplerStateModule = shaderManager->getShaderModuleID("RenderTextureSampleModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 	KernelDataModule = shaderManager->getShaderModuleID("KernelDataModule");
 }
 

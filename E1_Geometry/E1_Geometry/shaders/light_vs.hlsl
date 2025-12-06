@@ -7,11 +7,12 @@ cbuffer MatrixBuffer : register(b0)
 	matrix projectionMatrix;
 };
 
-cbuffer CameraBuffer : register(b1)
+cbuffer CameraDataBuffer : register(b1)
 {
-    float3 cameraPosition;
-    float padding;
-}
+    float4 ambientLight; // 16
+    float3 cameraPosition; // 12
+    int numberOfLights; // 4
+};
 
 struct InputType
 {
@@ -22,33 +23,32 @@ struct InputType
 
 struct OutputType
 {
-	float4 position : SV_POSITION;
-	float2 tex : TEXCOORD0;
-	float3 normal : NORMAL;
-    float3 worldPosition : TEXCOORD1;
-    float3 viewVector : TEXCOORD2;
+    float4 position : SV_POSITION;
+    float3 worldPos : TEXCOORD0;
+    float3 viewVector : TEXCOORD1;
+    float2 tex : TEXCOORD2;
+    float3 normal : NORMAL;
 };
+
 
 OutputType main(InputType input)
 {
-	OutputType output;
+    OutputType output;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-	output.position = mul(input.position, worldMatrix);
-	output.position = mul(output.position, viewMatrix);
-	output.position = mul(output.position, projectionMatrix);
-
-	// Store the texture coordinates for the pixel shader.
-	output.tex = input.tex;
-
-	// Calculate the normal vector against the world matrix only and normalise.
-	output.normal = mul(input.normal, (float3x3)worldMatrix);
-	output.normal = normalize(output.normal);
-	
-	// Calculate the positon of the vertex in the world
-    output.worldPosition = mul(input.position, worldMatrix).xyz;
-    output.viewVector = cameraPosition.xyz - output.worldPosition.xyz;
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Calculate the positon of the vertex in the world
+    output.worldPos = mul(input.position, worldMatrix).xyz;
+    output.viewVector = cameraPosition.xyz - output.worldPos.xyz;
     output.viewVector = normalize(output.viewVector);
-	
-	return output;
+
+
+    output.tex = input.tex;
+    output.normal = mul(input.normal, (float3x3) worldMatrix);
+    output.normal = normalize(output.normal);
+
+    return output;
 }

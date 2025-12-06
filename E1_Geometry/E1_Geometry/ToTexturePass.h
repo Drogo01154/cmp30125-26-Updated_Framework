@@ -7,9 +7,9 @@
 #include "RenderTexture.h"
 #include <memory>
 
-class RenderToTexturePass : public renderPass {
+class ToTexturePass : public renderPass {
 public:
-	RenderToTexturePass(size_t stage,
+	ToTexturePass(size_t stage,
 		passDependancies& deps,
 		ShaderManager* shaderManager,
 		ID3D11Device* device, 

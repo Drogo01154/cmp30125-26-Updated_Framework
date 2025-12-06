@@ -199,11 +199,11 @@ public:
 			// Parse BSON
 			json = nlohmann::json::from_bson(buffer);
 		} else {
-			//file >> json;
+			file >> json;
 		}
 		return true;
 	}
-	/*
+	
 	inline bool saveSceneJson(const std::string& sceneName, const nlohmann::json& json, bool asBson) {
 		const std::string* path = nullptr;
 		
@@ -238,7 +238,7 @@ public:
 		}
 		return true;
 	}
-	*/
+	
 
 	inline std::wstring* locateModel(const std::string& name) {
 		auto model = models.find(name);

@@ -165,6 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App1.cpp" />
+    <ClCompile Include="BlurPass.h" />
     <ClCompile Include="CameraDataModule.cpp" />
     <ClCompile Include="CMDepthShader.cpp" />
     <ClCompile Include="CMHeightDepthShader.cpp" />
@@ -195,6 +196,12 @@
     <ClCompile Include="MiniMapTextureShader.cpp" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
+    <FxCompile Include="shaders\BloomCombine_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="shaders\BloomThreshold_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\depthCM_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -235,6 +242,9 @@
     <None Include="shaders\heightMapCommon_ps.hlsl">
       <FileType>Document</FileType>
     </None>
+    <FxCompile Include="shaders\GausseanBlur_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="shaders\shadowHeightmap_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -310,7 +320,8 @@
   <ItemGroup>
     <ClInclude Include="..\DXFramework\Material.h" />
     <ClInclude Include="App1.h" />
-    <ClInclude Include="BloomModule.h" />
+    <ClInclude Include="BloomCombinePass.h" />
+    <ClInclude Include="ConstantBufferModule.h" />
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="CMDepthShader.h" />
     <ClInclude Include="CMHeightDepthShader.h" />
@@ -321,6 +332,7 @@
     <ClInclude Include="HeightMapShadowShader.h" />
     <ClInclude Include="LightPass.h" />
     <ClInclude Include="PointLightDataModule.h" />
+    <ClInclude Include="TextureToTexturePass.h" />
     <ClInclude Include="ShadowMapDataModule.h" />
     <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="ShadowShader.h" />
@@ -336,7 +348,7 @@
     <ClInclude Include="MaterialDataModule.h" />
     <ClInclude Include="MiniMapDataModule.h" />
     <ClInclude Include="MiniMapPass.h" />
-    <ClInclude Include="RenderToTexturePass.h" />
+    <ClInclude Include="ToTexturePass.h" />
     <ClInclude Include="SamplerDataModule.h" />
     <ClInclude Include="ShaderInit.h" />
     <ClInclude Include="SMHeightDepthShader.h" />
@@ -346,6 +358,7 @@
     <ClInclude Include="MiniMapTextureShader.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="MatrixDataModule.h" />
+    <ClInclude Include="ThresholdPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">
@@ -377,11 +390,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ProjectPlan.txt">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -67,9 +67,6 @@
     <Filter Include="Source Files\ShaderModules\RenderPassModules">
       <UniqueIdentifier>{f6f1fe54-b8a5-4e22-a0c2-8bea3b4fe5ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ShaderModules\GeometryDataModules">
-      <UniqueIdentifier>{e3afc48a-f82d-49ac-b60a-d90f0c7953d7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\ShaderModules\Common Modules">
       <UniqueIdentifier>{e7def1cf-fa95-4285-8412-c47b0f8c35a0}</UniqueIdentifier>
     </Filter>
@@ -97,11 +94,26 @@
     <Filter Include="Header Files\ShaderModules\Lights Modules">
       <UniqueIdentifier>{aadc1cff-fe82-4a20-a4db-3d9928a2fd48}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ShaderModules\Lights Modules\RenderPassModules">
+    <Filter Include="Header Files\ShaderModules\RenderPassModules">
       <UniqueIdentifier>{090a945e-e1e1-44fe-ab2d-9b58ec5589ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ShaderModules\PostProcessingModules">
-      <UniqueIdentifier>{1a50f3aa-0b57-453c-bf7a-f5d86e426757}</UniqueIdentifier>
+    <Filter Include="Source Files\ShaderModules\Common Modules\GeometryDataModules">
+      <UniqueIdentifier>{e3afc48a-f82d-49ac-b60a-d90f0c7953d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RenderPasses\PostProcessing">
+      <UniqueIdentifier>{4624c481-9c27-47b5-b972-4479c8498d62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RenderPasses\PostProcessing\BloomPasses">
+      <UniqueIdentifier>{ceae27e6-dac9-4732-9e16-fb465f2b8b10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RenderPasses\GometryPasses">
+      <UniqueIdentifier>{8ad3aef5-9985-4770-8d66-b62b74505437}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RenderPasses\BasePasses">
+      <UniqueIdentifier>{e1ceab4a-4b71-4237-b7f7-42505f7c5eeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Texture Shaders\BloomShaders">
+      <UniqueIdentifier>{da6024fe-0261-4983-b437-db30a800557f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -145,7 +157,7 @@
       <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
     <ClCompile Include="KernelDataModule.h">
-      <Filter>Header Files\ShaderModules\Lights Modules\RenderPassModules</Filter>
+      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
     </ClCompile>
     <ClCompile Include="SMDepthShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
@@ -163,16 +175,16 @@
       <Filter>Source Files\ShaderModules\RenderPassModules</Filter>
     </ClCompile>
     <ClCompile Include="HeightMapDataModule.cpp">
-      <Filter>Source Files\ShaderModules\GeometryDataModules</Filter>
+      <Filter>Source Files\ShaderModules\Common Modules\GeometryDataModules</Filter>
     </ClCompile>
     <ClCompile Include="MatrixDataModule.cpp">
-      <Filter>Source Files\ShaderModules\GeometryDataModules</Filter>
+      <Filter>Source Files\ShaderModules\Common Modules\GeometryDataModules</Filter>
     </ClCompile>
     <ClCompile Include="MaterialDataModule.cpp">
-      <Filter>Source Files\ShaderModules\GeometryDataModules</Filter>
+      <Filter>Source Files\ShaderModules\Common Modules\GeometryDataModules</Filter>
     </ClCompile>
     <ClCompile Include="ManipulationDataModule.cpp">
-      <Filter>Source Files\ShaderModules\GeometryDataModules</Filter>
+      <Filter>Source Files\ShaderModules\Common Modules\GeometryDataModules</Filter>
     </ClCompile>
     <ClCompile Include="SamplerDataModule.cpp">
       <Filter>Source Files\ShaderModules\Common Modules</Filter>
@@ -207,6 +219,9 @@
     <ClCompile Include="HeightMapShadowShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders\LightShaders</Filter>
     </ClCompile>
+    <ClCompile Include="BlurPass.h">
+      <Filter>Header Files\RenderPasses\PostProcessing\BloomPasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App1.h">
@@ -237,7 +252,7 @@
       <Filter>Header Files\Shaders\TextureShaders</Filter>
     </ClInclude>
     <ClInclude Include="GreyScaleDataModule.h">
-      <Filter>Header Files\ShaderModules\Lights Modules\RenderPassModules</Filter>
+      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
     </ClInclude>
     <ClInclude Include="HeightMapDataModule.h">
       <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
@@ -255,13 +270,7 @@
       <Filter>Header Files\ShaderModules\Common Modules</Filter>
     </ClInclude>
     <ClInclude Include="MiniMapDataModule.h">
-      <Filter>Header Files\ShaderModules\Lights Modules\RenderPassModules</Filter>
-    </ClInclude>
-    <ClInclude Include="MiniMapPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderToTexturePass.h">
-      <Filter>Header Files\RenderPasses</Filter>
+      <Filter>Header Files\ShaderModules\RenderPassModules</Filter>
     </ClInclude>
     <ClInclude Include="ShaderInit.h">
       <Filter>Source Files\Shaders</Filter>
@@ -272,17 +281,8 @@
     <ClInclude Include="ManipulationDataModule.h">
       <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
     </ClInclude>
-    <ClInclude Include="GeometryPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
-    <ClInclude Include="FinalPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
     <ClInclude Include="SMDepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="DepthPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
     </ClInclude>
     <ClInclude Include="CMDepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
@@ -299,12 +299,6 @@
     <ClInclude Include="ShadowMapDataModule.h">
       <Filter>Header Files\ShaderModules\Lights Modules</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
-    <ClInclude Include="LightPass.h">
-      <Filter>Header Files\RenderPasses</Filter>
-    </ClInclude>
     <ClInclude Include="CMHeightDepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClInclude>
@@ -317,11 +311,41 @@
     <ClInclude Include="ShadowShader.h">
       <Filter>Header Files\Shaders\MeshShaders</Filter>
     </ClInclude>
-    <ClInclude Include="GenericShader.h">
-      <Filter>Source Files\Shaders</Filter>
+    <ClInclude Include="ConstantBufferModule.h">
+      <Filter>Header Files\ShaderModules\Common Modules</Filter>
     </ClInclude>
-    <ClInclude Include="BloomModule.h">
-      <Filter>Header Files\ShaderModules\PostProcessingModules</Filter>
+    <ClInclude Include="GenericShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="BloomCombinePass.h">
+      <Filter>Header Files\RenderPasses\PostProcessing\BloomPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthPass.h">
+      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FinalPass.h">
+      <Filter>Header Files\RenderPasses\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryPass.h">
+      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="LightPass.h">
+      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureToTexturePass.h">
+      <Filter>Header Files\RenderPasses\BasePasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ThresholdPass.h">
+      <Filter>Header Files\RenderPasses\PostProcessing\BloomPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowPass.h">
+      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniMapPass.h">
+      <Filter>Header Files\RenderPasses\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="ToTexturePass.h">
+      <Filter>Header Files\RenderPasses\BasePasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -400,6 +424,15 @@
     <FxCompile Include="shaders\depthSM_vs.hlsl">
       <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="shaders\BloomCombine_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\BloomShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\BloomThreshold_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\BloomShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\GausseanBlur_ps.hlsl">
+      <Filter>Resource Files\Texture Shaders\BloomShaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\lightCommon_ps.hlsl">
@@ -429,8 +462,5 @@
     <None Include="shaders\Sharpen_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\KernelShaders</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ProjectPlan.txt" />
   </ItemGroup>
 </Project>

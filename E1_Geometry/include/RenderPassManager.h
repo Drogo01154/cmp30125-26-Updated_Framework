@@ -76,6 +76,20 @@ public:
 		potentialPasses.emplace(name, PassData(dependancies, std::move(constructionFunction)));
 	}
 
+	inline void ImGuiRender() {
+		for (auto& it : activePassList) {
+			if (it.second->hasImGuiMenu()) {
+				it.second->ImGuiMenu();
+			}
+		}
+	}
+
+	void clearActivePasses() {
+		activePassList.clear();
+		activePassIndexes.clear();
+		potentialPasses.clear();
+	}
+
 private:
 	std::unordered_map<std::string, PassData> potentialPasses;
 	std::vector<std::pair<std::string, std::shared_ptr<renderPass>>> activePassList;

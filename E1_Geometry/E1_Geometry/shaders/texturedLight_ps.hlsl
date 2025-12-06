@@ -9,10 +9,10 @@ SamplerState sampler0 : register(s0);
 struct InputType
 {
     float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
+    float3 worldPos : TEXCOORD0;
+    float3 viewVector : TEXCOORD1;
+    float2 tex : TEXCOORD2;
     float3 normal : NORMAL;
-    float3 worldPosition : TEXCOORD1;
-    float3 viewVector : TEXCOORD2;
 };
 
 float4 main(InputType input) : SV_Target
@@ -24,9 +24,9 @@ float4 main(InputType input) : SV_Target
     
     for (int i = 0; i < numberOfLights; i++)
     {
-        finalColour += calculateLight(diffuse, i, input.worldPosition, input.normal, input.viewVector);
+        finalColour += calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
     }
     
     // Multiply by diffuse texture and clamp to 0..1
-    return saturate(finalColour);
+    return finalColour;
 }

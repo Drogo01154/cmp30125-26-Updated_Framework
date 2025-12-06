@@ -8,16 +8,18 @@
 #include <d3dcompiler.h> 
 #include <unordered_map>
 #include <memory>
+#include <string>
 
 #define passDependancies std::unordered_map<std::string, std::shared_ptr<renderPass>>
 
 class renderPass {
 public:
 
-	renderPass(size_t stage, const passDependancies&) { passStage = stage; }
+	renderPass(size_t stage, const passDependancies&) { passStage = stage; hasImGui = false; }
 	virtual void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) = 0;
 	virtual void ImGuiMenu() {}
-private:
+	bool hasImGuiMenu() { return hasImGui; }
+protected:
 	size_t passStage;
 	bool hasImGui;
 };

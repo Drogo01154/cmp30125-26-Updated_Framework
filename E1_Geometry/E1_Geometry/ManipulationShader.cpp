@@ -9,7 +9,7 @@ ManipulationShader::ManipulationShader(ShaderManager* shaderManager, ID3D11Devic
 	materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 	cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 	sampleStateModule = shaderManager->getShaderModuleID("GeometryTextureSampleModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 	manipulationDataModule = shaderManager->getShaderModuleID("ManipulationDataModule");
 }
 

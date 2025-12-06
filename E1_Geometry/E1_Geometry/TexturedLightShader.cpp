@@ -9,7 +9,7 @@ TexturedLightShader::TexturedLightShader(ShaderManager* shaderManager, ID3D11Dev
 	cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 
 	sampleStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 }
 
 
@@ -37,6 +37,7 @@ void TexturedLightShader::initShader(const wchar_t* vsFilename, const wchar_t* p
 void TexturedLightShader::setResources(ID3D11DeviceContext* deviceContext) {
 	//Set vertex shader resources
 	matrixDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);
+	cameraDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_VERTEX_SHADER, deviceContext, 1);
 
 	//Set pixel shaders cBuffers
 	cameraDataModule->module->setResources(D3D11_SHADER_VERSION_TYPE::D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);

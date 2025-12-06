@@ -6,7 +6,7 @@ MiniMapTextureShader::MiniMapTextureShader(ShaderManager* shaderManager, ID3D11D
 	initShader(L"texture_vs.cso", L"textureMiniMap_ps.cso");
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	samplerStateModule = shaderManager->getShaderModuleID("RenderTextureSampleModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 	miniMapDataModule = shaderManager->getShaderModuleID("miniMapDataModule");
 	/*
 	

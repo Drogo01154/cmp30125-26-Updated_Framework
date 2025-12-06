@@ -6,9 +6,9 @@ SMHeightDepthShader::SMHeightDepthShader(ShaderManager* shaderManager, ID3D11Dev
 	initShader(L"depthHeightmapSM_vs.cso", L"depthSM_ps.cso");
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
-	textureDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 	samplerStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
-	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+	heightMapDataModule = shaderManager->getShaderModuleID("TextureDataModule2");
 }
 
 

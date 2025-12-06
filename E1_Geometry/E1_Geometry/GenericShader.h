@@ -3,12 +3,15 @@
 #include <optional>
 
 struct resourceData {
-	resourceData(const std::string& moduleName, std::vector<std::pair<D3D11_SHADER_VERSION_TYPE, size_t>>& resourceAllocationData) :
-		moduleName(moduleName), resourceAllocationData(std::move(resourceAllocationData)) {
+	resourceData() {}
+	resourceData(std::string moduleName, std::vector<std::pair<D3D11_SHADER_VERSION_TYPE, size_t>> resourceAllocationData)
+		: moduleName(std::move(moduleName)), resourceAllocationData(std::move(resourceAllocationData)) {
 	}
+
 	std::string moduleName;
 	std::vector<std::pair<D3D11_SHADER_VERSION_TYPE, size_t>> resourceAllocationData;
 };
+
 
 struct shaderData {
 	shaderData(
@@ -39,8 +42,8 @@ public:
 	GenericShader(
 		ShaderManager* shaderManager, 
 		ID3D11Device* device, HWND hwnd, 
-		const shaderData& loadData, 
-		const std::vector<resourceData>& moduleData) 
+		shaderData loadData, 
+		std::vector<resourceData> moduleData) 
 		: BaseShader(device, hwnd) 
 	{
 		//Resize module vector to correct size
@@ -55,8 +58,8 @@ public:
 		}
 
 		//LoadShaders
-		if (loadData.ps) { loadPixelShader(loadData.ps); }
-		if (loadData.vs) { loadVertexShader(loadData.vs); }
+		if (!loadData.ps || !loadData.vs) { throw std::runtime_error("Error cannot instantiate without a vertex and a pixel shader!"); }
+		initShader(loadData.vs, loadData.ps);
 		if (loadData.gs) { loadGeometryShader(loadData.gs); }
 		if (loadData.hs) { loadHullShader(loadData.hs); }
 		if (loadData.ds) { loadDomainShader(loadData.ds); }
@@ -73,6 +76,11 @@ public:
 
 		//Release base shader components
 		BaseShader::~BaseShader();
+	}
+
+	void initShader(const wchar_t* vertexShader, const wchar_t* pixelShader) {
+		loadVertexShader(vertexShader);
+		loadPixelShader(pixelShader);
 	}
 
 	void setResources(ID3D11DeviceContext* deviceContext) {

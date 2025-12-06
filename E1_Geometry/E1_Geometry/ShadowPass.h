@@ -1,6 +1,6 @@
 #pragma once
 #include "DepthPass.h"
-#include "RenderToTexturePass.h"
+#include "ToTexturePass.h"
 #include "LightsDataModule.h"
 #include "CameraDataModule.h"
 #include "PointLightDataModule.h"
@@ -11,13 +11,13 @@
 #include "MaterialDataModule.h"
 #include "HeightMapDataModule.h"
 
-class ShadowPass : public RenderToTexturePass {
+class ShadowPass : public ToTexturePass {
 public:
 	ShadowPass(
 		size_t stage, passDependancies& deps, ShaderManager* shaderManager,
 		InstanceManager* instanceManager, ID3D11Device* device, D3D* renderer,
 		const RenderTextureData& RTData) 
-		: RenderToTexturePass(stage, deps, shaderManager, device, RTData),
+		: ToTexturePass(stage, deps, shaderManager, device, RTData),
 		instanceManager(instanceManager), shaderManager(shaderManager), renderer(renderer)
 	{
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
@@ -25,8 +25,8 @@ public:
 		materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 		cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 		shadowMapDataModule = shaderManager->getShaderModuleID("ShadowMapDataModule");
-		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
-		heightMapTextureModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
+		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
 		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
 
 		shader = shaderManager->getGeometryShader("ShadowShader");

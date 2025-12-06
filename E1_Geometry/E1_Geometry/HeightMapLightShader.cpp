@@ -9,8 +9,8 @@ HeightMapLightShader::HeightMapLightShader(ShaderManager* shaderManager, ID3D11D
 	cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 
 	samplerStateModule = shaderManager->getShaderModuleID("GeometryTextureSampleModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
-	heightMapTextureModule = shaderManager->getShaderModuleID("HMTextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
+	heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
 	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
 }
 

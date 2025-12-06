@@ -6,20 +6,14 @@ Texture2D shaderTexture : register(t4);
 SamplerComparisonState ShadowMapSampler : register(s0);
 SamplerComparisonState CubeMapSampler : register(s1);
 SamplerState diffuseSampler : register(s2);
-/*
-static const float kernelWeights[9] =
-{
-        1.f / 16.f, 2.f / 16.f, 1.f / 16.f,
-        2.f / 16.f, 4.f / 16.f, 2.f / 16.f,
-        1.f / 16.f, 2.f / 16.f, 1.f / 16.f
-};
-*/
 
-static const float kernelWeights[9] =
+static const float kernelWeights[25] =
 {
-        1.f / 9.f, 1.f / 9.f, 1.f / 9.f,
-        1.f / 9.f, 1.f / 9.f, 1.f / 9.f,
-        1.f / 9.f, 1.f / 9.f, 1.f / 9.f
+        1.f / 256.f, 4.f / 256.f, 6.f / 256.f, 4.f / 256.f, 1.f / 256.f,
+        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
+        6.f / 256.f, 24.f / 256.f, 36.f / 256.f, 24.f / 256.f, 6.f / 256.f,
+        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
+        1.f / 256.f, 4.f / 256.f, 6.f / 256.f, 4.f / 256.f, 1.f / 256.f
 };
 
 float3 calcCubeOffsetDirection(float3 direction, float2 offset)
@@ -37,18 +31,17 @@ float3 calcCubeOffsetDirection(float3 direction, float2 offset)
     (up * offset.y * texelAngle));  
 }
 
-
-float Guassean3X3Normal(float2 pos, int mapIndex, float depthVal)
+float Gaussean5X5Normal(float2 pos, int mapIndex, float depthVal)
 {
     float shadow = 0;
     [unroll]
-    for (int y = -1; y < 2; y++)
+    for (int y = -2; y < 3; y++)
     {
         [unroll]
-        for (int x = -1; x < 2; x++)
+        for (int x = -2; x < 3; x++)
         {
             //Calculate kernel index
-            int index = (y + 1) * 3 + x + 1;
+            int index = (y + 2) * 5 + (x + 2);
             //Calculate sample offset
             float2 offset = { x * shadowMapTexelSize.x, y * shadowMapTexelSize.y };
             //Accumulate weighted sample
@@ -59,16 +52,16 @@ float Guassean3X3Normal(float2 pos, int mapIndex, float depthVal)
     return shadow;
 }
 
-float Guassean3X3Point(float3 lightDirection, int mapIndex, float depthVal)
+float Gaussean5X5Point(float3 lightDirection, int mapIndex, float depthVal)
 {
     float shadow = 0;
     [unroll]
-    for (int y = -1; y < 2; y++)
+    for (int y = -2; y < 3; y++)
     {
         [unroll]
-        for (int x = -1; x < 2; x++)
+        for (int x = -2; x < 3; x++)
         {
-            int index = (y + 1) * 3 + x + 1;
+            int index = (y + 2) * 5 + (x + 2);
             float3 sampleDir = calcCubeOffsetDirection(lightDirection, float2(x, y));
             shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), depthVal) * kernelWeights[index];
         }
@@ -129,20 +122,8 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         
         // Distance from light to fragment
         float fragmentDistance = length(worldPos - lightPos) / farPlane;
-         
-        //Uses percentage-close filtering to smooth shadows 
-        shadow = cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(lightDirection, mapIndex), fragmentDistance - bias);
-        /*
-````````for (int i = 0; i < 8; i++)
-        {
-            float3 sampleDir = calcCubeOffsetDirection(lightDirection, offsets[i]);
-            shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), fragmentDistance - bias);
-        }
-
-        shadow /= 9.0f;    
-        */
-        
-        //shadow = Guassean3X3Point(lightDirection, mapIndex, fragmentDistance - bias);
+                 
+        shadow = Gaussean5X5Point(lightDirection, mapIndex, fragmentDistance - bias);
 
     }
     else    // Spot or directional light
@@ -163,22 +144,8 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         float2 pTexCoord = getProjectiveCoords(lightViewPos);
         
         if (hasDepthData(pTexCoord))
-        {
-
-            //Uses percentage-close filtering to smooth shadows 
-            
-            shadow = shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord, mapIndex), depth - bias);
-
-           
-
-            for (int i = 0; i < 8; i++)
-                shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pTexCoord + offsets[i] * shadowMapTexelSize, mapIndex), depth - bias);
-            
-            shadow /= 9.0f;
-        
-            
-            //shadow = Guassean3X3(pTexCoord, mapIndex, depth - bias);
-           
+        {   
+            shadow = Gaussean5X5Normal(pTexCoord, mapIndex, depth - bias);
         }    
     }
     return shadow;

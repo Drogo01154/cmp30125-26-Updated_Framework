@@ -1,17 +1,22 @@
 #pragma once
-#include "RenderToTexturePass.h"
+#include "ToTexturePass.h"
 #include "TextureDataModule.h"
 
 class FinalRenderPass : public renderPass {
 public:
-	FinalRenderPass(size_t stage, const passDependancies& deps, D3D* renderer, ShaderManager* shaderManager, InstanceManager* instanceManager, const OrthoMeshData& orthoData) : renderPass(stage, deps), renderer(renderer), instanceManager(instanceManager) {
-		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	FinalRenderPass(
+		size_t stage, const passDependancies& deps, 
+		D3D* renderer, ShaderManager* shaderManager, 
+		InstanceManager* instanceManager, const OrthoMeshData& orthoData) : 
+		renderPass(stage, deps), 
+		renderer(renderer), instanceManager(instanceManager) {
+		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 
 		shader = shaderManager->getPassShader("TextureShader");
 
 		orthoMesh = instanceManager->createOrthoMeshInstance(orthoID, orthoData);
-		inputTexture = std::dynamic_pointer_cast<RenderToTexturePass>(deps.begin()->second)->getTextureOutput();
+		inputTexture = std::dynamic_pointer_cast<ToTexturePass>(deps.begin()->second)->getTextureOutput();
 		if (inputTexture == nullptr) { throw std::runtime_error("Error: no input texture!"); }
 	}
 

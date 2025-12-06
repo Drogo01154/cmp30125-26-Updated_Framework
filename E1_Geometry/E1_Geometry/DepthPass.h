@@ -29,7 +29,7 @@ public:
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		pointLightDataModule = shaderManager->getShaderModuleID("PointLightDataModule");
 		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
-		heightMapTextureModule = shaderManager->getShaderModuleID("HeightMapTextureDataModule");
+		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
 
 		NonPointDepthShader = shaderManager->getGeometryShader("SMDepthShader");
 		PointDepthShader = shaderManager->getGeometryShader("CMDepthShader");

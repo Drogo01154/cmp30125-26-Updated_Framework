@@ -5,7 +5,7 @@ GreyScaleTextureShader::GreyScaleTextureShader(ShaderManager* shaderManager, ID3
 	initShader(L"texture_vs.cso", L"textureGreyscale_ps.cso");
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	samplerStateModule = shaderManager->getShaderModuleID("RenderTextureSampleModule");
-	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+	textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 	greyScaleDataModule = shaderManager->getShaderModuleID("GreyScaleDataModule");
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "RenderToTexturePass.h"
+#include "ToTexturePass.h"
 #include "LightsDataModule.h"
 #include "CameraDataModule.h"
 #include "SamplerDataModule.h"
@@ -7,20 +7,20 @@
 #include "MatrixDataModule.h"
 #include "MaterialDataModule.h"
 
-class LightPass : public RenderToTexturePass {
+class LightPass : public ToTexturePass {
 public:
 	LightPass(
 		size_t stage, passDependancies& deps, ShaderManager* shaderManager,
 		InstanceManager* instanceManager, ID3D11Device* device, D3D* renderer,
 		const RenderTextureData& RTData)
-		: RenderToTexturePass(stage, deps, shaderManager, device, RTData),
+		: ToTexturePass(stage, deps, shaderManager, device, RTData),
 		instanceManager(instanceManager), shaderManager(shaderManager), renderer(renderer)
 	{
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		lightDataModule = shaderManager->getShaderModuleID("LightsDataModule");
 		materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 		cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
-		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule");
+		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 		shader = shaderManager->getGeometryShader("BasicLightShader");
 	}
 

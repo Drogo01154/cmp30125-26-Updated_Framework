@@ -2,7 +2,7 @@
 #include "RenderToTexturePass.h"
 #include "MatrixDataModule.h"
 
-class GeometryPass : public RenderToTexturePass {
+class GeometryPass : public ToTexturePass {
 public:
 	GeometryPass(size_t stage,
 		passDependancies& deps,
@@ -10,7 +10,7 @@ public:
 		ShaderManager* shaderManager,
 		D3D* renderer,
 		const RenderTextureData& RTData)
-		: RenderToTexturePass(stage, deps, shaderManager, renderer->getDevice(), RTData),
+		: ToTexturePass(stage, deps, shaderManager, renderer->getDevice(), RTData),
 		instanceManager(instanceManager),
 		shaderManager(shaderManager),
 		renderer(renderer)
