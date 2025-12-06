@@ -452,32 +452,34 @@ void SceneGraph::to_json(nlohmann::json& j) {
 	j["Ambient"] = ambientLight;
 	instanceManager->to_json(j["Instances"]);
 
-	std::queue<std::pair <nlohmann::json*, std::shared_ptr<sceneNode>>> nodeQueue;
-	nodeQueue.push(std::make_pair(&j["Nodes"], root));
+	std::queue<std::pair <nlohmann::json&, std::shared_ptr<sceneNode>>> nodeQueue;
+	nodeQueue.emplace(j["Nodes"], root);
 	while (nodeQueue.size() > 0) {
-		auto [nodeJsonPtr, nodePtr] = nodeQueue.front();
+		auto [nodeJson, nodePtr] = nodeQueue.front();
 		nodeQueue.pop();
-		(*nodeJsonPtr) = nlohmann::json::object();
 
-		(*nodeJsonPtr)["NodeName"] = nodePtr->name;
-		(*nodeJsonPtr)["Transform"] = nodePtr->m_transform;
+		nodeJson = nlohmann::json::object(); 
 
-		if (!nodePtr->cameraInstance.IsValid()) {
-			(*nodeJsonPtr)["CameraID"] = static_cast<int64_t>(nodePtr->cameraID);
+		nodeJson["NodeName"] = nodePtr->name;
+		nodeJson["Transform"] = nodePtr->m_transform;
+
+		if (nodePtr->cameraInstance.IsValid()) {
+			nodeJson["CameraID"] = static_cast<int64_t>(nodePtr->cameraID);
 		}
-		if (!nodePtr->lightInstance.IsValid()) {
-			(*nodeJsonPtr)["LightID"] = static_cast<int64_t>(nodePtr->lightID);
+		if (nodePtr->lightInstance.IsValid()) {
+			nodeJson["LightID"] = static_cast<int64_t>(nodePtr->lightID);
 		}
-		if (!nodePtr->meshInstance.IsValid()) {
-			(*nodeJsonPtr)["MeshID"] = static_cast<int64_t>(nodePtr->meshID);
+		if (nodePtr->meshInstance.IsValid()) {
+			nodeJson["MeshID"] = static_cast<int64_t>(nodePtr->meshID);
 		}
 
 		if (nodePtr->children.size() > 0) {
-			auto& childrenJson = (*nodeJsonPtr)["Children"];
+			auto [iter, inserted] = nodeJson.emplace("Children", nlohmann::json());
+			auto& childrenJson = iter.value();
 			childrenJson = nlohmann::json::array();
 			for (auto child : nodePtr->children) {
 				childrenJson.push_back(nlohmann::json());
-				nodeQueue.push(std::make_pair(&childrenJson.back(), child));
+				nodeQueue.emplace(childrenJson.back(), child); // safe if captured immediately
 			}
 		}
 	}

@@ -189,7 +189,7 @@ void InstanceManager::to_json(nlohmann::json& j) {
 		if (data) {
 			
 			nlohmann::json camJson;
-			camJson["ID"] - static_cast<uint64_t>(ID);
+			camJson["ID"] = static_cast<uint64_t>(ID);
 			camJson["Type"] = data->type;
 			camJson["Camera"] = nlohmann::json::object();
 
@@ -208,7 +208,10 @@ void InstanceManager::to_json(nlohmann::json& j) {
 		if (data) {
 			nlohmann::json meshInstanceJson;
 			meshInstanceJson["ID"] = static_cast<uint64_t>(ID);
-			meshInstanceJson["MaterialName"] = data->mat->MaterialName;
+			if (data->mat.IsValid()) {
+				meshInstanceJson["MaterialName"] = data->mat->MaterialName;
+			}
+			
 			meshInstanceJson["Transform"] = data->m_transform;
 
 			const std::string meshName = geometryManager->determineMeshUID(data->mesh);
@@ -298,7 +301,9 @@ void InstanceManager::from_json(
 
 		GeometryData data;
 		data.m_transform = meshInstanceJson.at("Transform").get<Transform>();
-		data.mat = materialManager->getMaterialInstance(meshInstanceJson.at("MaterialName").get<std::string>());
+		if (meshInstanceJson.contains("MaterialName")) {
+			data.mat = materialManager->getMaterialInstance(meshInstanceJson.at("MaterialName").get<std::string>());
+		}
 		
 		std::string meshName = meshInstanceJson.at("MeshName").get<std::string>();
 		if (!loadedMeshes.contains(meshName)) {
