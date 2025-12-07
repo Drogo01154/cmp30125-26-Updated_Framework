@@ -194,8 +194,8 @@ namespace nlohmann {
 			l.setInnerCone(j.at("innerCone").get<float>());
 			l.setOuterCone(j.at("outerCone").get<float>());
 			l.m_transform = j.at("transform").get<Transform>();
-			l.setFar(j.at("innerCone").get<float>());
-			l.setNear(j.at("outerCone").get<float>());
+			l.setFar(j.at("far").get<float>());
+			l.setNear(j.at("near").get<float>());
 			l.setConstBias(j.at("constBias").get<float>());
 			l.setSlopeBias(j.at("slopeBias").get<float>());
 			if (type == lightTypes::spot) {
