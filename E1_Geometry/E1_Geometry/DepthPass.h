@@ -42,6 +42,22 @@ public:
 		maxPointLights = 5;
 		maxNonPointLights = 5;
 		spotLightAspect = inputData.sWidth / inputData.sHeight;
+
+		
+
+		D3D11_RASTERIZER_DESC rasterDesc;
+		rasterDesc.AntialiasedLineEnable = false;
+		rasterDesc.CullMode = D3D11_CULL_FRONT;
+		rasterDesc.DepthBias = 0;
+		rasterDesc.DepthBiasClamp = 0.0f;
+		rasterDesc.DepthClipEnable = true;
+		rasterDesc.FillMode = D3D11_FILL_SOLID;
+		rasterDesc.FrontCounterClockwise = true;
+		rasterDesc.MultisampleEnable = false;
+		rasterDesc.ScissorEnable = false;
+		rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+		renderer->getDevice()->CreateRasterizerState(&rasterDesc, rsCullFront.GetAddressOf());
 	}
 	
 	void updateProjectionMatrices() {
@@ -124,6 +140,12 @@ public:
 	}
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
+		ID3D11RasterizerState* previousRasteriserState;
+
+		deviceContext->RSGetState(&previousRasteriserState);
+
+		deviceContext->RSSetState(rsCullFront.Get());
+
 		bool lightNumChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED);
 		bool projectionChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTPROJECTIONCHANGED);
 		bool lightDataChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED);
@@ -148,6 +170,7 @@ public:
 					Material* mat = instance->mat;
 					std::shared_ptr<BaseShader> shader;
 					if (mat->HeightMapData) {
+						deviceContext->RSSetState(previousRasteriserState);
 						std::shared_ptr<HeightMapDataModule> mapDataModule 
 							= std::dynamic_pointer_cast<HeightMapDataModule>(heightMapDataModule->module);
 						std::shared_ptr<TextureDataModule> textureModule 
@@ -158,6 +181,7 @@ public:
 						shader = (isPointLight 
 							? this->PointHeightMapDepthShader->shader 
 							: this->NonPointHeightMapDepthShader->shader);
+						deviceContext->RSSetState(rsCullFront.Get());
 					}
 					else {
 						shader = (isPointLight 
@@ -194,6 +218,9 @@ public:
 			GeometryRenderFunction(false, light.second->getViewMatrix(), light.second->getProjectionMatrix());
 			++nonPointIndex;
 		}
+
+		deviceContext->RSSetState(previousRasteriserState);
+		previousRasteriserState->Release();
 	};
 	ShadowMapArray* getShadowMapArray() { return &shadowMapArray; }
 	CubeMapArray* getCubeMapArray() { return &cubeMapArray; }
@@ -232,4 +259,6 @@ private:
 
 	static constexpr float expandThreshold = 1.0f;   // 100% of capacity
 	static constexpr float shrinkThreshold = 0.25f;  // 25% of capacity
+
+	ComPtr<ID3D11RasterizerState> rsCullFront;
 };

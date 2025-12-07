@@ -9,7 +9,6 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 	selectedCreateCamera = -1;
 	selectedCreateLight = -1;
 	selectedCreateMesh = -1;
-	selectedModel = -1;
 	selectedCreateModel = -1;
 	meshSelectedMaterial = -1;
 	inputResolution = 20;
@@ -21,24 +20,17 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 	createBaseScene();
 }
 
-void SceneGraph::resetScene() {
-	root = nullptr;
+void SceneGraph::resetScene(bool loadBasics) {
 
-	root = std::make_shared<sceneNode>();
-	root->name = "Scene";
+	root.reset();
 
-	root->m_transform.computeGlobalMatrix();
-	auto CameraNode = createChild("Default Camera", root);
+	size_t test1 = instanceManager->getNumberOfCameras();
+	size_t test2 = instanceManager->getNumberOfLights();
+	size_t test3 = instanceManager->getNumberOfMeshes();
 
-	CameraNode->cameraInstance = instanceManager->createFPCamera(CameraNode->cameraID);
-	if (CameraNode->cameraInstance.IsValid()) {
-		std::shared_ptr<Camera> camera = CameraNode->cameraInstance->camera;
-		camera->m_transform.setParent(&CameraNode->m_transform);
-		camera->m_transform.setPosition(10.0f, 5.0f, -5.0f);
-		camera->update();
-		CameraNode->cameraInstance->camera;
+	if (loadBasics) {
+		createBaseScene();
 	}
-
 }
 
 void SceneGraph::SceneGraph::createBaseScene() {
@@ -65,7 +57,7 @@ void SceneGraph::SceneGraph::createBaseScene() {
 
 	std::shared_ptr<sceneNode> sphereNode = createChild("Sphere", root);
 	
-	sphereNode->meshInstance = instanceManager->createSphereMeshInstance(planeNode->meshID, inputResolution);
+	sphereNode->meshInstance = instanceManager->createSphereMeshInstance(sphereNode->meshID, inputResolution);
 	mesh = sphereNode->meshInstance.Get();
 	mesh->m_transform.setParent(&sphereNode->m_transform);
 	mesh->m_transform.setPosition(XMFLOAT3(10.f, 3.f, 10.f), false);
@@ -100,7 +92,7 @@ void SceneGraph::graphImGui(std::shared_ptr<sceneNode> node)
 {
 	nodeIncrement++;
 	// Check if this node is currently selected
-	bool isSelected = (selectedNode == node);
+	bool isSelected = (selectedNode.lock() == node);
 
 	// Combine flags: selectable + span full width
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth;
@@ -139,12 +131,23 @@ void SceneGraph::deleteNodeLight(std::shared_ptr<sceneNode> node) {
 }
 
 void SceneGraph::deleteNode(std::shared_ptr<sceneNode>& node) {
-	if (selectedNode == node) {
+
+	if (selectedNode.lock() == node) {
 		childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 		nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
-		selectedNode = nullptr;
+		selectedNode.reset();
 	}
 
+	if (std::shared_ptr<sceneNode> parent = node->parent.lock())
+	{
+		size_t parentChildSize = parent->children.size();
+		for (int i = 0; i < parentChildSize; i++) {
+			if (parent->children[i] == node) {
+				parent->children.erase(parent->children.begin() + i);
+				break;
+			}
+		}
+	}
 	node.reset();
 }
 
@@ -441,8 +444,8 @@ void SceneGraph::imGuiRender() {
 		graphImGui(root);
 	}
 	
-	if (selectedNode != nullptr && ImGui::CollapsingHeader("NodeDetails")) {
-		nodeImGui(selectedNode);
+	if (selectedNode.lock() && ImGui::CollapsingHeader("NodeDetails")) {
+		nodeImGui(selectedNode.lock());
 	}
 }
 
@@ -490,12 +493,18 @@ void SceneGraph::to_json(nlohmann::json& j) {
 
 void SceneGraph::from_json(CONST nlohmann::json& j) {
 
+	selectedNode.reset();
+	resetScene(false);
+
 	ambientLight = j.at("Ambient").get<XMFLOAT4>();
 
 	std::unordered_map<size_t, size_t> newLightIDMap;
 	std::unordered_map<size_t, size_t> newMeshIDMap;
 	std::unordered_map<size_t, size_t> newCameraIDMap;
-	instanceManager->from_json(j, &newCameraIDMap, &newMeshIDMap, &newLightIDMap);
+
+	instanceManager->setDestroyNoInstances(false);
+
+	instanceManager->from_json(j["Instances"], &newCameraIDMap, &newMeshIDMap, &newLightIDMap);
 
 	std::function<std::shared_ptr<sceneNode>(const nlohmann::json&, std::shared_ptr<sceneNode>)> nodeFromJson =
 		[&](const nlohmann::json& nodeJson, std::shared_ptr<sceneNode> parent) -> std::shared_ptr<sceneNode> {
@@ -511,7 +520,8 @@ void SceneGraph::from_json(CONST nlohmann::json& j) {
 		newNode->m_transform.computeGlobalMatrix(true);
 
 		if (nodeJson.contains("CameraID")) {
-			newNode->cameraID = newCameraIDMap.at(static_cast<size_t>(nodeJson.at("CameraID").get<uint64_t>()));
+			size_t oldID = static_cast<size_t>(nodeJson.at("CameraID").get<uint64_t>());
+			newNode->cameraID = newCameraIDMap.at(oldID);
 			newNode->cameraInstance = instanceManager->tryGetCameraInstance(newNode->cameraID);
 			if (CameraData* camera = newNode->cameraInstance.Get()) {
 				camera->camera->m_transform.setParent(&newNode->m_transform);
@@ -520,7 +530,8 @@ void SceneGraph::from_json(CONST nlohmann::json& j) {
 		}
 
 		if (nodeJson.contains("LightID")) {
-			newNode->lightID = newLightIDMap.at(static_cast<size_t>(nodeJson.at("LightID").get<uint64_t>()));
+			size_t oldID = static_cast<size_t>(nodeJson.at("LightID").get<uint64_t>());
+			newNode->lightID = newLightIDMap.at(oldID);
 			newNode->lightInstance = instanceManager->tryGetLightInstance(newNode->lightID);
 			if (Light* light = newNode->lightInstance.Get()) {
 				light->m_transform.setParent(&newNode->m_transform);
@@ -529,7 +540,8 @@ void SceneGraph::from_json(CONST nlohmann::json& j) {
 		}
 
 		if (nodeJson.contains("MeshID")) {
-			newNode->meshID = newMeshIDMap.at(static_cast<size_t>(nodeJson.at("MeshID").get<uint64_t>()));
+			size_t oldID = static_cast<size_t>(nodeJson.at("MeshID").get<uint64_t>());
+			newNode->meshID = newMeshIDMap.at(oldID);
 			newNode->meshInstance = instanceManager->tryGetGeometryInstance(newNode->meshID);
 			if (GeometryData* meshInstance = newNode->meshInstance.Get()) {
 				meshInstance->m_transform.setParent(&newNode->m_transform);
@@ -539,17 +551,15 @@ void SceneGraph::from_json(CONST nlohmann::json& j) {
 
 		if (nodeJson.contains("Children")) {
 			const nlohmann::json& children = nodeJson["Children"];
-			newNode->children.resize(children.size());
-			for (const auto& childJson : children) {
-				newNode->children.push_back(nodeFromJson(childJson, newNode));
+			size_t numberOfChildren = children.size();
+			newNode->children.resize(numberOfChildren);
+			for (int i = 0; i < numberOfChildren; ++i) {
+				newNode->children[i] = nodeFromJson(children[i], newNode);
 			}
 		}
-		
 
 		return newNode;
 		};
-
-	instanceManager->setDestroyNoInstances(false);
 
 	root = nodeFromJson(j["Root"], nullptr);
 

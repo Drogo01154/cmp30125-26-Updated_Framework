@@ -161,7 +161,7 @@ void InstanceManager::setActiveCamera(size_t ID) {
 
 void InstanceManager::setDestroyNoInstances(bool value) {
 	geometryCache.setDeleteNoInstances(value);
-	geometryCache.setDeleteNoInstances(value);
+	cameraCache.setDeleteNoInstances(value);
 	lightCache.setDeleteNoInstances(value);
 }
 
@@ -181,6 +181,8 @@ void InstanceManager::to_json(nlohmann::json& j) {
 	j["LightInstances"] = nlohmann::json::array();
 	j["CameraInstances"] = nlohmann::json::array();
 	j["MeshInstances"] = nlohmann::json::array();
+
+	j["ActiveCameraID"] = static_cast<uint64_t>(activeCameraID);
 	
 
 	nlohmann::json& cameraArray = j["cameraInstances"];
@@ -266,15 +268,16 @@ void InstanceManager::from_json(
 		newLightIDMap->emplace(oldID, newID);	
 	}
 
-	const nlohmann::json& cameraArray = j["CameraInstances"];
+	const nlohmann::json& cameraArray = j["cameraInstances"];
 	for (const auto& camJson : cameraArray) {
 		CameraTypes type = camJson.at("Type").get<CameraTypes>();
 		std::shared_ptr<Camera> camera;
+		size_t newID;
 		if (type == CameraTypes::FPCAMERA) {
-			camera = std::make_shared<Camera>(FPCamera(input, screenWidth, screenHeight, hwnd));
+			camera = std::make_shared<FPCamera>(input, screenWidth, screenHeight, hwnd);
 		}
 		else {
-			camera = std::make_shared<Camera>(Camera());
+			camera = std::make_shared<Camera>();
 		}
 
 		const nlohmann::json& camData = camJson["Camera"];
@@ -282,13 +285,14 @@ void InstanceManager::from_json(
 		camera->setLookSpeed(camData.at("LookSpeed").get<float>());
 
 		size_t oldID = static_cast<size_t>(camJson.at("ID").get<uint64_t>());
-		size_t newID;
+		
 
-		cameraCache.emplaceID(newID, CameraData(type, camera));
+		cameraCache.emplaceID(newID, CameraData(type, camera), false);
 
 		newCameraIDMap->emplace(oldID, newID);
 	}
 
+	activeCameraID = newCameraIDMap->at(static_cast<size_t>(j.at("ActiveCameraID").get<uint64_t>()));
 
 	const nlohmann::json& meshes = j["Meshes"];				//Json array of used meshes
 	geometryManager->setDestroyNoInstances(false);
@@ -312,48 +316,58 @@ void InstanceManager::from_json(
 
 			size_t newID;
 
-			switch (meshType) {
-			case MeshType::AMODEL:
-				data.mesh = geometryManager->createAModel(meshJson.at("file").get<std::string>());
-				break;
-			case MeshType::CUBE:
-				data.mesh = geometryManager->createCubeMesh(meshJson.at("resolution").get<int>());
-				break;
+			if (meshJson.contains("Parameters")) {
+				const nlohmann::json& paramatersJson = meshJson["Parameters"];
+				switch (meshType) {
+					case MeshType::AMODEL:
+						data.mesh = geometryManager->createAModel(paramatersJson.at("file").get<std::string>());
+						break;
+					case MeshType::CUBE:
+						data.mesh = geometryManager->createCubeMesh(paramatersJson.at("resolution").get<int>());
+						break;
 
-			case MeshType::MODEL:
-				data.mesh = geometryManager->createModel(meshJson.at("file").get<std::string>());
-				break;
+					case MeshType::MODEL:
+						data.mesh = geometryManager->createModel(paramatersJson.at("file").get<std::string>());
+						break;
 
-			case MeshType::ORTHO:
-				data.mesh = geometryManager->createOrthoMesh(
-					meshJson.at("width").get<int>(),
-					meshJson.at("height").get<int>(),
-					meshJson.at("xPos").get<int>(),
-					meshJson.at("yPos").get<int>());
-				break;
+					case MeshType::ORTHO:
+						data.mesh = geometryManager->createOrthoMesh(
+							paramatersJson.at("width").get<int>(),
+							paramatersJson.at("height").get<int>(),
+							paramatersJson.at("xPos").get<int>(),
+							paramatersJson.at("yPos").get<int>());
+						break;
 
-			case MeshType::PLANE:
-				data.mesh = geometryManager->createPlaneMesh(meshJson.at("resolution").get<int>());
-				break;
+					case MeshType::PLANE:
+						data.mesh = geometryManager->createPlaneMesh(paramatersJson.at("resolution").get<int>());
+						break;
 
-			case MeshType::POINT:
-				data.mesh = geometryManager->createPointMesh();
-				break;
+					case MeshType::SPHERE:
+						data.mesh = geometryManager->createSphereMesh(paramatersJson.at("resolution").get<int>());
+						break;
+				}
+			} else {
+				switch (meshType) {
+					case MeshType::POINT:
+						data.mesh = geometryManager->createPointMesh();
+						break;
 
-			case MeshType::QUAD:
-				data.mesh = geometryManager->createQuadMesh();
-				break;
-			case MeshType::SPHERE:
-				data.mesh = geometryManager->createSphereMesh(meshJson.at("resolution").get<int>());
-				break;
-			case MeshType::TESSELATION:
-				data.mesh = geometryManager->createTesselationMesh();
-				break;
+					case MeshType::QUAD:
+						data.mesh = geometryManager->createQuadMesh();
+						break;
+					case MeshType::TESSELATION:
+						data.mesh = geometryManager->createTesselationMesh();
+						break;
 
-			case MeshType::TRIANGLE:
-				data.mesh = geometryManager->createTriangleMesh();
-				break;
+					case MeshType::TRIANGLE:
+						data.mesh = geometryManager->createTriangleMesh();
+						break;
+				}
+		
+			
 			}
+			loadedMeshes.emplace(meshName);
+			
 		}
 		else {
 			data.mesh = geometryManager->tryGetMesh(meshName);
@@ -361,16 +375,15 @@ void InstanceManager::from_json(
 		size_t oldID = static_cast<size_t>(meshInstanceJson.at("ID").get<uint64_t>());
 		size_t newID;
 
+
 		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED | DirtyModuleFlags::LIGHTSDATACHANGED);
 
 		//Add to cache?
-		geometryCache.emplaceID(newID, data);
+		geometryCache.emplaceID(newID, std::move(data), false);
 
 
 		newMeshIDMap->emplace(oldID, newID);
 		
-
-		//Deserialise mesh instances
 	}
 
 	geometryManager->setDestroyNoInstances(true);

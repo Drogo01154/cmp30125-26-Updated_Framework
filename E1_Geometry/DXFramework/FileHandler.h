@@ -17,11 +17,13 @@ namespace fs = std::filesystem;
 class FileHandler {
 	//inline static std::unordered_map<std::string, bool> scenes;
 
+	//Constructor
 	FileHandler() {
-		fs::path folder = "res/scenes";
 
-		if (!fs::exists(folder)) {
-			fs::create_directory(folder);
+		//Build scene folder if does not exist
+		fs::path SceneFolder = "res/scenes";
+		if (!fs::exists(SceneFolder)) {
+			fs::create_directory(SceneFolder);
 		}
 		LocateFiles(L"res/");
 
@@ -52,6 +54,7 @@ class FileHandler {
 		int index = 0;
 		for (auto& it : scenes) {
 			sceneCharList[index] = it.first.c_str();
+			++index;
 		}
 	}
 
@@ -100,6 +103,7 @@ class FileHandler {
 		//Recursively loop through directories
 		for (const auto& entry : fs::recursive_directory_iterator(_DirectoryPath))
 		{
+			std::string directoryString = Converters::convert_from_wstring(std::wstring(_DirectoryPath));
 			const auto path = entry.path();
 			//Get current files extension
 			extension = path.extension().string();
@@ -128,7 +132,7 @@ class FileHandler {
 						if (models.find(stringName) != models.end()) { throw std::runtime_error("Error: Model: " + stringName + " Is a duplicate!"); }
 						else {
 							std::filesystem::path relativePath = fs::relative(path, _DirectoryPath).parent_path();
-							std::wstring inputPath = std::wstring(_DirectoryPath) + relativePath.wstring() + L"/";
+							std::string inputPath = directoryString + (relativePath.empty() ? "" : (relativePath.string() + "/")) + stringName + extension;
 							models.emplace(stringName, inputPath);
 						}
 						found = true;
@@ -207,9 +211,10 @@ public:
 	inline bool saveSceneJson(const std::string& sceneName, const nlohmann::json& json, bool asBson) {
 		const std::string* path = nullptr;
 		
+		//If sceneName already exists
 		auto it = scenes.find(sceneName);
 		if (it != scenes.end()) {
-			//Get file path of already existing scene
+			//Get file path of existing scene
 			path = &it->second.first;
 			//Update format
 			it->second.second = asBson;
@@ -220,34 +225,45 @@ public:
 			// Insert new scene
 			auto [iter, inserted] = scenes.emplace(sceneName, std::make_pair(inputPath, asBson));
 			path = &iter->second.first;
+			updateVectors(true);
 		}
 
+		//if path not found or correctly generated
 		if (!path)
 			return false;
 
+		//If saving as binary json
 		if (asBson) {
+			//Convert to binary json
 			std::vector<uint8_t> bsonData = nlohmann::json::to_bson(json);
+			//Open and clear file
 			std::ofstream file(*path, std::ios::binary | std::ios::trunc);
+			//If file open successful
 			if (!file.is_open()) return false;
+			//Write binary to file
 			file.write(reinterpret_cast<const char*>(bsonData.data()), bsonData.size());
 		}
-		else {
+		else {	// is saving as json
+			//Open and clear file
 			std::ofstream file(*path, std::ios::trunc);
+			//If open successful
 			if (!file.is_open()) return false;
+			//Write json to file
 			file << json.dump(4);
 		}
 		return true;
 	}
 	
-
-	inline std::wstring* locateModel(const std::string& name) {
+	//Find model in map
+	inline const std::string& locateModel(const std::string& name) {
 		auto model = models.find(name);
 		if (model != models.end()) {
-			return &model->second;
+			return model->second;
 		}
 		return nullptr;
 	}
 
+	//Fine texture in map
 	inline std::wstring* locateImage(const std::wstring& name) {
 		auto image = images.find(name);
 		if (image != images.end()) {
@@ -256,9 +272,10 @@ public:
 		return nullptr;
 	}
 private:
+
 	std::vector<std::wstring> supportedObjectExtensions;
 
-	std::unordered_map<std::string, std::wstring> models;
+	std::unordered_map<std::string, std::string> models;
 	std::unordered_map<std::wstring, std::wstring> images;
 	std::unordered_map<std::string, std::pair<std::string, bool>> scenes;
 

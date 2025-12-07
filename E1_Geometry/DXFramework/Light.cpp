@@ -9,45 +9,19 @@ Light::Light(lightTypes type) :
 	attenuation(0.05f, 0.01f, 0.001f, 100.f),
 	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
 	innerCone(XMConvertToRadians(8.f)),
-	outerCone(XMConvertToRadians(20.f)),
-	type(type) 
+	outerCone(XMConvertToRadians(20.f))
 {
 	lightNear = 0.1f;
 	lightFar = 25.0f;
 
-	switch (type) {
-	case lightTypes::point:
-		viewMatrixes.resize(6);
+	setType(type);
 
-		minConstBias = 0.001f;   // slider minimum
-		maxConstBias = 0.005f;   // slider maximum
-		minSlopeBias = 0.004f;   // slider minimum
-		maxSlopeBias = 0.01f;    // slider maximum
-		break;
-
-	case lightTypes::directional:
-		viewMatrixes.resize(1);
+	if (type == lightTypes::directional) {
 		orthoWidth = 50.f;
 		orthoHeight = 50.f;
-
-		minConstBias = 0.0001f;   // tiny, just to avoid acne
-		maxConstBias = 0.002f;    // small enough to avoid floating shadows
-
-		minSlopeBias = 0.05f;     // shallow slopes
-		maxSlopeBias = 0.5f;      // steep slopes
-		break;
-	case lightTypes::spot:
-		viewMatrixes.resize(1);
+	}
+	else if (type == lightTypes::spot) {
 		FOV = XMConvertToRadians(45.0f); // 45° cone
-
-		minConstBias = 0.001f;   // small offset to avoid acne
-		maxConstBias = 0.005f;
-
-		minSlopeBias = 0.001f;   // tiny slope bias
-		maxSlopeBias = 0.01f;    // small enough for steep slopes
-		break;
-	default:
-		throw std::runtime_error("Error: Light type does not exist!");
 	}
 
 	constBias = minConstBias;
@@ -101,6 +75,37 @@ void Light::generateProjectionMatrix(float aspect)
 void Light::setType(lightTypes type) 
 {
 	this->type = type;
+
+	switch (type) {
+	case lightTypes::point:
+		viewMatrixes.resize(6);
+
+		minConstBias = 0.001f;   // slider minimum
+		maxConstBias = 0.005f;   // slider maximum
+		minSlopeBias = 0.004f;   // slider minimum
+		maxSlopeBias = 0.01f;    // slider maximum
+		break;
+
+	case lightTypes::directional:
+		viewMatrixes.resize(1);
+		minConstBias = 0.0001f;   // tiny, just to avoid acne
+		maxConstBias = 0.002f;    // small enough to avoid floating shadows
+
+		minSlopeBias = 0.05f;     // shallow slopes
+		maxSlopeBias = 0.5f;      // steep slopes
+		break;
+	case lightTypes::spot:
+		viewMatrixes.resize(1);
+
+		minConstBias = 0.001f;   // small offset to avoid acne
+		maxConstBias = 0.005f;
+
+		minSlopeBias = 0.001f;   // tiny slope bias
+		maxSlopeBias = 0.01f;    // small enough for steep slopes
+		break;
+	default:
+		throw std::runtime_error("Error: Light type does not exist!");
+	}
 }
 
 void Light::setAttenuation(float constant, float linear, float quadratic, float cutoffDistance)

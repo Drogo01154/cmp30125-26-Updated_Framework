@@ -32,7 +32,7 @@ public:
 
 	void createBaseScene();
 
-	void resetScene();
+	void resetScene(bool loadBasics = true);
 
 	std::shared_ptr<sceneNode> createChild(const std::string& name = "Unamed", std::shared_ptr<sceneNode> parent = nullptr);
 	void graphImGui(std::shared_ptr<sceneNode> node);
@@ -74,9 +74,8 @@ private:
 	InstanceManager* instanceManager;
 	MaterialManager* materialManager;
 	std::shared_ptr<sceneNode> root;
-	std::shared_ptr<sceneNode> selectedNode;
+	std::weak_ptr<sceneNode> selectedNode;
 	size_t nodeIncrement;
-	size_t selectedModel;
 
 	XMFLOAT4 ambientLight;
 

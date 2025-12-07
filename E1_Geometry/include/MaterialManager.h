@@ -39,8 +39,6 @@ private:
 	ShaderManager* shaderManager;
 	TextureManager* textureManager;
 	InstanceCache<std::string, Material> materialCache;
-	std::unordered_map<std::string, size_t> materialNamesToIDs;
-	std::vector<const char*> materialNames;
 
 	int selectedMaterial;
 	int selectedTexture;

@@ -106,14 +106,14 @@
     <Filter Include="Header Files\RenderPasses\PostProcessing\BloomPasses">
       <UniqueIdentifier>{ceae27e6-dac9-4732-9e16-fb465f2b8b10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\RenderPasses\GometryPasses">
-      <UniqueIdentifier>{8ad3aef5-9985-4770-8d66-b62b74505437}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\RenderPasses\BasePasses">
       <UniqueIdentifier>{e1ceab4a-4b71-4237-b7f7-42505f7c5eeb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\Texture Shaders\BloomShaders">
       <UniqueIdentifier>{da6024fe-0261-4983-b437-db30a800557f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\RenderPasses\Geometry">
+      <UniqueIdentifier>{8ad3aef5-9985-4770-8d66-b62b74505437}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -321,16 +321,16 @@
       <Filter>Header Files\RenderPasses\PostProcessing\BloomPasses</Filter>
     </ClInclude>
     <ClInclude Include="DepthPass.h">
-      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+      <Filter>Header Files\RenderPasses\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="FinalPass.h">
       <Filter>Header Files\RenderPasses\PostProcessing</Filter>
     </ClInclude>
     <ClInclude Include="GeometryPass.h">
-      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+      <Filter>Header Files\RenderPasses\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="LightPass.h">
-      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+      <Filter>Header Files\RenderPasses\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="TextureToTexturePass.h">
       <Filter>Header Files\RenderPasses\BasePasses</Filter>
@@ -339,7 +339,7 @@
       <Filter>Header Files\RenderPasses\PostProcessing\BloomPasses</Filter>
     </ClInclude>
     <ClInclude Include="ShadowPass.h">
-      <Filter>Header Files\RenderPasses\GometryPasses</Filter>
+      <Filter>Header Files\RenderPasses\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="MiniMapPass.h">
       <Filter>Header Files\RenderPasses\PostProcessing</Filter>

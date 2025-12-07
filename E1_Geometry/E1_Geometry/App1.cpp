@@ -164,9 +164,10 @@ void App1::selectPipeline(Pipelines pipeline) {
 	default:
 		throw std::runtime_error("Error: pipeline does not exist!");
 	}
-	shaderMgr->SetModuleDirtyflags(DirtyModuleFlags::ALL);
 	selectedPipeline = static_cast<int>(pipeline);
 	passMgr->InitPass("FinalPass");
+	activePipeline = pipeline;
+	shaderMgr->SetModuleDirtyflags(DirtyModuleFlags::ALL);
 }
 
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
@@ -269,13 +270,15 @@ void App1::gui()
 
 		const std::vector<const char*>* sceneList = FileHandler::get().getSceneList();
 		ImGui::Combo("Select Scene", &selectedScene, sceneList->data(), sceneList->size());
-		if (ImGui::Button("LoadScene") && selectedScene > 0) {
+		if (ImGui::Button("LoadScene") && selectedScene >= 0) {
 			std::string sceneName(sceneList->at(selectedScene));
 			loadScene(sceneName);
 		}
 
 		if (ImGui::Button("Reset Scene")) {
+			passMgr->clearActivePasses();
 			sceneGraph->resetScene();
+			selectPipeline(activePipeline);
 		}
 	}
 
@@ -298,18 +301,24 @@ void App1::gui()
 
 void App1::saveScene(const std::string& sceneName) {
 	nlohmann::json inputJSON;
+	passMgr->clearActivePasses();
 	sceneGraph->to_json(inputJSON);
+	inputJSON["activePipeline"] = activePipeline;
 
 	if (FileHandler::get().saveSceneJson(sceneName, inputJSON, saveAsBson)) {
 		this->sceneName = sceneName;
 	}
+	selectPipeline(activePipeline);
 }
 
 void App1::loadScene(const std::string& sceneName) {
+	passMgr->clearActivePasses();
 	nlohmann::json outputJSON;
 	if (FileHandler::get().loadSceneJson(sceneName, outputJSON)) {
+		activePipeline = outputJSON.at("activePipeline").get<Pipelines>();
 		sceneGraph->from_json(outputJSON);
 		this->sceneName = sceneName;
 		strcpy_s(SceneNameBuffer, sizeof(SceneNameBuffer), sceneName.c_str());
 	}
+	selectPipeline(activePipeline);
 }

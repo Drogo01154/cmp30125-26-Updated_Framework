@@ -58,6 +58,7 @@ private:
 	char SceneNameBuffer[128];
 	bool saveAsBson; 
 	std::string sceneName;
+	Pipelines activePipeline;
 };
 
 #endif

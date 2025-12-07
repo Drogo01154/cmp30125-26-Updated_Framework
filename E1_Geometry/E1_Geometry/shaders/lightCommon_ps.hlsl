@@ -48,28 +48,28 @@ float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector)
 
 
 // Calculate lighting intensity based on direction and normal. Combine with light colour.
-float4 calculateLightingIntensity(float3 lightDirection, float3 normal, float4 ldiffuse)
+float4 calculateLightingIntensity(float3 lightDirection, float3 normal)
 {
-    float intensity = saturate(dot(normal, lightDirection));
-    float4 colour = saturate(ldiffuse * intensity);
-    return colour;
+    return saturate(dot(normal, lightDirection));
 }
 
 float4 calculateLight(float4 diffuse, int lightNumber, float3 pixelPosition, float3 normal, float3 viewVector)
 {
     int lightType = lights[lightNumber].type;
     
+    float4 lightDiffuse = diffuse * lights[lightNumber].lightDiffuse;
+    
     float4 returnValue;
     
-        if (lightType == 0) // Directional Light
-        {
-            //Calculate light intensity muiltiplied by diffuse
-            float4 intensity = calculateLightingIntensity(-lights[lightNumber].lightDirection, normal, lights[lightNumber].lightDiffuse);
-            //Calculate light specular
-            float4 specular = calcSpecular(-lights[lightNumber].lightDirection, normal, viewVector);
-            //Return only intensity and specular
-            returnValue = intensity * diffuse + specular;
-        } 
+    if (lightType == 0) // Directional Light
+    {
+        //Calculate light intensity muiltiplied by diffuse
+        float4 intensity = calculateLightingIntensity(-lights[lightNumber].lightDirection, normal);
+        //Calculate light specular
+        float4 specular = calcSpecular(-lights[lightNumber].lightDirection, normal, viewVector);
+        //Return only intensity and specular
+        returnValue = (lightDiffuse + specular) * intensity;
+    } 
     else
     {
         //Create vector from light to pixel
@@ -87,19 +87,16 @@ float4 calculateLight(float4 diffuse, int lightNumber, float3 pixelPosition, flo
              //Calculate Light's Distance Falloff factor
             float attenuation = 1 / (lights[lightNumber].lightAttenuation[0] + (lights[lightNumber].lightAttenuation[1] * distance) + (lights[lightNumber].lightAttenuation[2] * (distance * distance)));
             
-            float4 intensity = calculateLightingIntensity(pixelToLightVec, normal, lights[lightNumber].lightDiffuse) * diffuse;
+            float4 intensity = calculateLightingIntensity(pixelToLightVec, normal);
             
             float4 specular = calcSpecular(pixelToLightVec, normal, viewVector);
             
-            if (lightType == 1) // Point Light
-            {
-                returnValue = (intensity + specular) * attenuation;
-            }
-            else if (lightType == 2) //  Spot Light
+            returnValue = (lightDiffuse + specular) * intensity * attenuation;
+            if (lightType == 2) //  Spot Light
             {
                 float cosTheta = dot(pixelToLightVec, normalize(-lights[lightNumber].lightDirection));
                 float spotFactor = saturate((cosTheta - lights[lightNumber].outerCone) / (lights[lightNumber].innerConeOrFarPlane - lights[lightNumber].outerCone));
-                returnValue = (intensity + specular) * attenuation * spotFactor;
+                returnValue *= spotFactor;
             }
         }
         else

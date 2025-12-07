@@ -297,21 +297,27 @@ void MaterialManager::to_json(nlohmann::json& j) {
 void MaterialManager::from_json(const nlohmann::json& j) {
 	deleteAllMaterials();
 	for (auto matJson : j) {
-		Material recreatedMat;
+		std::string matName = matJson.at("Name").get<std::string>();
 
-		recreatedMat.MaterialName = matJson.at("Name").get<std::string>();
-		recreatedMat.textureString = matJson.contains("Texture")
+		Material mat;
+
+		mat.MaterialName = matName;
+		mat.baseColour = matJson.at("BaseColour").get<XMFLOAT4>();
+		mat.specularColour = matJson.at("SpecularColour").get<XMFLOAT4>();
+		mat.specularPower = matJson.at("SpecularPower").get<float>();
+		mat.textureString = matJson.contains("Texture")
 			? Converters::convert_to_wstring(matJson.at("Texture").get<std::string>())
 			: L"";
-		recreatedMat.baseColour = matJson.at("BaseColour").get<XMFLOAT4>();
-		recreatedMat.specularColour = matJson.at("SpecularColour").get<XMFLOAT4>();
-		recreatedMat.specularPower = matJson.at("SpecularPower").get<float>();
 		if (matJson.contains("HeightMapData")) {
 			const nlohmann::json& heightMapJson = matJson["HeightMapData"];
-			recreatedMat.HeightMapData = std::make_unique<HeightMapInfo>();
-			recreatedMat.HeightMapData->HeightTextureString = Converters::convert_to_wstring(heightMapJson.at("Texture").get<std::string>());
-			recreatedMat.HeightMapData->HeightMultiplier = heightMapJson.at("Multiplier").get<float>();
+			mat.HeightMapData = std::make_unique<HeightMapInfo>();
+			mat.HeightMapData->HeightTextureString = Converters::convert_to_wstring(heightMapJson.at("Texture").get<std::string>());
+			mat.HeightMapData->HeightMultiplier = heightMapJson.at("Multiplier").get<float>();
 		}
-		materialCache.emplaceID(recreatedMat.MaterialName, std::move(recreatedMat));
+		else {
+			mat.HeightMapData = nullptr;
+		}
+		
+		materialCache.emplaceID(matName, std::move(mat), false); 
 	}
 }

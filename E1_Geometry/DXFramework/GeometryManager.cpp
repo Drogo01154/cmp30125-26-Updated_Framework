@@ -118,11 +118,15 @@ MeshInstance GeometryManager::RetrieveAddMesh(MeshType type,
 		case MeshType::TESSELATION:	mesh = std::make_shared<TessellationMesh>(device, deviceContext); break;
 		case MeshType::TRIANGLE:	mesh = std::make_shared<TriangleMesh>(device, deviceContext); break;
 
-		case MeshType::MODEL:		mesh = std::make_shared<Model>(device, deviceContext, file->c_str()); break;
-		case MeshType::AMODEL:		mesh = std::make_shared<AModel>(device, *file);	break;
+		case MeshType::MODEL:
+		case MeshType::AMODEL:
+		{
+			const std::string& filePath = FileHandler::get().locateModel(*file);
 
-			if ()
-				std::string filePath = FileHandler::get().locateModel(*file);
+			mesh = (type == MeshType::MODEL)
+				? std::dynamic_pointer_cast<BaseMesh>(std::make_shared<Model>(device, deviceContext, filePath.c_str()))
+				: std::dynamic_pointer_cast<BaseMesh>(std::make_shared<AModel>(device, filePath));
+		}
 			break;
 		case MeshType::CUBE:		mesh = std::make_shared<CubeMesh>(device, deviceContext, *resolution); break;
 		case MeshType::PLANE:		mesh = std::make_shared<PlaneMesh>(device, deviceContext, *resolution);	break;

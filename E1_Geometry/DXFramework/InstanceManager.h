@@ -110,7 +110,6 @@ private:
 	int screenHeight;
 
 	size_t activeCameraID;
-	std::shared_ptr<CameraInstance> activeCamera;
 
 	ShaderManager* shaderManager;
 	GeometryManager* geometryManager;
