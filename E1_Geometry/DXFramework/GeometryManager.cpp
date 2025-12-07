@@ -120,7 +120,9 @@ MeshInstance GeometryManager::RetrieveAddMesh(MeshType type,
 
 		case MeshType::MODEL:		mesh = std::make_shared<Model>(device, deviceContext, file->c_str()); break;
 		case MeshType::AMODEL:		mesh = std::make_shared<AModel>(device, *file);	break;
-		
+
+			if ()
+				std::string filePath = FileHandler::get().locateModel(*file);
 			break;
 		case MeshType::CUBE:		mesh = std::make_shared<CubeMesh>(device, deviceContext, *resolution); break;
 		case MeshType::PLANE:		mesh = std::make_shared<PlaneMesh>(device, deviceContext, *resolution);	break;

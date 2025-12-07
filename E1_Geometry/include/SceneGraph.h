@@ -21,7 +21,7 @@ struct sceneNode {
 	LightInstance lightInstance;
 
 	std::vector<std::shared_ptr<sceneNode>> children;
-	std::shared_ptr<sceneNode> parent;
+	std::weak_ptr<sceneNode> parent;
 };
 
 class SceneGraph {
@@ -32,6 +32,8 @@ public:
 
 	void createBaseScene();
 
+	void resetScene();
+
 	std::shared_ptr<sceneNode> createChild(const std::string& name = "Unamed", std::shared_ptr<sceneNode> parent = nullptr);
 	void graphImGui(std::shared_ptr<sceneNode> node);
 
@@ -41,7 +43,7 @@ public:
 
 	void deleteNodeLight(std::shared_ptr<sceneNode> node);
 
-	void deleteNode(std::shared_ptr<sceneNode> node);
+	void deleteNode(std::shared_ptr<sceneNode>& node);
 
 	void selectNode(std::shared_ptr<sceneNode> node);
 
@@ -62,7 +64,11 @@ public:
 
 	void from_json(const nlohmann::json& j);
 
+
+
 private:
+	nlohmann::json NodeToJson(std::shared_ptr<sceneNode> node);
+
 	ShaderManager* shaderManager;
 	GeometryManager* geometryManager;
 	InstanceManager* instanceManager;

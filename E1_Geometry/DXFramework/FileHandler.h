@@ -42,7 +42,7 @@ class FileHandler {
 				++index;
 			}
 			index = 0;
-			for (auto it : models) {
+			for (auto& it : models) {
 				modelCharList[index] = it.first.c_str();
 				++index;
 			}
@@ -50,7 +50,7 @@ class FileHandler {
 		size_t sceneNum = scenes.size();
 		sceneCharList.resize(sceneNum);
 		int index = 0;
-		for (auto it : scenes) {
+		for (auto& it : scenes) {
 			sceneCharList[index] = it.first.c_str();
 		}
 	}

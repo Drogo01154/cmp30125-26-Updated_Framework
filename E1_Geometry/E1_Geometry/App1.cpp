@@ -273,6 +273,10 @@ void App1::gui()
 			std::string sceneName(sceneList->at(selectedScene));
 			loadScene(sceneName);
 		}
+
+		if (ImGui::Button("Reset Scene")) {
+			sceneGraph->resetScene();
+		}
 	}
 
 

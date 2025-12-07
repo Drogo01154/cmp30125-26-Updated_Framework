@@ -21,10 +21,29 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 	createBaseScene();
 }
 
+void SceneGraph::resetScene() {
+	root = nullptr;
+
+	root = std::make_shared<sceneNode>();
+	root->name = "Scene";
+
+	root->m_transform.computeGlobalMatrix();
+	auto CameraNode = createChild("Default Camera", root);
+
+	CameraNode->cameraInstance = instanceManager->createFPCamera(CameraNode->cameraID);
+	if (CameraNode->cameraInstance.IsValid()) {
+		std::shared_ptr<Camera> camera = CameraNode->cameraInstance->camera;
+		camera->m_transform.setParent(&CameraNode->m_transform);
+		camera->m_transform.setPosition(10.0f, 5.0f, -5.0f);
+		camera->update();
+		CameraNode->cameraInstance->camera;
+	}
+
+}
+
 void SceneGraph::SceneGraph::createBaseScene() {
 	root = std::make_shared<sceneNode>();
 	root->name = "Scene";
-	root->parent = nullptr;
 	root->m_transform.computeGlobalMatrix();
 	auto CameraNode = createChild("Default Camera", root);
 
@@ -119,26 +138,14 @@ void SceneGraph::deleteNodeLight(std::shared_ptr<sceneNode> node) {
 	node->lightID = SIZE_MAX;
 }
 
-void SceneGraph::deleteNode(std::shared_ptr<sceneNode> node) {
+void SceneGraph::deleteNode(std::shared_ptr<sceneNode>& node) {
 	if (selectedNode == node) {
 		childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 		nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 		selectedNode = nullptr;
 	}
 
-	if (node->parent) {
-		std::vector<std::shared_ptr<sceneNode>>* parentsChildren = &node->parent->children;
-		node->parent->children.erase(
-			std::remove(node->parent->children.begin(), node->parent->children.end(), node),
-			node->parent->children.end()
-		);
-		while (node->children.size() > 0) {
-			deleteNode(*node->children.begin());
-		}
-		if (node->meshInstance.IsValid()) { deleteNodeMesh(node); }
-		if (node->lightInstance.IsValid()) { deleteNodeLight(node); }
-		if (node->cameraInstance.IsValid()) { deleteNodeCamera(node); }
-	}
+	node.reset();
 }
 
 void SceneGraph::selectNode(std::shared_ptr<sceneNode> node) {
@@ -447,120 +454,104 @@ const XMFLOAT4& SceneGraph::getAmbientLight() {
 	return ambientLight;
 }
 
+nlohmann::json SceneGraph::NodeToJson(std::shared_ptr<sceneNode> node) {
+	nlohmann::json nodeJson;
+	nodeJson["NodeName"] = node->name;
+	nodeJson["Transform"] = node->m_transform;
+
+	if (node->cameraInstance.IsValid()) {
+		nodeJson["CameraID"] = static_cast<int64_t>(node->cameraID);
+	}
+	if (node->lightInstance.IsValid()) {
+		nodeJson["LightID"] = static_cast<int64_t>(node->lightID);
+	}
+	if (node->meshInstance.IsValid()) {
+		nodeJson["MeshID"] = static_cast<int64_t>(node->meshID);
+	}
+
+	if (node->children.size() > 0) {
+		 
+		 nlohmann::json& childArray = nodeJson["Children"];
+		 childArray = nlohmann::json::array();
+		 for(auto childNode : node->children) {
+			 childArray.push_back(NodeToJson(childNode));
+		 }
+	}
+	return nodeJson;
+}
+
 void SceneGraph::to_json(nlohmann::json& j) {
 
 	j["Ambient"] = ambientLight;
 	instanceManager->to_json(j["Instances"]);
 
-	std::queue<std::pair <nlohmann::json&, std::shared_ptr<sceneNode>>> nodeQueue;
-	nodeQueue.emplace(j["Nodes"], root);
-	while (nodeQueue.size() > 0) {
-		auto [nodeJson, nodePtr] = nodeQueue.front();
-		nodeQueue.pop();
-
-		nodeJson = nlohmann::json::object(); 
-
-		nodeJson["NodeName"] = nodePtr->name;
-		nodeJson["Transform"] = nodePtr->m_transform;
-
-		if (nodePtr->cameraInstance.IsValid()) {
-			nodeJson["CameraID"] = static_cast<int64_t>(nodePtr->cameraID);
-		}
-		if (nodePtr->lightInstance.IsValid()) {
-			nodeJson["LightID"] = static_cast<int64_t>(nodePtr->lightID);
-		}
-		if (nodePtr->meshInstance.IsValid()) {
-			nodeJson["MeshID"] = static_cast<int64_t>(nodePtr->meshID);
-		}
-
-		if (nodePtr->children.size() > 0) {
-			auto [iter, inserted] = nodeJson.emplace("Children", nlohmann::json());
-			auto& childrenJson = iter.value();
-			childrenJson = nlohmann::json::array();
-			for (auto child : nodePtr->children) {
-				childrenJson.push_back(nlohmann::json());
-				nodeQueue.emplace(childrenJson.back(), child); // safe if captured immediately
-			}
-		}
-	}
+	j["Root"] = NodeToJson(root);
 }
-void SceneGraph::from_json(const nlohmann::json& j) {
-	std::unordered_map<size_t, size_t> newCameraIDMap;
-	std::unordered_map<size_t, size_t> newLightIDMap;
-	std::unordered_map<size_t, size_t> newMeshIDMap;
-	instanceManager->from_json(j, &newCameraIDMap, &newMeshIDMap, &newLightIDMap);
 
-	struct nodeData {
-		nodeData(const nlohmann::json* nodeJson,
-			std::shared_ptr<sceneNode> node,
-			std::shared_ptr<sceneNode> parent) :
-			nodeJson(nodeJson),
-			node(node),
-			parent(parent) {
-		}
-		const nlohmann::json* nodeJson;
-		std::shared_ptr<sceneNode> node;
-		std::shared_ptr<sceneNode> parent;
-	};
-
-	instanceManager->setDestroyNoInstances(false);
+void SceneGraph::from_json(CONST nlohmann::json& j) {
 
 	ambientLight = j.at("Ambient").get<XMFLOAT4>();
 
-	std::queue<nodeData> nodeQueue;
-	root = std::make_shared<sceneNode>();
-	nodeQueue.push(nodeData(&j["Nodes"], root, nullptr));
+	std::unordered_map<size_t, size_t> newLightIDMap;
+	std::unordered_map<size_t, size_t> newMeshIDMap;
+	std::unordered_map<size_t, size_t> newCameraIDMap;
+	instanceManager->from_json(j, &newCameraIDMap, &newMeshIDMap, &newLightIDMap);
 
-	while (nodeQueue.size() > 0) {
-		nodeData data = nodeQueue.front();
-		nodeQueue.pop();
-		data.node->name = data.nodeJson->at("NodeName").get<std::string>();
+	std::function<std::shared_ptr<sceneNode>(const nlohmann::json&, std::shared_ptr<sceneNode>)> nodeFromJson =
+		[&](const nlohmann::json& nodeJson, std::shared_ptr<sceneNode> parent) -> std::shared_ptr<sceneNode> {
+		std::shared_ptr<sceneNode> newNode = std::make_shared<sceneNode>();
+		newNode->parent = parent;
 
-		data.node->parent = data.parent;
+		newNode->name = nodeJson.at("NodeName").get<std::string>();
+		newNode->m_transform = nodeJson.at("Transform").get<Transform>();
 
-		data.node->m_transform = data.nodeJson->at("Transform").get<Transform>();
-		if (data.parent != nullptr) {
-			data.node->m_transform.setParent(&data.parent->m_transform);
+		if (parent != nullptr) {
+			newNode->m_transform.setParent(&parent->m_transform);
 		}
-		data.node->m_transform.computeGlobalMatrix(true);
+		newNode->m_transform.computeGlobalMatrix(true);
 
-		if (data.nodeJson->contains("CameraID")) {
-			data.node->cameraID = newCameraIDMap[static_cast<size_t>(data.nodeJson->at("CameraID").get<uint64_t>())];
-			data.node->cameraInstance = instanceManager->tryGetCameraInstance(data.node->cameraID);
-			if (CameraData* camera = data.node->cameraInstance.Get()) {
-				camera->camera->m_transform.setParent(&data.node->m_transform);
+		if (nodeJson.contains("CameraID")) {
+			newNode->cameraID = newCameraIDMap.at(static_cast<size_t>(nodeJson.at("CameraID").get<uint64_t>()));
+			newNode->cameraInstance = instanceManager->tryGetCameraInstance(newNode->cameraID);
+			if (CameraData* camera = newNode->cameraInstance.Get()) {
+				camera->camera->m_transform.setParent(&newNode->m_transform);
 				camera->camera->updateGlobals(true);
 			}
 		}
 
-		if (data.nodeJson->contains("LightID")) {
-			data.node->lightID = newLightIDMap[static_cast<size_t>(data.nodeJson->at("LightID").get<uint64_t>())];
-			data.node->lightInstance = instanceManager->tryGetLightInstance(data.node->lightID);
-			if (Light* light = data.node->lightInstance.Get()) {
-				light->m_transform.setParent(&data.node->m_transform);
+		if (nodeJson.contains("LightID")) {
+			newNode->lightID = newLightIDMap.at(static_cast<size_t>(nodeJson.at("LightID").get<uint64_t>()));
+			newNode->lightInstance = instanceManager->tryGetLightInstance(newNode->lightID);
+			if (Light* light = newNode->lightInstance.Get()) {
+				light->m_transform.setParent(&newNode->m_transform);
 				light->updateGlobals(true);
 			}
 		}
 
-		if (data.nodeJson->contains("MeshID")) {
-			data.node->meshID = newMeshIDMap[static_cast<size_t>(data.nodeJson->at("MeshID").get<uint64_t>())];
-			data.node->meshInstance = instanceManager->tryGetGeometryInstance(data.node->meshID);
-			if (GeometryData* meshInstance = data.node->meshInstance.Get()) {
-				meshInstance->m_transform.setParent(&data.node->m_transform);
+		if (nodeJson.contains("MeshID")) {
+			newNode->meshID = newMeshIDMap.at(static_cast<size_t>(nodeJson.at("MeshID").get<uint64_t>()));
+			newNode->meshInstance = instanceManager->tryGetGeometryInstance(newNode->meshID);
+			if (GeometryData* meshInstance = newNode->meshInstance.Get()) {
+				meshInstance->m_transform.setParent(&newNode->m_transform);
 				meshInstance->m_transform.computeGlobalMatrix(true);
 			}
 		}
 
-
-		if (data.nodeJson->contains("Children"))
-		{
-			for (auto& jsonChild : (*data.nodeJson)["Children"]) {
-				data.node->children.push_back(std::make_shared<sceneNode>());
-				nodeQueue.push(nodeData(&jsonChild, data.node->children.back(), data.node));
+		if (nodeJson.contains("Children")) {
+			const nlohmann::json& children = nodeJson["Children"];
+			newNode->children.resize(children.size());
+			for (const auto& childJson : children) {
+				newNode->children.push_back(nodeFromJson(childJson, newNode));
 			}
 		}
-	}
+		
+
+		return newNode;
+		};
+
+	instanceManager->setDestroyNoInstances(false);
+
+	root = nodeFromJson(j["Root"], nullptr);
 
 	instanceManager->setDestroyNoInstances(true);
 }
-
