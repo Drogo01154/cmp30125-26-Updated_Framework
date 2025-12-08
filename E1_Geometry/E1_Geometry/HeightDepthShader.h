@@ -1,27 +1,27 @@
 #pragma once
 
-#ifndef _SMHEIGHTDEPTHSHADER_H_
-#define _SMHEIGHTDEPTHSHADER_H_
+#ifndef _CMHEIGHTDEPTHSHADER_H_
+#define _CMHEIGHTDEPTHSHADER_H_
 
 
 #include "DXF.h"
 
-class SMHeightDepthShader : public BaseShader
+class HeightDepthShader : public BaseShader
 {
-
 public:
 
-	SMHeightDepthShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
-	~SMHeightDepthShader();
+	HeightDepthShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
+	~HeightDepthShader();
 
 	void setResources(ID3D11DeviceContext* deviceContext);
 
 private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);
 	ModuleInstance matrixDataModule;
-	ModuleInstance heightMapDataModule;
+	ModuleInstance lightDepthDataModule;
 	ModuleInstance heightMapTextureDataModule;
 	ModuleInstance textureSamplerModule;
+	ModuleInstance heightMapDataModule;
 };
 
 #endif

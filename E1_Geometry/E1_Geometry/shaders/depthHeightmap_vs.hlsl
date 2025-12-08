@@ -1,9 +1,19 @@
+Texture2D heightMapTexture : register(t0);
+SamplerState textureSampler : register(s0);
+
 cbuffer MatrixBuffer : register(b0)
 {
     matrix worldMatrix;
     matrix viewMatrix;
     matrix projectionMatrix;
 };
+
+cbuffer mapData : register(b1)
+{
+    float2 offset;
+    float heightMultiplier;
+    int resolution;
+}
 
 struct InputType
 {
@@ -15,20 +25,24 @@ struct InputType
 struct OutputType
 {
     float4 position : SV_POSITION;
-    float4 worldPosition : TEXCOORD0;
+    float3 worldPosition : TEXCOORD0;
+    float4 depthPosition : TEXCOORD1;
 };
 
 OutputType main(InputType input)
 {
     OutputType output;
-
+    
     // Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
 
     // Store the position value in a second input value for depth value calculations.
-    output.worldPosition = mul(input.position, worldMatrix);
+    output.worldPosition.xyz = mul(input.position, worldMatrix);
+    
+    // Store the clip space position value in a second input value for depth value calculations.
+    output.depthPosition = output.position;
 	
     return output;
-}
+};

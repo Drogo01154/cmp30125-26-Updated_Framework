@@ -4,7 +4,6 @@
 #include "ToTexturePass.h"
 #include "LightsDataModule.h"
 #include "CameraDataModule.h"
-#include "PointLightDataModule.h"
 #include "ShadowMapDataModule.h"
 #include "SamplerDataModule.h"
 #include "TextureDataModule.h"

@@ -167,20 +167,18 @@
     <ClCompile Include="App1.cpp" />
     <ClCompile Include="BlurPass.h" />
     <ClCompile Include="CameraDataModule.cpp" />
-    <ClCompile Include="CMDepthShader.cpp" />
-    <ClCompile Include="CMHeightDepthShader.cpp" />
+    <ClCompile Include="DepthShader.cpp" />
+    <ClCompile Include="HeightDepthShader.cpp" />
     <ClCompile Include="HeightMapLightShader.h" />
     <ClCompile Include="HeightMapShadowShader.cpp" />
-    <ClCompile Include="PointLightDataModule.cpp" />
+    <ClCompile Include="LightDepthDataBuffer.cpp" />
     <ClCompile Include="ShadowMapDataModule.cpp" />
     <ClCompile Include="ShadowShader.cpp" />
-    <ClCompile Include="SMDepthShader.cpp" />
     <ClCompile Include="HeightMapDataModule.cpp" />
     <ClCompile Include="HeightMapLightShader.cpp" />
     <ClCompile Include="ManipulationDataModule.cpp" />
     <ClCompile Include="MaterialDataModule.cpp" />
     <ClCompile Include="SamplerDataModule.cpp" />
-    <ClCompile Include="SMHeightDepthShader.cpp" />
     <ClCompile Include="TextureDataModule.cpp" />
     <ClCompile Include="BasicLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
@@ -192,27 +190,18 @@
     <FxCompile Include="shaders\BloomThreshold_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\depthCM_ps.hlsl">
+    <FxCompile Include="shaders\depth_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\depthCM_vs.hlsl">
+    <FxCompile Include="shaders\depth_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="shaders\depthHeightmapCM_vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\depthHeightmapSM_vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\depthSM_vs.hlsl">
+    <FxCompile Include="shaders\depthHeightmap_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <FxCompile Include="shaders\depthSM_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
     <None Include="shaders\shadowCommon_ps.hlsl">
       <FileType>Document</FileType>
     </None>
@@ -266,18 +255,17 @@
     <ClInclude Include="BloomCombinePass.h" />
     <ClInclude Include="ConstantBufferModule.h" />
     <ClInclude Include="CameraDataModule.h" />
-    <ClInclude Include="CMDepthShader.h" />
-    <ClInclude Include="CMHeightDepthShader.h" />
+    <ClInclude Include="DepthShader.h" />
+    <ClInclude Include="HeightDepthShader.h" />
     <ClInclude Include="DepthPass.h" />
     <ClInclude Include="GenericShader.h" />
     <ClInclude Include="HeightMapShadowShader.h" />
     <ClInclude Include="LightPass.h" />
-    <ClInclude Include="PointLightDataModule.h" />
+    <ClInclude Include="LightDepthDataBuffer.h" />
     <ClInclude Include="TextureToTexturePass.h" />
     <ClInclude Include="ShadowMapDataModule.h" />
     <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="ShadowShader.h" />
-    <ClInclude Include="SMDepthShader.h" />
     <ClInclude Include="FinalPass.h" />
     <ClInclude Include="HeightMapDataModule.h" />
     <ClInclude Include="LightsDataModule.h" />
@@ -286,7 +274,6 @@
     <ClInclude Include="ToTexturePass.h" />
     <ClInclude Include="SamplerDataModule.h" />
     <ClInclude Include="ShaderInit.h" />
-    <ClInclude Include="SMHeightDepthShader.h" />
     <ClInclude Include="TextureDataModule.h" />
     <ClInclude Include="BasicLightShader.h" />
     <ClInclude Include="TextureShader.h" />

@@ -5,10 +5,8 @@
 #include "ShadowPass.h"
 #include "TextureShader.h"
 #include "ShadowShader.h"
-#include "CMDepthShader.h"
-#include "SMDepthShader.h"
-#include "CMHeightDepthShader.h"
-#include "SMHeightDepthShader.h"
+#include "DepthShader.h"
+#include "HeightDepthShader.h"
 #include "BasicLightShader.h"
 #include "LightPass.h"
 #include "HeightMapShadowShader.h"
@@ -39,8 +37,8 @@ void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
 
 	//Lights data module to send light information to shaders
 	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", device, hwnd, instanceMgr.get());
-	//Another light module to send  point light specific data to shaders
-	shaderMgr->AddShaderModule<PointLightDataModule>("PointLightDataModule", device, hwnd);
+	//Another light module to send light specific data to depth buffers
+	shaderMgr->AddShaderModule<LightDepthDataBuffer>("LightDepthDataModule", device, hwnd);
 	//Material module to send material data to shaders
 	shaderMgr->AddShaderModule<MaterialDataModule>("MaterialDataModule", device, hwnd);
 	//Camera module to send camera and world data to shaders
@@ -68,10 +66,8 @@ void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
 void App1::addShaderConstructors(HWND hwnd, ID3D11Device* device) {
 
 	//Depth shaders
-	shaderMgr->addGeometryShader<SMDepthShader>("SMDepthShader", shaderMgr.get(), device, hwnd);
-	shaderMgr->addGeometryShader<CMDepthShader>("CMDepthShader", shaderMgr.get(), device, hwnd);
-	shaderMgr->addGeometryShader<SMHeightDepthShader>("SMHeightDepthShader", shaderMgr.get(), device, hwnd);
-	shaderMgr->addGeometryShader<CMHeightDepthShader>("CMHeightDepthShader", shaderMgr.get(), device, hwnd);
+	shaderMgr->addGeometryShader<DepthShader>("DepthShader", shaderMgr.get(), device, hwnd);
+	shaderMgr->addGeometryShader<HeightDepthShader>("HeightDepthShader", shaderMgr.get(), device, hwnd);
 
 	//Shadow map shaders
 	shaderMgr->addGeometryShader<ShadowShader>("ShadowShader", shaderMgr.get(), device, hwnd);

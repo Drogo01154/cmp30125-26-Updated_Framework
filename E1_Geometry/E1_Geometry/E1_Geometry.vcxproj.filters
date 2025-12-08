@@ -123,10 +123,7 @@
     <ClCompile Include="TextureShader.cpp">
       <Filter>Source Files\Shaders\TextureShaders</Filter>
     </ClCompile>
-    <ClCompile Include="SMDepthShader.cpp">
-      <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
-    </ClCompile>
-    <ClCompile Include="CMDepthShader.cpp">
+    <ClCompile Include="DepthShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClCompile>
     <ClCompile Include="HeightMapDataModule.cpp">
@@ -153,7 +150,7 @@
     <ClCompile Include="LightsDataModule.cpp">
       <Filter>Source Files\ShaderModules\LightsModules</Filter>
     </ClCompile>
-    <ClCompile Include="PointLightDataModule.cpp">
+    <ClCompile Include="LightDepthDataBuffer.cpp">
       <Filter>Source Files\ShaderModules\LightsModules</Filter>
     </ClCompile>
     <ClCompile Include="ShadowMapDataModule.cpp">
@@ -165,10 +162,7 @@
     <ClCompile Include="HeightMapLightShader.h">
       <Filter>Header Files\Shaders\MeshShaders</Filter>
     </ClCompile>
-    <ClCompile Include="CMHeightDepthShader.cpp">
-      <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
-    </ClCompile>
-    <ClCompile Include="SMHeightDepthShader.cpp">
+    <ClCompile Include="HeightDepthShader.cpp">
       <Filter>Source Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClCompile>
     <ClCompile Include="HeightMapShadowShader.cpp">
@@ -212,10 +206,7 @@
     <ClInclude Include="ManipulationDataModule.h">
       <Filter>Header Files\ShaderModules\GeometryShaderModules</Filter>
     </ClInclude>
-    <ClInclude Include="SMDepthShader.h">
-      <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="CMDepthShader.h">
+    <ClInclude Include="DepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClInclude>
     <ClInclude Include="CameraDataModule.h">
@@ -224,16 +215,13 @@
     <ClInclude Include="LightsDataModule.h">
       <Filter>Header Files\ShaderModules\Lights Modules</Filter>
     </ClInclude>
-    <ClInclude Include="PointLightDataModule.h">
+    <ClInclude Include="LightDepthDataBuffer.h">
       <Filter>Header Files\ShaderModules\Lights Modules</Filter>
     </ClInclude>
     <ClInclude Include="ShadowMapDataModule.h">
       <Filter>Header Files\ShaderModules\Lights Modules</Filter>
     </ClInclude>
-    <ClInclude Include="CMHeightDepthShader.h">
-      <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
-    </ClInclude>
-    <ClInclude Include="SMHeightDepthShader.h">
+    <ClInclude Include="HeightDepthShader.h">
       <Filter>Header Files\Shaders\MeshShaders\DepthShaders</Filter>
     </ClInclude>
     <ClInclude Include="HeightMapShadowShader.h">
@@ -292,25 +280,19 @@
     <FxCompile Include="shaders\texture_vs.hlsl">
       <Filter>Resource Files\Texture Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\depthSM_ps.hlsl">
-      <Filter>Resource Files\Depth Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="shaders\shadow_ps.hlsl">
       <Filter>Resource Files\Shadow Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\shadow_vs.hlsl">
       <Filter>Resource Files\Shadow Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\depthCM_ps.hlsl">
+    <FxCompile Include="shaders\depth_ps.hlsl">
       <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\depthCM_vs.hlsl">
+    <FxCompile Include="shaders\depth_vs.hlsl">
       <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\depthHeightmapCM_vs.hlsl">
-      <Filter>Resource Files\Depth Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\depthHeightmapSM_vs.hlsl">
+    <FxCompile Include="shaders\depthHeightmap_vs.hlsl">
       <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\shadowHeightmap_ps.hlsl">
@@ -318,9 +300,6 @@
     </FxCompile>
     <FxCompile Include="shaders\shadowHeightmap_vs.hlsl">
       <Filter>Resource Files\Shadow Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\depthSM_vs.hlsl">
-      <Filter>Resource Files\Depth Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\BloomCombine_ps.hlsl">
       <Filter>Resource Files\Texture Shaders\BloomShaders</Filter>

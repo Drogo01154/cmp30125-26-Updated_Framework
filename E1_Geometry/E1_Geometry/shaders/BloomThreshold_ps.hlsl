@@ -14,7 +14,7 @@ struct InputType
 
 cbuffer BloomBuffer : register(b0)
 {
-    float threshold;
+    float threshold;    
     float intensity;
 };
 

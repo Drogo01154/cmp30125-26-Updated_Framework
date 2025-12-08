@@ -137,7 +137,7 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         //Cacluate the lights view position
         float4 lightViewPos = mul(float4(worldPos, 1), lightViewProj);
         
-        float depth = lightViewPos.z / lightViewPos.w;
+        float depth = (lightType == 0) ? lightViewPos.z : (lightViewPos.z / lightViewPos.w);
         // Calculate the projected texture coordinates.
         float2 pTexCoord = getProjectiveCoords(lightViewPos);
         
