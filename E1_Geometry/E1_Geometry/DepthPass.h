@@ -29,7 +29,7 @@ public:
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		pointLightDataModule = shaderManager->getShaderModuleID("PointLightDataModule");
 		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
-		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
+		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule4");
 
 		NonPointDepthShader = shaderManager->getGeometryShader("SMDepthShader");
 		PointDepthShader = shaderManager->getGeometryShader("CMDepthShader");
@@ -226,6 +226,7 @@ public:
 	CubeMapArray* getCubeMapArray() { return &cubeMapArray; }
 	const XMFLOAT2* getTexelSize() { return &texelSize; }
 private:
+
 	ShadowMapArray shadowMapArray;
 	CubeMapArray cubeMapArray;
 

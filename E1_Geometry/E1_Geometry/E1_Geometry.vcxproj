@@ -175,25 +175,15 @@
     <ClCompile Include="ShadowMapDataModule.cpp" />
     <ClCompile Include="ShadowShader.cpp" />
     <ClCompile Include="SMDepthShader.cpp" />
-    <ClCompile Include="GreyScaleDataModule.cpp" />
-    <ClCompile Include="GreyScaleTextureShader.cpp" />
-    <ClCompile Include="GreyScaleTextureShader.h" />
     <ClCompile Include="HeightMapDataModule.cpp" />
     <ClCompile Include="HeightMapLightShader.cpp" />
-    <ClCompile Include="AlbedoLightShader.cpp" />
-    <ClCompile Include="KernelDataModule.cpp" />
-    <ClCompile Include="KernelDataModule.h" />
-    <ClCompile Include="KernelShader.cpp" />
     <ClCompile Include="ManipulationDataModule.cpp" />
     <ClCompile Include="MaterialDataModule.cpp" />
-    <ClCompile Include="MiniMapDataModule.cpp" />
     <ClCompile Include="SamplerDataModule.cpp" />
     <ClCompile Include="SMHeightDepthShader.cpp" />
     <ClCompile Include="TextureDataModule.cpp" />
-    <ClCompile Include="TexturedLightShader.cpp" />
+    <ClCompile Include="BasicLightShader.cpp" />
     <ClCompile Include="LightsDataModule.cpp" />
-    <ClCompile Include="ManipulationShader.cpp" />
-    <ClCompile Include="MiniMapTextureShader.cpp" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="MatrixDataModule.cpp" />
     <FxCompile Include="shaders\BloomCombine_ps.hlsl">
@@ -217,19 +207,6 @@
     <FxCompile Include="shaders\depthSM_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <None Include="shaders\BoxBlur_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <FileType>Document</FileType>
-    </None>
-    <FxCompile Include="shaders\colourGradient_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\colourGradient_vs.hlsl">
-      <FileType>Document</FileType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <ClCompile Include="ColourShader.cpp" />
-    <ClCompile Include="ColourShaderGradient.cpp" />
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -239,12 +216,12 @@
     <None Include="shaders\shadowCommon_ps.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="shaders\heightMapCommon_ps.hlsl">
-      <FileType>Document</FileType>
-    </None>
     <FxCompile Include="shaders\GausseanBlur_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
+    <None Include="shaders\heightMapCommon_ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="shaders\shadowHeightmap_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -257,25 +234,6 @@
     <FxCompile Include="shaders\shadow_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
-    <None Include="shaders\Sharpen_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <FileType>Document</FileType>
-    </None>
-    <None Include="shaders\kernel_ps.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="shaders\EdgeDetection_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <FileType>Document</FileType>
-    </None>
-    <None Include="shaders\Gaussian3X3_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <FileType>Document</FileType>
-    </None>
-    <None Include="shaders\Gaussian5X5_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <FileType>Document</FileType>
-    </None>
     <FxCompile Include="shaders\heightMap_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
@@ -289,26 +247,11 @@
       </ShaderModel>
       <FileType>Document</FileType>
     </None>
-    <FxCompile Include="shaders\albedoLight_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\texturedLight_ps.hlsl">
+    <FxCompile Include="shaders\light_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\light_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\manipulation_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\manipulation_vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\textureGreyscale_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="shaders\textureMiniMap_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="shaders\texture_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -325,8 +268,6 @@
     <ClInclude Include="CameraDataModule.h" />
     <ClInclude Include="CMDepthShader.h" />
     <ClInclude Include="CMHeightDepthShader.h" />
-    <ClInclude Include="ColourShader.h" />
-    <ClInclude Include="ColourShaderGradient.h" />
     <ClInclude Include="DepthPass.h" />
     <ClInclude Include="GenericShader.h" />
     <ClInclude Include="HeightMapShadowShader.h" />
@@ -338,24 +279,16 @@
     <ClInclude Include="ShadowShader.h" />
     <ClInclude Include="SMDepthShader.h" />
     <ClInclude Include="FinalPass.h" />
-    <ClInclude Include="GeometryPass.h" />
-    <ClInclude Include="GreyScaleDataModule.h" />
     <ClInclude Include="HeightMapDataModule.h" />
-    <ClInclude Include="AlbedoLightShader.h" />
-    <ClInclude Include="KernelShader.h" />
     <ClInclude Include="LightsDataModule.h" />
     <ClInclude Include="ManipulationDataModule.h" />
     <ClInclude Include="MaterialDataModule.h" />
-    <ClInclude Include="MiniMapDataModule.h" />
-    <ClInclude Include="MiniMapPass.h" />
     <ClInclude Include="ToTexturePass.h" />
     <ClInclude Include="SamplerDataModule.h" />
     <ClInclude Include="ShaderInit.h" />
     <ClInclude Include="SMHeightDepthShader.h" />
     <ClInclude Include="TextureDataModule.h" />
-    <ClInclude Include="TexturedLightShader.h" />
-    <ClInclude Include="ManipulationShader.h" />
-    <ClInclude Include="MiniMapTextureShader.h" />
+    <ClInclude Include="BasicLightShader.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="MatrixDataModule.h" />
     <ClInclude Include="ThresholdPass.h" />
@@ -364,32 +297,6 @@
     <ProjectReference Include="..\DXFramework\DXFramework.vcxproj">
       <Project>{e887c38b-1273-433a-9dac-a153da5cf145}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="shaders\colour_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Directory)%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Directory)%(Filename).cso</ObjectFileOutput>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="shaders\colour_vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Directory)%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Directory)%(Filename).cso</ObjectFileOutput>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,15 +15,20 @@ private:
 	void initShader(const wchar_t* cs, const wchar_t* ps);
 
 private:
-	ModuleInstance matrixDataModule;
+	//Vertex Shader Modules
+	ModuleInstance matrixDataModule;	// Shaders Matrix Data
+	ModuleInstance cameraDataModule;	// Camera Data Module
+	ModuleInstance lightsDataModule;	// light data module
+	ModuleInstance materialDataModule;  // Material data module
 
-	ModuleInstance cameraDataModule;
-	ModuleInstance materialDataModule;
-	ModuleInstance lightDataModule;
+	ModuleInstance textureSampleStateModule;	// Module for texture sampler
 
-	ModuleInstance samplerStateModule;
-	ModuleInstance textureDataModule;
-	ModuleInstance heightMapTextureModule;
+	ModuleInstance heightMapDataModule;			// Module for heightmap data
 
-	ModuleInstance heightMapDataModule;
+	ModuleInstance diffuseMapTextureModule;		// Module for colour texture
+	ModuleInstance normalMapTextureModule;		// Module for normal texture
+	ModuleInstance emissiveMapTextureModule;	// Module for emissive texture
+	ModuleInstance heightMapTextureModule;		// Module for height map texture
+	ModuleInstance heightMapSamplerStateModule; // Module for height map sampler
+	
 };

@@ -1,11 +1,5 @@
 #include"lightCommon_ps.hlsl"
 
-// Light pixel shader
-// Calculate diffuse lighting for a single spot light (also texturing)
-
-Texture2D texture0 : register(t1);
-SamplerState sampler0 : register(s0);
-
 struct InputType
 {
     float4 position : SV_POSITION;
@@ -17,8 +11,9 @@ struct InputType
 
 float4 main(InputType input) : SV_Target
 {
-    // Get diffuse Colour
-    float4 diffuse = texture0.Sample(sampler0, input.tex) * baseColour;
+    input.normal = applyNormalMap(input.normal, input.tex);
+    float4 diffuse = getDiffuse(input.tex);
+    float4 emissive = calcEmissive(input.tex);
     
     float4 finalColour = ambientLight * diffuse;
     
@@ -28,5 +23,5 @@ float4 main(InputType input) : SV_Target
     }
     
     // Multiply by diffuse texture and clamp to 0..1
-    return finalColour;
+    return finalColour + emissive;
 }

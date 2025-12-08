@@ -30,8 +30,13 @@ struct Material
 	XMFLOAT4 baseColour;						///< Colour value of texture;
 	XMFLOAT4 specularColour;					///< Specular colour value
 	float specularPower;						///< Specular power exponent
-	std::wstring textureString;
-	TextureInstance texture;					///< Materials texture
+	float emissiveStrength;						///< Emission strength
+	std::wstring diffuseTextureString;			///< Diffuse Colour access string
+	std::wstring normalTextureString;			///< normal Texture access string
+	std::wstring emissiveTextureString;			///< emission Texture access string
+	TextureInstance diffuseTexture;				///< Materials diffuse texture
+	TextureInstance normalTexture;				///< Materials normal texture
+	TextureInstance emissionTexture;			///< Materials emission texture
 	std::unique_ptr<HeightMapInfo> HeightMapData;	///< Ptr to height map data of plane.
 };
 

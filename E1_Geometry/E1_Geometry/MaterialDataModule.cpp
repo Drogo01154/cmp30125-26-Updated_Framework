@@ -16,15 +16,49 @@ MaterialDataModule::MaterialDataModule(ID3D11Device* device, HWND hwnd) :
 void MaterialDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, Material* material) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MaterialBufferType* materialPtr;
+
+
+	#define HASDIFFUSE   0x1  // 0001
+	#define HASNORMAL    0x2  // 0010
+	#define HASEMISSIVE  0x4  // 0100
+
+	int flags = 0;  //No flags
+
+	if (material->diffuseTexture.IsValid())
+		flags |= HASDIFFUSE;   // set diffuse bit
+
+	if (material->emissionTexture.IsValid())
+		flags |= HASEMISSIVE;  // set emissive bit
+
+	if (material->normalTexture.IsValid())
+		flags |= HASNORMAL;    // set normal bit
+
+	if (flags & HASEMISSIVE) {
+		int test = 1;
+	}
+
+
 	//Send material data to buffer
 	deviceContext->Map(MaterialDataBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	materialPtr = (MaterialBufferType*)mappedResource.pData;
 	materialPtr->baseColour = material->baseColour;
-	materialPtr->specular = material->specularColour;
+	materialPtr->specularColour = material->specularColour;
 	materialPtr->specularPower = material->specularPower;
+	materialPtr->emissiveStrength = material->emissiveStrength;
+	materialPtr->flags = flags;
 
 	deviceContext->Unmap(MaterialDataBuffer.Get(), 0);
 }
+
+struct MaterialBufferType
+{
+	XMFLOAT4 baseColour;
+	XMFLOAT4 specularColour;
+	float specularPower;
+	float emissiveStrength;
+	int flags;
+	XMFLOAT3 padding1;
+};
 
 void MaterialDataModule::setResources(D3D11_SHADER_VERSION_TYPE shaderType, ID3D11DeviceContext* deviceContext, size_t startingRegister) {
 

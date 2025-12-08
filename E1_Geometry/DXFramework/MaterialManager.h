@@ -41,8 +41,11 @@ private:
 	InstanceCache<std::string, Material> materialCache;
 
 	int selectedMaterial;
-	int selectedTexture;
+	int selectedDiffuseTexture;
+	int selectedNormalTexture;
+	int selectedEmissiveTexture;
 	int selectedHeightMapTexture;
+
 	char newNameInput[256] = "";
 	char existingNameInput[256] = "";
 };

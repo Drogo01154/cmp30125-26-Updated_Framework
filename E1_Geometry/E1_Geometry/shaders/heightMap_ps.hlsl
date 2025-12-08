@@ -1,8 +1,6 @@
 #include "lightCommon_ps.hlsl"
 #include "heightMapCommon_ps.hlsl"
 
-Texture2D albedoTexture : register(t2);
-
 struct InputType
 {
     float4 position : SV_POSITION;
@@ -15,10 +13,11 @@ struct InputType
 
 float4 main(InputType input) : SV_TARGET
 {
-    input.normal = calculateNormal(input.tex);
+    input.normal = calculateHeightMapNormal(input.tex);
     
     // Get diffuse Colour
-    float4 diffuse = albedoTexture.Sample(textureSampler, input.tex) * baseColour;
+    float4 diffuse = getDiffuse(input.tex);
+    float4 emissive = calcEmissive(input.tex);
     
     float4 finalColour = ambientLight * diffuse;
     
@@ -28,7 +27,7 @@ float4 main(InputType input) : SV_TARGET
     }
     
     // Multiply by diffuse texture and clamp to 0..1
-    return saturate(finalColour);
+    return finalColour + emissive;
 }
 
 

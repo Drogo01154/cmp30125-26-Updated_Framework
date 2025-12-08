@@ -1,9 +1,12 @@
-
 // Light pixel shader
 // Calculate diffuse lighting for a single spot light (also texturing)
 
 //Utilises B0 and t0 pixel shader buffers
 
+Texture2D diffuseTexture : register(t0);
+Texture2D normalTexture : register(t1);
+Texture2D emissiveTexture : register(t2);
+SamplerState textureSampler : register(s0);
 
 cbuffer CameraDataBuffer : register(b0)
 {
@@ -12,15 +15,38 @@ cbuffer CameraDataBuffer : register(b0)
     int numberOfLights; // 4
     float2 shadowMapTexelSize;  // 8
     float2 padding;            // 8
-};
+};  
+
+#define HAS_DIFFUSE   0x1  // 0001
+#define HAS_NORMAL    0x2  // 0010
+#define HAS_EMISSIVE  0x4  // 0100
+
 
 cbuffer MaterialDataBuffer : register(b1)
 {
-    float4 baseColour; // 16
-    float4 specularColour; // 16
-    float specularPower; // 4
-    float3 padding1; // 12
+    float4 baseColour;          // 16
+    float4 specularColour;      // 16
+    float specularPower;        // 4
+    float emissiveStrength;     // 4
+    int flags;                  // 4
+    float padding1;            // 4
 };
+
+
+float4 calcEmissive(float2 pos)
+{
+    return ((flags & HAS_EMISSIVE) != 0) ? emissiveTexture.Sample(textureSampler, pos) * emissiveStrength : float4(0.f, 0.f, 0.f, 0.f);
+}
+
+float4 getDiffuse(float2 pos)
+{
+    return ((flags & HAS_DIFFUSE) != 0) ? diffuseTexture.Sample(textureSampler, pos) * baseColour : baseColour;
+}
+
+float3 applyNormalMap(float3 inputNormal, float2 pos)
+{
+    return ((flags & HAS_NORMAL) != 0) ? normalize(normalTexture.Sample(textureSampler, pos).rgb * 2.0 - 1.0) : inputNormal;    
+}
 
 struct Light // 80 bytes
 {
@@ -36,7 +62,7 @@ struct Light // 80 bytes
     float slopeBias;
 };
 
-StructuredBuffer<Light> lights : register(t0);
+StructuredBuffer<Light> lights : register(t3);
 
 float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector)
 {

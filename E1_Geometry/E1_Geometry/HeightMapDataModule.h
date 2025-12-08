@@ -7,12 +7,13 @@
 //Common module for setting up vertex data buffer
 class HeightMapDataModule : public BaseShaderModule {
 private:
-	/** Default world, view, projection matrix buffer struct */
 	struct MapBufferType
 	{
-		XMFLOAT2 pixelOffset;
-		float heightMultiplier;
-		int resolution;
+		XMFLOAT2 offset;              // 8
+		float heightMultiplier;       // 4
+		float heightPadding;		  // 4
+		XMFLOAT2 worldStep;           // 8
+		XMFLOAT2 heightPadding2;      // 8
 	};
 public:
 	HeightMapDataModule(ID3D11Device* device, HWND hwnd);

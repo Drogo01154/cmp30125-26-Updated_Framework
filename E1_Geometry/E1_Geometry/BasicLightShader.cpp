@@ -1,24 +1,23 @@
-#include "ShadowShader.h"
+#include "BasicLightShader.h"
 
-ShadowShader::ShadowShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) :	BaseShader(device, hwnd){
-	initShader(L"shadow_vs.cso", L"shadow_ps.cso");
+BasicLightShader::BasicLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd) : BaseShader(device, hwnd)
+{
+	initShader(L"light_vs.cso", L"light_ps.cso");
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	lightsDataModule = shaderManager->getShaderModuleID("LightsDataModule");
 	materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 
 	cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
-	shadowMapDataModule = shaderManager->getShaderModuleID("ShadowMapDataModule");
 
 	textureSampleStateModule = shaderManager->getShaderModuleID("MaterialTextureSamplerModule");
-	shadowMapSamplerStateModule = shaderManager->getShaderModuleID("ShadowMapSamplerModule");
-	cubeMapSamplerStateModule = shaderManager->getShaderModuleID("CubeMapSamplerModule");
-
 	diffuseMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule1");
 	normalMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
 	emissiveMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule3");
 }
 
-ShadowShader::~ShadowShader() {
+
+BasicLightShader::~BasicLightShader()
+{
 	// Release the layout.
 	if (layout)
 	{
@@ -30,32 +29,28 @@ ShadowShader::~ShadowShader() {
 	BaseShader::~BaseShader();
 }
 
-void ShadowShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
+
+void BasicLightShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilename)
 {
 	// Load (+ compile) shader files
 	loadVertexShader(vsFilename);
 	loadPixelShader(psFilename);
 }
-void ShadowShader::setResources(ID3D11DeviceContext* deviceContext) {
+
+void BasicLightShader::setResources(ID3D11DeviceContext* deviceContext) {
 	//Vertex Shader
 	textureSampleStateModule->module->setResources(D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);	// SamplerState - S0
 	matrixDataModule->module->setResources(D3D11_SHVER_VERTEX_SHADER, deviceContext, 0);			//Cbuffer - BO
 	cameraDataModule->module->setResources(D3D11_SHVER_VERTEX_SHADER, deviceContext, 1);			//Cbuffer - B1
-	
+
 	//Pixel Shader
 	diffuseMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);		// Texture2D - T0
 	normalMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);		// Texture2D - T1
 	emissiveMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 2);		// Texture2D - T2
-
+	
 
 	textureSampleStateModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);		// SamplerState - S0
 	cameraDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);				// Cbuffer - B0
 	materialDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);			// Cbuffer - B1
 	lightsDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 3);				// Structured Buffer T3
-
-	shadowMapDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 4);			// Structured Buffer - T4, Texture2DArray - T5, TextureCubeArray - T6
-
-	shadowMapSamplerStateModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);	// SamplerState - S1
-	cubeMapSamplerStateModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 2);	// SamplerState - S2
 }
-

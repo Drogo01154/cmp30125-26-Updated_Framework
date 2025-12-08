@@ -1,12 +1,12 @@
-
 #pragma once
 #include "ShaderManager.h"
 
-class HeightMapShadowShader : public BaseShader {
-
+class BasicLightShader : public BaseShader
+{
+private:
 public:
-	HeightMapShadowShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
-	~HeightMapShadowShader();
+	BasicLightShader(ShaderManager* shaderManager, ID3D11Device* device, HWND hwnd);
+	~BasicLightShader();
 
 	void setResources(ID3D11DeviceContext* deviceContext);
 
@@ -20,19 +20,11 @@ private:
 	ModuleInstance lightsDataModule;	// light data module
 	ModuleInstance materialDataModule;  // Material data module
 
-	//Pixel Shader Modules
-	ModuleInstance shadowMapDataModule;	//Module for shadow maps
 
 	ModuleInstance textureSampleStateModule;	// Module for texture sampler
-	ModuleInstance shadowMapSamplerStateModule;	// Module for shadow map sampler
-	ModuleInstance cubeMapSamplerStateModule;	// Module for cube map sampler
-	ModuleInstance heightMapSamplerStateModule; // Module for height map sampler
-
-	ModuleInstance heightMapDataModule;			// Module for heightmap data
 
 	ModuleInstance diffuseMapTextureModule;		// Module for colour texture
 	ModuleInstance normalMapTextureModule;		// Module for normal texture
 	ModuleInstance emissiveMapTextureModule;	// Module for emissive texture
-	ModuleInstance heightMapTextureModule;		// Module for height map texture
-
 };
+

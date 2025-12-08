@@ -10,10 +10,12 @@ class MaterialDataModule : public BaseShaderModule {
 private:
 	struct MaterialBufferType
 	{
-		XMFLOAT4 baseColour;   // 16
-		XMFLOAT4 specular;     // 16
-		float specularPower;   // 4
-		XMFLOAT3 padding;      // 8
+		XMFLOAT4 baseColour;		// 16
+		XMFLOAT4 specularColour;	// 16
+		float specularPower;		// 4
+		float emissiveStrength;		// 4
+		int flags;					// 4
+		float padding1;
 	};
 
 public:

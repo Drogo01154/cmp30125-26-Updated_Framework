@@ -1,25 +1,22 @@
-// Light pixel shader
-// Calculate diffuse lighting for a single directional light (also texturing)
-
-Texture2D heightMapTexture : register(t5);
-SamplerState textureSampler : register(s3);
+Texture2D heightMapTexture : register(t7);
+SamplerState heightSampler : register(S3);
 
 cbuffer mapData : register(b2)
 {
-    float2 offset;
-    float  heightMultiplier;
-    int resolution;
+    float2 offset;              // 8  Value to move one texel in UV space
+    float heightMultiplier;     // 4
+    float heightPadding;        // 4
+    float2 worldStep;           // 8 wolrd units per texel
+    float2 heightPadding2;      // 8
 }
 
 float getHeight(float2 coord)
 {
-    return heightMapTexture.Sample(textureSampler, coord) * heightMultiplier;
+    return heightMapTexture.Sample(heightSampler, coord) * heightMultiplier;
 }
 
-float3 calculateNormal(float2 tex)
+float3 calculateHeightMapNormal(float2 tex)
 {
-    float2 worldStep = resolution * offset;
-    
     float heightN = getHeight(float2(tex.x, tex.y + offset.y));
     float heightS = getHeight(float2(tex.x, tex.y - offset.y));
     float heightE = getHeight(float2(tex.x + offset.x, tex.y));
@@ -30,6 +27,3 @@ float3 calculateNormal(float2 tex)
     
     return cross(bitangent, tangent);
 }
-
-
-

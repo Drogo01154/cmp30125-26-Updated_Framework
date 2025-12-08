@@ -19,9 +19,9 @@ enum class MeshType : uint8_t
 {
 	AMODEL,				// String Paramater
 	MODEL,				// String Paramater
-	POINT,			// No Paramater
-	QUAD,			// No Paramater
-	TESSELATION,	// No Paramater
+	POINT,				// No Paramater
+	QUAD,				// No Paramater
+	TESSELATION,		// No Paramater
 	TRIANGLE,			// No Paramater
 	CUBE,				// int Paramater
 	PLANE,				// int paramater

@@ -209,15 +209,28 @@ public:
 	}
 	
 	inline bool saveSceneJson(const std::string& sceneName, const nlohmann::json& json, bool asBson) {
-		const std::string* path = nullptr;
+		std::string* path = nullptr;
 		
 		//If sceneName already exists
 		auto it = scenes.find(sceneName);
 		if (it != scenes.end()) {
 			//Get file path of existing scene
 			path = &it->second.first;
-			//Update format
-			it->second.second = asBson;
+			if (it->second.second != asBson) {
+				//Update format
+				
+				try {
+					if (fs::exists(*path)) {
+						fs::remove(*path);   // deletes the file
+					}
+				}
+				catch (const fs::filesystem_error& e) {
+					throw std::runtime_error(std::string("Error deleting file: ") + e.what()); throw std::runtime_error("Error could not delete file!");
+				}
+				it->second.second = asBson;
+				*path = "res/scenes/" + sceneName + (asBson ? ".bson" : ".json");
+			}
+			
 		} else {
 			//Build new scene path
 			std::string inputPath = "res/scenes/" + sceneName + (asBson ? ".bson" : ".json");

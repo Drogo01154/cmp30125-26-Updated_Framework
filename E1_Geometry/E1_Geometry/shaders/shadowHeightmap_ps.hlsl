@@ -1,6 +1,7 @@
 #include "shadowCommon_ps.hlsl"
 #include "heightMapCommon_ps.hlsl"
 
+
 struct InputType
 {
     float4 position : SV_POSITION;
@@ -12,17 +13,18 @@ struct InputType
 
 float4 main(InputType input) : SV_TARGET
 { 
-    input.normal = calculateNormal(input.tex);
+    input.normal = calculateHeightMapNormal(input.tex);
     
-    float4 diffuse = shaderTexture.Sample(textureSampler, input.tex);
-    float4 colour = ambientLight * diffuse;
+    float4 diffuse = getDiffuse(input.tex);
+    float4 finalColour = ambientLight * diffuse;
+    float4 emissive = calcEmissive(input.tex);
         
     for (int i = 0; i < numberOfLights; i++)
     {
         float shadowScalar = calculateShadow(i, input.worldPos, input.normal);
         float4 lightColour = calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
-        colour += shadowScalar * lightColour;
+        finalColour += shadowScalar * lightColour;
 
     }
-    return colour;
+    return finalColour + emissive;
 }

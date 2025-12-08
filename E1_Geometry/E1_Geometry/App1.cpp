@@ -9,9 +9,10 @@
 #include "SMDepthShader.h"
 #include "CMHeightDepthShader.h"
 #include "SMHeightDepthShader.h"
-#include "TexturedLightShader.h"
+#include "BasicLightShader.h"
 #include "LightPass.h"
 #include "HeightMapShadowShader.h"
+#include "HeightMapLightShader.h"
 
 #include "GenericShader.h"
 #include "ConstantBufferModule.h"
@@ -33,6 +34,8 @@ void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
 	//Texture data modules to send albedo colour to shaders
 	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule1", device, hwnd);
 	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule2", device, hwnd);
+	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule3", device, hwnd);
+	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule4", device, hwnd);
 
 	//Lights data module to send light information to shaders
 	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", device, hwnd, instanceMgr.get());
@@ -47,7 +50,7 @@ void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
 	//Height map data module to send height map data to shaders
 	shaderMgr->AddShaderModule<HeightMapDataModule>("HeightMapDataModule", device, hwnd);
 
-	//Sampler specifically for sampling render textures
+	//Sampler specifically for sampling render textures	
 	shaderMgr->AddShaderModule<SamplerDataModule>("RenderTextureSamplerModule", device, hwnd, D3D11_TEXTURE_ADDRESS_CLAMP);
 	//Sampler specifically for sampling material and heightmap textures
 	shaderMgr->AddShaderModule<SamplerDataModule>("MaterialTextureSamplerModule", device, hwnd);
@@ -55,12 +58,15 @@ void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
 	shaderMgr->AddShaderModule<SamplerDataModule>("ShadowMapSamplerModule", device, hwnd, D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, 1, D3D11_COMPARISON_LESS_EQUAL);
 	shaderMgr->AddShaderModule<SamplerDataModule>("CubeMapSamplerModule", device, hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, 1, D3D11_COMPARISON_LESS_EQUAL);
 
+	shaderMgr->AddShaderModule<SamplerDataModule>("HeightMapSamplerModule", device, hwnd, D3D11_TEXTURE_ADDRESS_CLAMP, D3D11_FILTER_MIN_MAG_MIP_LINEAR);
+
 	shaderMgr->AddShaderModule<ConstantDataModule<BloomBufferType>>("BloomDataModule", device, hwnd);
 	shaderMgr->AddShaderModule<ConstantDataModule<BlurBufferType>>("BlurModule", device, hwnd);
 }
 
 //Function for storing constructors of different shader types
 void App1::addShaderConstructors(HWND hwnd, ID3D11Device* device) {
+
 	//Depth shaders
 	shaderMgr->addGeometryShader<SMDepthShader>("SMDepthShader", shaderMgr.get(), device, hwnd);
 	shaderMgr->addGeometryShader<CMDepthShader>("CMDepthShader", shaderMgr.get(), device, hwnd);
@@ -70,8 +76,9 @@ void App1::addShaderConstructors(HWND hwnd, ID3D11Device* device) {
 	//Shadow map shaders
 	shaderMgr->addGeometryShader<ShadowShader>("ShadowShader", shaderMgr.get(), device, hwnd);
 	shaderMgr->addGeometryShader<HeightMapShadowShader>("HeightMapShadowShader", shaderMgr.get(), device, hwnd);
+	shaderMgr->addGeometryShader<HeightMapLightShader>("HeightMapLightShader", shaderMgr.get(), device, hwnd);
 
-	shaderMgr->addGeometryShader<TexturedLightShader>("BasicLightShader", shaderMgr.get(), device, hwnd);
+	shaderMgr->addGeometryShader<BasicLightShader>("BasicLightShader", shaderMgr.get(), device, hwnd);
 
 	std::vector<resourceData> shaderInputs;
 	shaderInputs.resize(4);

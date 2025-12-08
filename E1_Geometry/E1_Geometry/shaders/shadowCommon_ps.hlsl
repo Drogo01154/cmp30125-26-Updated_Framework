@@ -1,11 +1,9 @@
 #include"lightCommon_ps.hlsl"
-StructuredBuffer<float4x4> lightViewProjs : register(t1); // lightProjectionMatrix * lightViewMatrix on the CPU
-Texture2DArray shadowMaps : register(t2);
-TextureCubeArray cubeMaps : register(t3);
-Texture2D shaderTexture : register(t4);
-SamplerComparisonState ShadowMapSampler : register(s0);
-SamplerComparisonState CubeMapSampler : register(s1);
-SamplerState diffuseSampler : register(s2);
+StructuredBuffer<float4x4> lightViewProjs : register(t4); // lightProjectionMatrix * lightViewMatrix on the CPU
+Texture2DArray shadowMaps : register(t5);
+TextureCubeArray cubeMaps : register(t6);
+SamplerComparisonState ShadowMapSampler : register(s1);
+SamplerComparisonState CubeMapSampler : register(s2);
 
 static const float kernelWeights[25] =
 {

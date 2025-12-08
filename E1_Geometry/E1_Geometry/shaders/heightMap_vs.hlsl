@@ -19,9 +19,11 @@ cbuffer CameraBuffer : register(b1)
 
 cbuffer mapData : register(b2)
 {
-    float2 offset;
-    float heightMultiplier;
-    int resolution;
+    float2 offset; // 8
+    float heightMultiplier; // 4
+    float heightPadding; // 4
+    float2 worldStep; // 8
+    float2 heightPadding2; // 8
 }
 
 struct InputType

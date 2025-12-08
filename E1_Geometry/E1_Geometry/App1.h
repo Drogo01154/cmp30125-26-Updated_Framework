@@ -4,7 +4,6 @@
 
 // Includes
 #include "../DXFramework/DXF.h"
-#include "TexturedLightShader.h"
 
 
 class App1 : public BaseApplication

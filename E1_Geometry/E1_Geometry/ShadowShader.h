@@ -16,14 +16,17 @@ class ShadowShader : public BaseShader {
 		//Vertex Shader Modules
 		ModuleInstance matrixDataModule;	// Shaders Matrix Data
 		ModuleInstance cameraDataModule;	// Camera Data Module
+		ModuleInstance lightsDataModule;	// light data module
+		ModuleInstance materialDataModule;  // Material data module
 
 		//Pixel Shader Modules
-		ModuleInstance lightDataModule;		//Lights data module
-		ModuleInstance materialDataModule;	//Material Data module
 		ModuleInstance shadowMapDataModule;	//Module for shadow maps
-		
-		ModuleInstance textureSamplerStateModule;	// Module for texture sampler
+
+		ModuleInstance textureSampleStateModule;	// Module for texture sampler
 		ModuleInstance shadowMapSamplerStateModule;	// Module for shadow map sampler
 		ModuleInstance cubeMapSamplerStateModule;	// Module for cube map sampler
-		ModuleInstance textureDataModule;			// Module for texture data
+
+		ModuleInstance diffuseMapTextureModule;		// Module for colour texture
+		ModuleInstance normalMapTextureModule;		// Module for normal texture
+		ModuleInstance emissiveMapTextureModule;	// Module for emissive texture
 };

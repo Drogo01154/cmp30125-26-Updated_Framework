@@ -16,15 +16,27 @@ public:
 		: ToTexturePass(stage, deps, shaderManager, device, RTData),
 		instanceManager(instanceManager), shaderManager(shaderManager), renderer(renderer)
 	{
+		
+		texelSize = XMFLOAT2(1.f / static_cast<float>(RTData.screenWidth), 1.f / static_cast<float>(RTData.screenHeight));
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		lightDataModule = shaderManager->getShaderModuleID("LightsDataModule");
 		materialDataModule = shaderManager->getShaderModuleID("MaterialDataModule");
 		cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
-		textureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
+
+		diffuseTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
+		normalTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule2");
+		emissiveTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule3");
+		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule4");
+
+		heightMapShader = shaderManager->getGeometryShader("HeightMapLightShader");
+
 		shader = shaderManager->getGeometryShader("BasicLightShader");
 	}
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
+
+		// Clear the scene. (default blue colour)
+		renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
 		//Return if no lights
 		textureOutput->setRenderTarget(renderer->getDeviceContext());
 		textureOutput->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
@@ -32,8 +44,9 @@ public:
 		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::CAMERA)) {
 			//Update camera Data module
 			shared_ptr<CameraDataModule> cameraData = std::dynamic_pointer_cast<CameraDataModule>(cameraDataModule->module);
-			cameraData->setModuleParamaters(deviceContext);
+			cameraData->setModuleParamaters(deviceContext, texelSize);
 		}
+		
 		//Check if light number or data changed
 		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED) ||
 			shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED)) {
@@ -42,12 +55,12 @@ public:
 			shared_ptr<LightsDataModule> lightsData = std::dynamic_pointer_cast<LightsDataModule>(lightDataModule->module);
 			lightsData->setModuleParamaters(deviceContext, nullptr);
 		}
+
 		size_t lightNum = instanceManager->getNumberOfLights();
 		if (instanceManager->getNumberOfLights() == 0) { return; }
 		std::shared_ptr<MatrixDataModule> matrixData = std::dynamic_pointer_cast<MatrixDataModule>(matrixDataModule->module);
 		std::shared_ptr<MaterialDataModule> materialData = std::dynamic_pointer_cast<MaterialDataModule>(materialDataModule->module);
-		std::shared_ptr<TextureDataModule> textureData = std::dynamic_pointer_cast<TextureDataModule>(textureDataModule->module);
-
+		
 		XMMATRIX viewMatrix = instanceManager->getActiveCamera()->camera->getViewMatrix();
 		const XMMATRIX& projectionMatrix = renderer->getProjectionMatrix();
 		//Loop over geometry
@@ -61,20 +74,50 @@ public:
 				// Set material Data
 				materialData->setModuleParamaters(deviceContext, mat);
 				// Set texture Data
-				textureData->setModuleParamaters(deviceContext, mat->texture->texture.Get());
+
+				if (mat->diffuseTexture.IsValid()) {
+					std::shared_ptr<TextureDataModule> diffuseModule = std::dynamic_pointer_cast<TextureDataModule>(diffuseTextureDataModule->module);
+					diffuseModule->setModuleParamaters(deviceContext, mat->diffuseTexture->texture.Get());
+				}
+
+				if (mat->normalTexture.IsValid()) {
+					std::shared_ptr<TextureDataModule> normalModule = std::dynamic_pointer_cast<TextureDataModule>(normalTextureDataModule->module);
+					normalModule->setModuleParamaters(deviceContext, mat->normalTexture->texture.Get());
+				}
+
+				if (mat->emissionTexture.IsValid()) {
+					std::shared_ptr<TextureDataModule> emissiveModule = std::dynamic_pointer_cast<TextureDataModule>(emissiveTextureDataModule->module);
+					emissiveModule->setModuleParamaters(deviceContext, mat->emissionTexture->texture.Get());
+				}
 
 				//Send Geometry Data
 				std::shared_ptr<BaseMesh> mesh = meshInstance->mesh->mesh;
-				mesh->sendData(deviceContext);
-				shader->shader->setResources(deviceContext);
-				shader->shader->render(deviceContext, mesh->getIndexCount());
+
+				if (mat->HeightMapData) {
+					std::shared_ptr<TextureDataModule> heightMapData = std::dynamic_pointer_cast<TextureDataModule>(heightMapTextureModule->module);
+					std::shared_ptr<HeightMapDataModule> heightData = std::dynamic_pointer_cast<HeightMapDataModule>(heightMapDataModule->module);
+
+					heightMapData->setModuleParamaters(deviceContext, mat->HeightMapData->HeightTexture->texture.Get());
+					heightData->setModuleParamaters(deviceContext, mat, meshInstance);
+
+					mesh->sendData(deviceContext);
+					heightMapShader->shader->setResources(deviceContext);
+					heightMapShader->shader->render(deviceContext, mesh->getIndexCount());
+				}
+				else {
+					mesh->sendData(deviceContext);
+					shader->shader->setResources(deviceContext);
+					shader->shader->render(deviceContext, mesh->getIndexCount());
+				}
 			}
-			});
+		});
 	};
 private:
 	D3D* renderer;
 	InstanceManager* instanceManager;
 	ShaderManager* shaderManager;
+
+	XMFLOAT2 texelSize;
 
 	//Vertex Shader Modules
 	ModuleInstance matrixDataModule;	// Shaders Matrix Data
@@ -83,5 +126,13 @@ private:
 	//Pixel Shader Modules
 	ModuleInstance lightDataModule;		//Lights data module
 	ModuleInstance materialDataModule;	//Material Data module
-	ModuleInstance textureDataModule;	//Module for materials texture
+
+	ModuleInstance diffuseTextureDataModule;	// Diffuse texture data module
+	ModuleInstance normalTextureDataModule;		// Normal texture data module
+	ModuleInstance emissiveTextureDataModule;	// Emissive texture data module
+
+	ModuleInstance heightMapDataModule;
+	ModuleInstance heightMapTextureModule;
+
+	ShaderInstance heightMapShader;
 };
