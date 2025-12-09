@@ -21,7 +21,7 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 }
 
 void SceneGraph::resetScene(bool loadBasics) {
-
+	materialManager->deleteAllMaterials();
 	root.reset();
 
 	size_t test1 = instanceManager->getNumberOfCameras();
@@ -29,6 +29,7 @@ void SceneGraph::resetScene(bool loadBasics) {
 	size_t test3 = instanceManager->getNumberOfMeshes();
 
 	if (loadBasics) {
+		materialManager->createMaterial("Default");
 		createBaseScene();
 	}
 }

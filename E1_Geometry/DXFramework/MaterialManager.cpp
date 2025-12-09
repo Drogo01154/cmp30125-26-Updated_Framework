@@ -116,10 +116,6 @@ void MaterialManager::updateSelectedMaterial() {
 
 	const auto& imageList = *FileHandler::get().getImageList();
 
-	if (!mat->emissiveTextureString.empty()) {
-		ImGui::SliderFloat("Emissive Strength: ", &mat->emissiveStrength, 0.1f, 10.f);
-	}
-
 	auto getSelectedTexture = [&](int& selectedValue, const std::wstring& textureWString) {
 		if (!textureWString.empty()) {
 			std::string textureString = Converters::convert_from_wstring(textureWString);
@@ -127,7 +123,7 @@ void MaterialManager::updateSelectedMaterial() {
 			// Find matching texture
 			for (int i = 0; i < imageList.size(); i++) {
 				if (textureString == std::string(imageList[i])) {
-					textureString = i;
+					selectedValue = i;
 					break;
 				}
 			}
@@ -241,6 +237,10 @@ void MaterialManager::imGuiRender() {
 					}
 				}
 
+				if (!mat->emissiveTextureString.empty()) {
+					ImGui::SliderFloat("Emissive Strength: ", &mat->emissiveStrength, 0.1f, 10.f);
+				}
+
 				const std::vector<const char*>* imageList = FileHandler::get().getImageList();
 
 				auto ComboImageSelectFunction = [&](const char* ImGuiTag, int& selectedValue, std::wstring* textureString, TextureInstance* textureInstance)
@@ -259,6 +259,7 @@ void MaterialManager::imGuiRender() {
 								*textureString = L"";
 								*textureInstance = TextureInstance();
 							}
+							updateSelectedMaterial();
 						}
 					};
 				ComboImageSelectFunction("Select Diffuse Texture: ", selectedDiffuseTexture, &mat->diffuseTextureString, &mat->diffuseTexture);
@@ -334,7 +335,7 @@ void MaterialManager::from_json(const nlohmann::json& j) {
 		mat.emissiveStrength = matJson.at("EmissiveStrength").get<float>();
 		
 		mat.diffuseTextureString = matJson.contains("DiffuseTexture") ? Converters::convert_to_wstring(matJson.at("DiffuseTexture").get<std::string>()) : L"";
-		mat.diffuseTextureString = matJson.contains("NormalTexture") ? Converters::convert_to_wstring(matJson.at("NormalTexture").get<std::string>()) : L"";
+		mat.normalTextureString = matJson.contains("NormalTexture") ? Converters::convert_to_wstring(matJson.at("NormalTexture").get<std::string>()) : L"";
 		mat.emissiveTextureString = matJson.contains("EmissiveTexture") ? Converters::convert_to_wstring(matJson.at("EmissiveTexture").get<std::string>()) : L"";
 
 		if (matJson.contains("HeightMapData")) {

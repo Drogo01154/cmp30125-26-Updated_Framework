@@ -510,7 +510,9 @@ private:
 			else {
 				stringStorage.push_back(id);
 			}
-			charVec.push_back(stringStorage.back().c_str());
+		}
+		for (const std::string& it : stringStorage) {
+			charVec.push_back(it.c_str());
 		}
 		charVectorDirty = false;
 	}

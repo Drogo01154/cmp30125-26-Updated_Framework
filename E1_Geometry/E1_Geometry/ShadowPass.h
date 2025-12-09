@@ -26,6 +26,8 @@ public:
 		cameraDataModule = shaderManager->getShaderModuleID("CameraDataModule");
 		shadowMapDataModule = shaderManager->getShaderModuleID("ShadowMapDataModule");
 
+		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
+
 		diffuseTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
 		normalTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule2");
 		emissiveTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule3");
