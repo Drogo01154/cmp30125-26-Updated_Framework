@@ -18,10 +18,11 @@ enum shaderTypes {
 class BaseShader;
 
 struct HeightMapInfo {
-	HeightMapInfo() : HeightTextureString(L"height"), HeightMultiplier(10.f) {}
+	HeightMapInfo() : HeightTextureString(L"height"), HeightMultiplier(10.f), UVScale(1) {}
 	std::wstring HeightTextureString;
 	TextureInstance HeightTexture;
 	float HeightMultiplier;
+	float UVScale;								///< Scales UVs for texture sampling
 };
 
 struct Material

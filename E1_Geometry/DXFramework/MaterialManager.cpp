@@ -267,6 +267,8 @@ void MaterialManager::imGuiRender() {
 				ComboImageSelectFunction("Select Emission Texture: ", selectedEmissiveTexture, &mat->emissiveTextureString, &mat->emissionTexture);
 
 				if (mat->HeightMapData != nullptr) {
+					ImGui::SliderFloat("Height Map Multiplier: ", &mat->HeightMapData->HeightMultiplier, 0.1f, 1000.f);
+					ImGui::SliderFloat("UV scale", &mat->HeightMapData->UVScale, 0.01f, 100.f);
 					ComboImageSelectFunction("Select Height Map Texture: ", selectedHeightMapTexture, &mat->HeightMapData->HeightTextureString, &mat->HeightMapData->HeightTexture);
 				}
 
@@ -317,6 +319,7 @@ void MaterialManager::to_json(nlohmann::json& j) {
 			nlohmann::json& heightData = matJson["HeightMapData"];
 			heightData["Multiplier"] = mat->HeightMapData->HeightMultiplier;
 			heightData["Texture"] = Converters::convert_from_wstring(mat->HeightMapData->HeightTextureString);
+			heightData["UVScale"] = mat->HeightMapData->UVScale;
 		}
 		j.push_back(matJson);
 		});
@@ -343,6 +346,7 @@ void MaterialManager::from_json(const nlohmann::json& j) {
 			mat.HeightMapData = std::make_unique<HeightMapInfo>();
 			mat.HeightMapData->HeightTextureString = Converters::convert_to_wstring(heightMapJson.at("Texture").get<std::string>());
 			mat.HeightMapData->HeightMultiplier = heightMapJson.at("Multiplier").get<float>();
+			mat.HeightMapData->UVScale = heightMapJson.contains("UVScale") ? heightMapJson.at("UVScale").get<float>() : 1.f;
 		}
 		else {
 			mat.HeightMapData = nullptr;

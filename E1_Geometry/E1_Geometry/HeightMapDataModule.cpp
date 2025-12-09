@@ -51,6 +51,7 @@ void HeightMapDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext
 	float resolution = static_cast<float>(std::get<int>(plane->mesh->params["resolution"]));
 	heightMapPtr->offset = pixelOffset;
 	heightMapPtr->worldStep = XMFLOAT2(pixelOffset.x * resolution, pixelOffset.y * resolution);
+	heightMapPtr->UVScale = material->HeightMapData->UVScale;
 	deviceContext->Unmap(heightMapBuffer.Get(), 0);
 }
 

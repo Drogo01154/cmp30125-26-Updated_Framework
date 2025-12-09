@@ -7,7 +7,8 @@ cbuffer mapData : register(b2)
     float heightMultiplier;     // 4
     float heightPadding;        // 4
     float2 worldStep;           // 8 wolrd units per texel
-    float2 heightPadding2;      // 8
+    float UVScale;              // 4
+    float heightMapPadding;     // 4
 }
 
 float getHeight(float2 coord)

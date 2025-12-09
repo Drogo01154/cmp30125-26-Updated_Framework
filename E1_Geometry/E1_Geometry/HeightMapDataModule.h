@@ -13,7 +13,8 @@ private:
 		float heightMultiplier;       // 4
 		float heightPadding;		  // 4
 		XMFLOAT2 worldStep;           // 8
-		XMFLOAT2 heightPadding2;      // 8
+		float UVScale;				  // 4
+		float padding;				  // 4
 	};
 public:
 	HeightMapDataModule(ID3D11Device* device, HWND hwnd);

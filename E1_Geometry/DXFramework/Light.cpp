@@ -42,10 +42,27 @@ void Light::generateViewMatrix()
 			);
 		}
 	}
-	else {
+	else if(type == lightTypes::spot){
 		XMVECTOR forward = cleanVector3(m_transform.getWorldForward());
 		XMVECTOR up = cleanVector3(m_transform.getWorldUp());
 		// Create the view matrix from the three vectors.
+		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + forward, up);
+	}
+	else {
+
+
+
+		XMVECTOR forward = m_transform.getWorldForward();
+		
+		//Choose fallback up if near
+		XMVECTOR tempUp = XMVectorSet(0, 1, 0, 0);
+		float dotForwardUp = fabs(XMVectorGetX(XMVector3Dot(forward, tempUp)));
+		if (dotForwardUp > 0.99f) {
+			tempUp = XMVectorSet(0, 0, 1, 0);
+		}
+		
+		XMVECTOR right = XMVector3Normalize(XMVector3Cross(tempUp, forward));
+		XMVECTOR up = XMVector3Normalize(XMVector3Cross(forward, right));
 		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + forward, up);
 	}
 }
@@ -88,7 +105,7 @@ void Light::setType(lightTypes type)
 
 	case lightTypes::directional:
 		viewMatrixes.resize(1);
-		minConstBias = 0.0001f;   // tiny, just to avoid acne
+		minConstBias = 0.001f;   // tiny, just to avoid acne
 		maxConstBias = 0.002f;    // small enough to avoid floating shadows
 
 		minSlopeBias = 0.05f;     // shallow slopes
@@ -97,7 +114,7 @@ void Light::setType(lightTypes type)
 	case lightTypes::spot:
 		viewMatrixes.resize(1);
 
-		minConstBias = 0.001f;   // small offset to avoid acne
+		minConstBias = 0.0001f;   // small offset to avoid acne
 		maxConstBias = 0.005f;
 
 		minSlopeBias = 0.001f;   // tiny slope bias
