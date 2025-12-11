@@ -171,6 +171,48 @@ void SceneGraph::selectNode(std::shared_ptr<sceneNode> node) {
 	}
 }
 
+void SceneGraph::duplicateNode(std::shared_ptr<sceneNode> node, std::shared_ptr<sceneNode> newParent) {
+
+	std::shared_ptr<sceneNode> newNode = std::make_shared<sceneNode>();
+
+	newNode->name = node->name;
+	newNode->parent = newParent;
+	
+	newNode->m_transform = node->m_transform;
+	Transform& newNodeTransform = node->m_transform;
+	newNode->m_transform.setParent(&newParent->m_transform);
+	newNodeTransform.computeGlobalMatrix();
+
+	if (node->lightInstance.IsValid()) {
+		newNode->lightInstance = instanceManager->duplicateLightInstance(newNode->lightID, node->lightID);
+		Transform& newLightTransform = newNode->lightInstance->m_transform;
+		newLightTransform.setParent(&newNodeTransform);
+		newNode->lightInstance->updateGlobals();
+		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
+	}
+
+	if (node->cameraInstance.IsValid()) {
+		newNode->cameraInstance = instanceManager->duplicateCameraInstance(newNode->cameraID, node->cameraID);
+		Transform& newCameraTransform = newNode->cameraInstance->camera->m_transform;
+		newCameraTransform.setParent(&newNodeTransform);
+		newNode->cameraInstance->camera->updateGlobals(true);
+	}
+
+	if (node->meshInstance.IsValid()) {
+		newNode->meshInstance = instanceManager->duplicateGeometryInstance(newNode->meshID, node->meshID);
+		Transform& newMeshTransform = newNode->meshInstance->m_transform;
+		newMeshTransform.setParent(&newNodeTransform);
+		newMeshTransform.computeGlobalMatrix();
+	}
+
+	size_t numberOfChildren = node->children.size();
+	newNode->children.resize(numberOfChildren);
+	for (size_t i = 0; i < numberOfChildren; ++i) {
+		duplicateNode(node->children[i], newNode);
+	}
+
+	newParent->children.push_back(newNode);
+}
 //ImGui function for attaching mesh to scene node
 void SceneGraph::imGuiMeshCreation(std::shared_ptr<sceneNode> node) {
 	bool meshExists = node->meshInstance.IsValid();
@@ -429,6 +471,15 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 	if (ImGui::Button("AttachChild")) {
 		createChild(childNameBuffer, node);
 	}
+
+	if (ImGui::Button("Duplicate to parent")) {
+		duplicateNode(node, node->parent.lock());
+	}
+
+	if (ImGui::Button("Duplicate to child")) {
+		duplicateNode(node, node);
+	}
+
 	if (ImGui::Button("Delete Node")) {
 		deleteNode(node);
 	}

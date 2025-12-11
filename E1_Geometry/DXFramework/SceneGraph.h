@@ -47,6 +47,8 @@ public:
 
 	void selectNode(std::shared_ptr<sceneNode> node);
 
+	void duplicateNode(std::shared_ptr<sceneNode> node, std::shared_ptr<sceneNode> newParent);
+
 	//ImGui function for attaching mesh to scene node
 	void imGuiMeshCreation(std::shared_ptr<sceneNode> node);
 	void imGuiCameraCreation(std::shared_ptr<sceneNode> node);

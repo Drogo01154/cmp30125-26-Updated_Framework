@@ -52,6 +52,35 @@ void InstanceManager::removeCameraInstance(size_t ID) {
 	cameraCache.RemoveID(ID);
 }
 
+GeometryInstance InstanceManager::duplicateGeometryInstance(size_t& newID, size_t instID) {
+
+	GeometryData* geometryData = geometryCache.tryGetValue(instID);
+
+	GeometryData newData;
+
+	newData.mat = geometryData->mat;
+	newData.mesh = geometryData->mesh;
+	newData.m_transform = geometryData->m_transform;
+
+	return geometryCache.emplaceID(newID, std::move(newData));
+}
+
+LightInstance InstanceManager::duplicateLightInstance(size_t& newID, size_t instID) {
+	Light* lightData = lightCache.tryGetValue(instID);
+	Light newLight = *lightData;
+	return lightCache.emplaceID(newID, std::move(newLight));
+	
+}
+CameraInstance InstanceManager::duplicateCameraInstance(size_t& newID, size_t instID) {
+	CameraData* cameraData = cameraCache.tryGetValue(instID);
+
+	std::shared_ptr<Camera> newCamera = cameraData->type == CameraTypes::BASIC
+		? std::make_shared<Camera>(*cameraData->camera)
+		: std::make_shared<FPCamera>(*std::dynamic_pointer_cast<FPCamera>(cameraData->camera));
+	CameraData newCameraData(cameraData->type, newCamera);
+	return cameraCache.emplaceID(newID, newCameraData);
+}
+
 size_t InstanceManager::getNumberOfLights() { return lightCache.size(); }
 size_t InstanceManager::getNumberOfMeshes() { return geometryCache.size(); }
 size_t InstanceManager::getNumberOfCameras() { return cameraCache.size(); }

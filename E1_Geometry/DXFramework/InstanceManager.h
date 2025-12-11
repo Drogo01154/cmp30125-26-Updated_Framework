@@ -42,6 +42,10 @@ public:
 	LightInstance tryGetLightInstance(size_t ID);
 	CameraInstance tryGetCameraInstance(size_t ID);
 
+	GeometryInstance duplicateGeometryInstance(size_t& newID, size_t instID);
+	LightInstance duplicateLightInstance(size_t& newID, size_t instID);
+	CameraInstance duplicateCameraInstance(size_t& newID, size_t instID);
+
 	void removeGeometryInstance(size_t ID);
 	void removeLightInstance(size_t ID);
 	void removeCameraInstance(size_t ID);

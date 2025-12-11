@@ -41,20 +41,24 @@ public:
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
 
+		bool lightNumChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED);
+		bool projectionChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTPROJECTIONCHANGED);
+		bool lightDataChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED);
+		bool cameraChanged = shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::CAMERA);
+		
 		// Clear the scene. (default black colour)
 		renderer->beginScene(1.0f, 1.0f, 1.0f, 1.0f);
 		//Return if no lights
 		textureOutput->setRenderTarget(renderer->getDeviceContext());
 		textureOutput->clearRenderTarget(renderer->getDeviceContext(), 0.39f, 0.58f, 0.92f, 1.0f);
 		//Check if camera changed
-		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::CAMERA)) {
+		if (cameraChanged || lightNumChanged) {
 			//Update camera Data module
 			shared_ptr<CameraDataModule> cameraData = std::dynamic_pointer_cast<CameraDataModule>(cameraDataModule->module);
 			cameraData->setModuleParamaters(deviceContext, *depthPass->getTexelSize());
 		}
 		//Check if light number or data changed
-		if (shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTNUMCHANGED) ||
-			shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTSDATACHANGED) || shaderManager->isModuleDirtyflagSet(DirtyModuleFlags::LIGHTPROJECTIONCHANGED)) {
+		if (lightNumChanged || projectionChanged || lightDataChanged) {
 			
 			const std::vector<int>* shadowMapIndexes = depthPass->getLightIndexes();
 			// Update light data module

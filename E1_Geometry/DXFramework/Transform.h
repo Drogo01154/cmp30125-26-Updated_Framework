@@ -13,7 +13,7 @@ class Transform
 {
 private:
 	XMVECTOR translation;
-	XMVECTOR rotation; // quaternion?
+	XMVECTOR rotation;
 	XMVECTOR scale;
 	XMMATRIX localMatrix;
 	XMMATRIX globalMatrix;
@@ -28,6 +28,7 @@ public:
 	}
 
 	inline void setParent(Transform* parent) { parentTransform = parent; }
+	inline Transform* getParent() const { return parentTransform; }
 
 	const XMMATRIX& getLocalMatrix() { return localMatrix; }
 	const XMMATRIX& getGlobalMatrix() { return globalMatrix; }
@@ -51,6 +52,17 @@ public:
 
 	__inline auto operator= (const XMMATRIX& mat) -> Transform& {
 		XMMatrixDecompose(&scale, &rotation, &translation, mat);
+		return *this;
+	}
+
+	Transform& operator=(const Transform& other) {
+		if (this != &other) {
+			translation = other.getTranslationVector();
+			rotation = other.getRotationQuat();
+			scale = other.getScaleVector();
+			parentTransform = other.getParent();
+			computeGlobalMatrix();
+		}
 		return *this;
 	}
 
