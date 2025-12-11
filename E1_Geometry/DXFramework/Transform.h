@@ -55,6 +55,14 @@ public:
 		return *this;
 	}
 
+	inline void UpdateFromGlobal(const XMMATRIX& newGlobal) {
+		XMMATRIX newLocal = (parentTransform != nullptr)
+			? newGlobal * XMMatrixInverse(nullptr, newGlobal)
+			: newGlobal;
+		XMMatrixDecompose(&scale, &rotation, &translation, newLocal);
+		computeGlobalMatrix();
+	}
+
 	Transform& operator=(const Transform& other) {
 		if (this != &other) {
 			translation = other.getTranslationVector();

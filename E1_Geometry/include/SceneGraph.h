@@ -6,7 +6,15 @@
 #include "InstanceManager.h"
 #include "FileHandler.h"
 #include <queue>
+#include "imgui/imgui.h"
+#include "imgui/ImGuizmo.h"
 
+enum selectedTransformTypes {
+	NODE,
+	CAMERA,
+	MESH,
+	LIGHT
+};
 
 struct sceneNode {
 	std::string name;
@@ -23,11 +31,11 @@ struct sceneNode {
 	std::vector<std::shared_ptr<sceneNode>> children;
 	std::weak_ptr<sceneNode> parent;
 };
-
+class D3D;
 class SceneGraph {
 public:
 	SceneGraph() = delete;
-	SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager, MaterialManager* materialManager);
+	SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager, MaterialManager* materialManager, D3D* renderer, Input* in);
 
 
 	void createBaseScene();
@@ -47,6 +55,8 @@ public:
 
 	void selectNode(std::shared_ptr<sceneNode> node);
 
+	void setImGuizmoTransform(selectedTransformTypes type);
+
 	void duplicateNode(std::shared_ptr<sceneNode> node, std::shared_ptr<sceneNode> newParent);
 
 	//ImGui function for attaching mesh to scene node
@@ -58,6 +68,8 @@ public:
 
 	void nodeImGui(std::shared_ptr<sceneNode> node);
 
+	void ImGuizmoRender(HWND wnd, int screenWidth, int screenHeight);
+
 	void imGuiRender();
 	void setAmbientLight(const XMFLOAT4& ambientLight);
 	const XMFLOAT4& getAmbientLight();
@@ -65,6 +77,8 @@ public:
 	void to_json(nlohmann::json& j);
 
 	void from_json(const nlohmann::json& j);
+
+	void handleInput();
 
 
 
@@ -75,11 +89,14 @@ private:
 	GeometryManager* geometryManager;
 	InstanceManager* instanceManager;
 	MaterialManager* materialManager;
+	Input* input;
 	std::shared_ptr<sceneNode> root;
 	std::weak_ptr<sceneNode> selectedNode;
 	size_t nodeIncrement;
 
 	XMFLOAT4 ambientLight;
+
+	D3D* renderer;
 
 	inline static const char* ThreeDimensionalMeshTypeStrings[10] = {
 		"AModel",
@@ -102,6 +119,23 @@ private:
 
 	char childNameBuffer[128];
 	char nodeNameBuffer[128];
+
+	 ImGuizmo::OPERATION ImGuizmoOperation;
+	 ImGuizmo::MODE ImGuizmoMode;
+
+	 bool ImGuizmoAllowTranslation;
+	 bool ImGuizmoAllowRotation;
+	 bool ImGuizmoAllowScale;
+	 bool ImGuizmoAllowModeSwitching;
+	 bool snapEnabled;
+	 XMFLOAT3 TranslationSnapValue;
+	 XMFLOAT3 RotationSnapValue;
+	 XMFLOAT3 ScaleSnapValue;
+	 XMFLOAT3* snapValue;
+
+	selectedTransformTypes selectedTransformType;
+	Transform* selectedTransform;
+
 };
 
 #endif

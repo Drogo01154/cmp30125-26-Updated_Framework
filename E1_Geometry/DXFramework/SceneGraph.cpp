@@ -1,10 +1,12 @@
 #include "SceneGraph.h"
-
-SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager, MaterialManager* materialManager) : 
-	shaderManager(shaderManager), 
-	instanceManager(instanceManager), 
+#include "D3D.h"
+SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceManager, GeometryManager* geometryManager, MaterialManager* materialManager, D3D* renderer, Input* in) :
+	shaderManager(shaderManager),
+	instanceManager(instanceManager),
 	geometryManager(geometryManager),
-	materialManager(materialManager)
+	materialManager(materialManager),
+	renderer(renderer),
+	input(in)
 {
 	selectedCreateCamera = -1;
 	selectedCreateLight = -1;
@@ -16,6 +18,8 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 
 	childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 	nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
+	
+	selectedTransform = nullptr;
 
 	createBaseScene();
 }
@@ -32,6 +36,8 @@ void SceneGraph::resetScene(bool loadBasics) {
 		materialManager->createMaterial("Default");
 		createBaseScene();
 	}
+	selectedTransform = nullptr;
+	selectedNode.reset();
 }
 
 void SceneGraph::SceneGraph::createBaseScene() {
@@ -117,16 +123,25 @@ void SceneGraph::graphImGui(std::shared_ptr<sceneNode> node)
 }
 
 void SceneGraph::deleteNodeMesh(std::shared_ptr<sceneNode> node) {
+	if (selectedTransformType == selectedTransformTypes::MESH) {
+		selectedTransform = nullptr;
+	}
 	node->meshInstance = GeometryInstance();
 	node->meshID = SIZE_MAX;
 }
 
 void SceneGraph::deleteNodeCamera(std::shared_ptr<sceneNode> node) {
+	if (selectedTransformType == selectedTransformTypes::CAMERA) {
+		selectedTransform = nullptr;
+	}
 	node->cameraInstance = CameraInstance();
 	node->cameraID = SIZE_MAX;
 }
 
 void SceneGraph::deleteNodeLight(std::shared_ptr<sceneNode> node) {
+	if (selectedTransformType == selectedTransformTypes::LIGHT) {
+		selectedTransform = nullptr;
+	}
 	node->lightInstance = LightInstance();
 	node->lightID = SIZE_MAX;
 }
@@ -137,6 +152,7 @@ void SceneGraph::deleteNode(std::shared_ptr<sceneNode>& node) {
 		childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 		nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 		selectedNode.reset();
+		selectedTransform = nullptr;
 	}
 
 	if (std::shared_ptr<sceneNode> parent = node->parent.lock())
@@ -169,6 +185,95 @@ void SceneGraph::selectNode(std::shared_ptr<sceneNode> node) {
 			}
 		}
 	}
+	setImGuizmoTransform(selectedTransformTypes::NODE);
+}
+
+void SceneGraph::setImGuizmoTransform(selectedTransformTypes type) {
+	selectedTransform = nullptr;
+	if (auto node = selectedNode.lock()) {
+		ImGuizmoAllowTranslation = true;
+		ImGuizmoAllowRotation = true;
+
+		ImGuizmoAllowScale = (type == selectedTransformTypes::CAMERA || type == selectedTransformTypes::LIGHT) ? false : true;
+
+		switch (type) {
+		case selectedTransformTypes::CAMERA:
+			if (node->cameraInstance.IsValid()) {
+				if (node->cameraInstance->type == CameraTypes::BASIC) {
+					selectedTransform = &node->cameraInstance->camera->m_transform;
+				}
+			}
+				break;
+		case selectedTransformTypes::LIGHT:
+			if (node->lightInstance.IsValid()) {
+				selectedTransform = &node->lightInstance->m_transform;
+			}
+			break;
+		case selectedTransformTypes::MESH:
+			if (node->meshInstance.IsValid()) {
+				selectedTransform = &node->meshInstance->m_transform;
+			}
+			break;
+		case selectedTransformTypes::NODE:
+			selectedTransform = &node->m_transform;
+			break;
+		}
+	}
+	ImGuizmoMode = ImGuizmo::MODE::LOCAL;
+	if (ImGuizmoAllowTranslation) {
+		ImGuizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+		snapValue = &TranslationSnapValue;
+	}
+	else if (ImGuizmoAllowRotation) {
+		ImGuizmoOperation = ImGuizmo::OPERATION::ROTATE;
+		snapValue = &RotationSnapValue;
+	}
+	else if (ImGuizmoAllowScale) {
+		ImGuizmoOperation = ImGuizmo::OPERATION::SCALE;
+		snapValue = &ScaleSnapValue;
+	}
+	ImGuizmoAllowModeSwitching = true;
+	selectedTransformType = type;
+}
+
+void SceneGraph::ImGuizmoRender(HWND wnd, int screenWidth, int screenHeight) {
+
+	RECT clientRect;
+	GetClientRect(wnd, &clientRect);
+
+	POINT topLeft = { 0, 0 };
+	ClientToScreen(wnd, &topLeft);
+
+	ImGuizmo::BeginFrame();
+
+	if (!selectedTransform) {
+		return;
+	}
+
+
+	auto toImGuizmo = [](const XMMATRIX& matrix, float out[16]) {
+		XMStoreFloat4x4(reinterpret_cast<XMFLOAT4X4*>(out), XMMatrixTranspose(matrix));
+		};
+
+	float GuizmoWorldMatrix[16];
+	float GuizmoProjectonMatrix[16];
+	float GuizmoViewMatrix[16];
+	toImGuizmo(instanceManager->getActiveCamera()->camera->getViewMatrix(), GuizmoViewMatrix);
+	toImGuizmo(renderer->getProjectionMatrix(), GuizmoProjectonMatrix);
+	toImGuizmo(selectedTransform->getGlobalMatrix(), GuizmoWorldMatrix);
+
+	ImGuizmo::SetDrawlist();
+	//ImVec2 windowSize = ImGui::GetWindowSize();
+	ImGuizmo::SetRect((float)topLeft.x, (float)topLeft.y, screenWidth, screenHeight);
+	ImGuizmo::Manipulate(GuizmoViewMatrix, GuizmoProjectonMatrix,
+	ImGuizmoOperation, ImGuizmoMode, GuizmoWorldMatrix, NULL, (snapEnabled && snapValue) ? &snapValue->x : NULL);
+
+	if (ImGuizmo::IsUsing() && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+		XMMATRIX outWorldMatrix = XMMatrixTranspose(XMLoadFloat4x4((XMFLOAT4X4*)GuizmoWorldMatrix));
+		selectedTransform->UpdateFromGlobal(outWorldMatrix);
+		updateNodeGlobals(selectedNode.lock(), false);
+	}
+	
 }
 
 void SceneGraph::duplicateNode(std::shared_ptr<sceneNode> node, std::shared_ptr<sceneNode> newParent) {
@@ -400,6 +505,9 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 		if (node->m_transform.imGuiRender("Node Transform: ", 0, true, true, true)) {
 			updateNodeGlobals(node, true);
 		}
+		if (selectedTransformType != selectedTransformTypes::NODE && ImGui::Button("Select Transform")) {
+			setImGuizmoTransform(selectedTransformTypes::NODE);
+		}
 		ImGui::TreePop();
 	}
 
@@ -418,7 +526,9 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 					}
 				}
 			}
-				
+			if (selectedTransformType != selectedTransformTypes::MESH && ImGui::Button("Select Transform ## 1")) {
+				setImGuizmoTransform(selectedTransformTypes::MESH);
+			}
 			ImGui::TreePop();
 		}
 		if (ImGui::Button("Delete Mesh")) { deleteNodeMesh(node); }
@@ -438,6 +548,9 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 			if (CameraData* cameraInstance = node->cameraInstance.Get()) {
 				if (cameraInstance->camera->imGuiRender(2, cameraInstance->type)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA); }
 			}
+			if (selectedTransformType != selectedTransformTypes::CAMERA && ImGui::Button("Select Transform ## 2")) {
+				setImGuizmoTransform(selectedTransformTypes::CAMERA);
+			}
 			ImGui::TreePop();
 		}
 		if (ImGui::Button("Delete Camera")) { deleteNodeCamera(node); }
@@ -455,6 +568,9 @@ void SceneGraph::nodeImGui(std::shared_ptr<sceneNode> node) {
 				bool lightProjectionChanged = false;
 				if (light->imGuiRender(3, lightProjectionChanged)) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED); }
 				if (lightProjectionChanged) { shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTPROJECTIONCHANGED); }
+			}
+			if (selectedTransformType != selectedTransformTypes::LIGHT && ImGui::Button("Select Transform ## 3")) {
+				setImGuizmoTransform(selectedTransformTypes::LIGHT);
 			}
 			ImGui::TreePop();
 		}
@@ -498,6 +614,86 @@ void SceneGraph::imGuiRender() {
 	
 	if (selectedNode.lock() && ImGui::CollapsingHeader("NodeDetails")) {
 		nodeImGui(selectedNode.lock());
+	}
+}
+
+void SceneGraph::handleInput() {
+	if (ImGui::GetIO().WantCaptureKeyboard) { return; }
+	
+	//If switch key pressed
+	if (ImGuizmoAllowModeSwitching && input->isKeyDown(VK_TAB))
+	{
+		ImGuizmoMode = (ImGuizmoMode == ImGuizmo::MODE::LOCAL) ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL;
+	}
+	if (ImGuizmoAllowTranslation && input->isKeyDown('T'));
+	{
+		ImGuizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+		snapValue = &TranslationSnapValue;
+	}
+	if (ImGuizmoAllowRotation && input->isKeyDown('R'))
+	{
+		ImGuizmoOperation = ImGuizmo::OPERATION::ROTATE;
+		snapValue = &RotationSnapValue;
+	}
+	if (ImGuizmoAllowScale && input->isKeyDown('E'))
+	{
+		ImGuizmoOperation = ImGuizmo::OPERATION::SCALE;
+		snapValue = &ScaleSnapValue;
+	}
+
+	if (input->isKeyDown(VK_CAPITAL)) {
+		snapEnabled = !snapEnabled;
+	}
+
+	if (ImGuizmoOperation == ImGuizmo::OPERATION::TRANSLATE || ImGuizmoOperation == ImGuizmo::OPERATION::TRANSLATE_X
+		|| ImGuizmoOperation == ImGuizmo::OPERATION::TRANSLATE_Y || ImGuizmoOperation == ImGuizmo::OPERATION::TRANSLATE_Z)
+	{
+		if (input->isKeyDown('X'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::TRANSLATE_X;
+		}
+		if (input->isKeyDown('Y'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::TRANSLATE_Y;
+		}
+		if (input->isKeyDown('Z'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::TRANSLATE_Z;
+		}
+	}
+
+	if (ImGuizmoOperation == ImGuizmo::OPERATION::ROTATE || ImGuizmoOperation == ImGuizmo::OPERATION::ROTATE_X
+		|| ImGuizmoOperation == ImGuizmo::OPERATION::ROTATE_Y || ImGuizmoOperation == ImGuizmo::OPERATION::ROTATE_Z)
+	{
+		if (input->isKeyDown('Y'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::ROTATE_X;
+		}
+		if (input->isKeyDown('Y'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::ROTATE_Y;
+		}
+		if (input->isKeyDown('Z'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::ROTATE_Z;
+		}
+	}
+
+	if (ImGuizmoOperation == ImGuizmo::OPERATION::SCALE || ImGuizmoOperation == ImGuizmo::OPERATION::SCALE_X
+		|| ImGuizmoOperation == ImGuizmo::OPERATION::SCALE_Y || ImGuizmoOperation == ImGuizmo::OPERATION::SCALE_Z)
+	{
+		if (input->isKeyDown('X'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::SCALE_X;
+		}
+		if (input->isKeyDown('Y'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::SCALE_Y;
+		}
+		if (input->isKeyDown('Z'))
+		{
+			ImGuizmoOperation = ImGuizmo::OPERATION::SCALE_Z;
+		}
 	}
 }
 

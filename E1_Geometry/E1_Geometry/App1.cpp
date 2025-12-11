@@ -26,6 +26,7 @@ App1::App1()
 
 //Function for storing constructors to create different module types
 void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
+
 	//Matrix data module to send matrix data to vertex shader
 	shaderMgr->AddShaderModule<MatrixDataModule>("MatrixDataModule", device, hwnd, instanceMgr.get());
 
@@ -242,6 +243,7 @@ bool App1::render()
 
 void App1::gui()
 {
+	sceneGraph->ImGuizmoRender(wnd, sWidth, sHeight);
 	// Force turn off unnecessary shader stages.
 	renderer->getDeviceContext()->GSSetShader(NULL, NULL, 0);
 	renderer->getDeviceContext()->HSSetShader(NULL, NULL, 0);

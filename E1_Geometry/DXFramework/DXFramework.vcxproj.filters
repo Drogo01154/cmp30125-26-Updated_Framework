@@ -204,6 +204,9 @@
     <ClInclude Include="RenderPass.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\imgui\ImGuizmo.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseMesh.cpp">
@@ -325,6 +328,9 @@
     </ClCompile>
     <ClCompile Include="CubeMapArray.cpp">
       <Filter>Source Files\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\ImGuizmo.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

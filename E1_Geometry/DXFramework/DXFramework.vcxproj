@@ -184,6 +184,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
   <ItemGroup>
     <ClInclude Include="..\include\imgui\imconfig.h" />
     <ClInclude Include="..\include\imgui\imgui.h" />
+    <ClInclude Include="..\include\imgui\ImGuizmo.h" />
     <ClInclude Include="..\include\imgui\imgui_impl_dx11.h" />
     <ClInclude Include="..\include\imgui\imgui_impl_win32.h" />
     <ClInclude Include="..\include\imgui\imgui_internal.h" />
@@ -237,6 +238,7 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\include\imgui\ImGuizmo.cpp" />
     <ClCompile Include="..\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\include\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\include\imgui\imgui_impl_dx11.cpp" />
