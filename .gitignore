@@ -346,3 +346,4 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 E1_Geometry/lib/debug/*.lib
+/E1_Geometry/lib/release/DXFramework.lib
