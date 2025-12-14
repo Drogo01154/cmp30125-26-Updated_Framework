@@ -1,4 +1,4 @@
-Texture2D heightMapTexture : register(t7);
+Texture2D heightMapTexture : register(t6);
 SamplerState heightSampler : register(S3);
 
 cbuffer mapData : register(b2)

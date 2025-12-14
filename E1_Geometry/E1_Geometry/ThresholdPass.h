@@ -25,6 +25,7 @@ public:
 			shaderManager, renderer, RTData, orthoData, "BloomThresholdShader")
 	{
 		hasImGui = true;
+		jsonString = std::make_unique<std::string>("BloomData");
 		//Set bloom values
 		bloomBuffer.threshold = 1.f;
 		bloomBuffer.exposure = 1.f;
@@ -37,6 +38,7 @@ public:
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
 		if (updateModules) {
 			bloomModule->setModuleParamaters(deviceContext, &bloomBuffer);
+			updateModules = false;
 		}
 		TextureToTexturePass::Render(deviceContext, device);
 	}
@@ -46,8 +48,19 @@ public:
 		// Inside your ImGui frame:
 		if (ImGui::CollapsingHeader("Bloom Settings")) {
 			if (ImGui::SliderFloat("Threshold", &bloomBuffer.threshold, 0.0f, 5.0f, "%.2f")) { updateModules = true; }
-			if (ImGui::SliderFloat("Eposure", &bloomBuffer.exposure, 0.0f, 100.0f, "%.2f")) { updateModules = true; }
+			if (ImGui::SliderFloat("Exposure", &bloomBuffer.exposure, 0.0f, 100.0f, "%.2f")) { updateModules = true; }
 		}
+	}
+
+	void toJson(nlohmann::json& json) {
+		json["Threshold"] = bloomBuffer.threshold;
+		json["Exposure"] = bloomBuffer.exposure;
+	}
+
+	void fromJson(const nlohmann::json& json) {
+		bloomBuffer.threshold = json.at("Threshold").get<float>();
+		bloomBuffer.exposure = json.at("Exposure").get<float>();
+		updateModules = true;
 	}
 private: 
 	//Modules

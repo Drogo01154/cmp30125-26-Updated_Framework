@@ -42,7 +42,6 @@ private:
 
 	int selectedMaterial;
 	int selectedDiffuseTexture;
-	int selectedNormalTexture;
 	int selectedEmissiveTexture;
 	int selectedHeightMapTexture;
 

@@ -67,13 +67,15 @@ void LightsDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext, c
 		lightPtr[i].type = static_cast<int>(type);
 		lightPtr[i].constBias = light->getConstBias();
 		lightPtr[i].slopeBias = light->getSlopeBias();
-		if (type != lightTypes::point) 
-		{ 
-			lightPtr[i].index = (*indexes)[nonPointIndex]; ++nonPointIndex;
-		}
-		else 
-		{ 
-			lightPtr[i].index = pointIndex; ++pointIndex;
+		if (indexes) {
+			if (type != lightTypes::point)
+			{
+				lightPtr[i].index = (*indexes)[nonPointIndex]; ++nonPointIndex;
+			}
+			else
+			{
+				lightPtr[i].index = pointIndex; ++pointIndex;
+			}
 		}
 		i++;
 		});

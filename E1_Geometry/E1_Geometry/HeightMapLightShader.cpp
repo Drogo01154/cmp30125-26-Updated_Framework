@@ -14,9 +14,8 @@ HeightMapLightShader::HeightMapLightShader(ShaderManager* shaderManager, ID3D11D
 	heightMapSamplerStateModule = shaderManager->getShaderModuleID("HeightMapSamplerModule");
 
 	diffuseMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule1");
-	normalMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
-	emissiveMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule3");
-	heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule4");
+	emissiveMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule2");
+	heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule3");
 }
 
 
@@ -50,16 +49,15 @@ void HeightMapLightShader::setResources(ID3D11DeviceContext* deviceContext) {
 
 	//Pixel Shader
 	diffuseMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);		// Texture2D - T0
-	normalMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);		// Texture2D - T1
-	emissiveMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 2);		// Texture2D - T2
+	emissiveMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);		// Texture2D - T1
 
 	textureSampleStateModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);		// SamplerState - S0
 	heightMapSamplerStateModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 3);	// SamplerState - S3
 
 	cameraDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 0);				// Cbuffer - B0
 	materialDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 1);			// Cbuffer - B1
-	lightsDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 3);				// Structured Buffer T3
+	lightsDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 2);				// Structured Buffer T2
 
-	heightMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 7);		// Texture2D - T7
+	heightMapTextureModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 6);		// Texture2D - T6
 	heightMapDataModule->module->setResources(D3D11_SHVER_PIXEL_SHADER, deviceContext, 2);			// Cbuffer - B2	
 }

@@ -29,9 +29,8 @@ public:
 		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
 
 		diffuseTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule1");
-		normalTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule2");
-		emissiveTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule3");
-		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule4");	
+		emissiveTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule2");
+		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule3");	
 
 		shader = shaderManager->getGeometryShader("ShadowShader");
 		heightMapShader = shaderManager->getGeometryShader("HeightMapShadowShader");
@@ -111,11 +110,6 @@ public:
 					diffuseModule->setModuleParamaters(deviceContext, mat->diffuseTexture->texture.Get());
 				}
 
-				if (mat->normalTexture.IsValid()) {
-					std::shared_ptr<TextureDataModule> normalModule = std::dynamic_pointer_cast<TextureDataModule>(normalTextureDataModule->module);
-					normalModule->setModuleParamaters(deviceContext, mat->normalTexture->texture.Get());
-				}
-
 				if (mat->emissionTexture.IsValid()) {
 					std::shared_ptr<TextureDataModule> emissiveModule = std::dynamic_pointer_cast<TextureDataModule>(emissiveTextureDataModule->module);
 					emissiveModule->setModuleParamaters(deviceContext, mat->emissionTexture->texture.Get());
@@ -143,6 +137,9 @@ public:
 			}
 		});
 	};
+
+	virtual void toJson(nlohmann::json& json) {}
+	virtual void fromJson(const nlohmann::json& json) {}
 private:
 
 	D3D* renderer;
@@ -160,7 +157,6 @@ private:
 	ModuleInstance shadowMapDataModule;	//Module for shadow maps
 
 	ModuleInstance diffuseTextureDataModule;	// Diffuse texture data module
-	ModuleInstance normalTextureDataModule;		// Normal texture data module
 	ModuleInstance emissiveTextureDataModule;	// Emissive texture data module
 
 	ModuleInstance heightMapDataModule;	

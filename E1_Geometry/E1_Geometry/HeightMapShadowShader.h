@@ -31,7 +31,6 @@ private:
 	ModuleInstance heightMapDataModule;			// Module for heightmap data
 
 	ModuleInstance diffuseMapTextureModule;		// Module for colour texture
-	ModuleInstance normalMapTextureModule;		// Module for normal texture
 	ModuleInstance emissiveMapTextureModule;	// Module for emissive texture
 	ModuleInstance heightMapTextureModule;		// Module for height map texture
 

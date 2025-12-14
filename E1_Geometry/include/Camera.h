@@ -49,10 +49,15 @@ public:
 	XMMATRIX getOrthoViewMatrix();	///< Get current orthographic view matrix for camera
 
 	void setFrameTime(float);
-	
+
+
 	float getLookSpeed() const;
+	float getYaw() const;
+	float getPitch() const;
 
 	void setLookSpeed(float speed);
+	void setYaw(float yaw);
+	void setPitch(float pitch);
 
 	bool imGuiRender(size_t transformIterator, CameraTypes type);
 

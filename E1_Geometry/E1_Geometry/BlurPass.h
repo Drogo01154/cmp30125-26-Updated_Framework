@@ -71,6 +71,9 @@ public:
 			horizontal = !horizontal;
 		}
 	}
+
+	virtual void toJson(nlohmann::json& json) {}
+	virtual void fromJson(const nlohmann::json& json) {}
 private:
 	//Modules
 	ModuleInstance blurModuleInstance;

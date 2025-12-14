@@ -53,6 +53,9 @@ public:
 		shader->shader->render(deviceContext, orthoMesh->mesh->mesh->getIndexCount());
 		renderer->setZBuffer(true);
 	}
+
+	virtual void toJson(nlohmann::json& json) = 0;
+	virtual void fromJson(const nlohmann::json& json) = 0;
 protected:
 	//Modules
 	ModuleInstance textureDataModule;

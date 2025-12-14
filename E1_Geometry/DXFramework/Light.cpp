@@ -114,7 +114,7 @@ void Light::setType(lightTypes type)
 	case lightTypes::spot:
 		viewMatrixes.resize(1);
 
-		minConstBias = 0.0001f;   // small offset to avoid acne
+		minConstBias = 0.0f;   // small offset to avoid acne
 		maxConstBias = 0.005f;
 
 		minSlopeBias = 0.001f;   // tiny slope bias

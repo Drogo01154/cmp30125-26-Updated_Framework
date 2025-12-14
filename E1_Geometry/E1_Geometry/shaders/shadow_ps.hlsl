@@ -11,7 +11,6 @@ struct InputType
 
 float4 main(InputType input) : SV_TARGET
 { 
-    input.normal = applyNormalMap(input.normal, input.tex);
     float4 diffuse = getDiffuse(input.tex);
     float4 emissive = calcEmissive(input.tex);
     

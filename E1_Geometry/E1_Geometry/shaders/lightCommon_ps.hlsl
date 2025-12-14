@@ -4,8 +4,7 @@
 //Utilises B0 and t0 pixel shader buffers
 
 Texture2D diffuseTexture : register(t0);
-Texture2D normalTexture : register(t1);
-Texture2D emissiveTexture : register(t2);
+Texture2D emissiveTexture : register(t1);
 SamplerState textureSampler : register(s0);
 
 cbuffer CameraDataBuffer : register(b0)
@@ -18,9 +17,7 @@ cbuffer CameraDataBuffer : register(b0)
 };  
 
 #define HAS_DIFFUSE   0x1  // 0001
-#define HAS_NORMAL    0x2  // 0010
-#define HAS_EMISSIVE  0x4  // 0100
-
+#define HAS_EMISSIVE  0x2  // 0100
 
 cbuffer MaterialDataBuffer : register(b1)
 {
@@ -43,11 +40,6 @@ float4 getDiffuse(float2 pos)
     return ((flags & HAS_DIFFUSE) != 0) ? diffuseTexture.Sample(textureSampler, pos) * baseColour : baseColour;
 }
 
-float3 applyNormalMap(float3 inputNormal, float2 pos)
-{
-    return ((flags & HAS_NORMAL) != 0) ? normalize(normalTexture.Sample(textureSampler, pos).rgb * 2.0 - 1.0) : inputNormal;    
-}
-
 struct Light // 80 bytes
 {
     float4 lightAttenuation;
@@ -62,7 +54,7 @@ struct Light // 80 bytes
     float slopeBias;
 };
 
-StructuredBuffer<Light> lights : register(t3);
+StructuredBuffer<Light> lights : register(t2);
 
 float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector)
 {
@@ -71,7 +63,6 @@ float4 calcSpecular(float3 lightDirection, float3 normal, float3 viewVector)
     float specularIntensity = pow(max(dot(normal, halfway), 0.0), specularPower);
     return saturate(specularColour * specularIntensity);
 }
-
 
 // Calculate lighting intensity based on direction and normal. Combine with light colour.
 float4 calculateLightingIntensity(float3 lightDirection, float3 normal)

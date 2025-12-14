@@ -38,6 +38,9 @@ public:
 		renderer->setZBuffer(true);
 	}
 
+	virtual void toJson(nlohmann::json& json) {}
+	virtual void fromJson(const nlohmann::json& json) {}
+
 private:
 	InstanceManager* instanceManager;
 	//Manager Ptrs

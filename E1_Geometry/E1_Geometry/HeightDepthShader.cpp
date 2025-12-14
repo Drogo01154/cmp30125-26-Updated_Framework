@@ -6,7 +6,7 @@ HeightDepthShader::HeightDepthShader(ShaderManager* shaderManager, ID3D11Device*
 	matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 	lightDepthDataModule = shaderManager->getShaderModuleID("LightDepthDataModule");
 	heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
-	heightMapTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule4");
+	heightMapTextureDataModule = shaderManager->getShaderModuleID("TextureDataModule3");
 	textureSamplerModule = shaderManager->getShaderModuleID("HeightMapSamplerModule");
 }
 

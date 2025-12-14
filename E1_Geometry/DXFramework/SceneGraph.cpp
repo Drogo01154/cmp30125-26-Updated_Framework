@@ -16,8 +16,6 @@ SceneGraph::SceneGraph(ShaderManager* shaderManager, InstanceManager* instanceMa
 
 	childNameBuffer[0] = '\0'; // first element is null, makes it an empty string
 	nodeNameBuffer[0] = '\0'; // first element is null, makes it an empty string
-
-	createBaseScene();
 }
 
 void SceneGraph::resetScene(bool loadBasics) {
@@ -369,14 +367,14 @@ void SceneGraph::updateNodeGlobals(std::shared_ptr<sceneNode> node, bool updateL
 	}
 
 	if (node->cameraInstance.IsValid()) {
-		node->cameraInstance->camera->updateGlobals(false);
+		node->cameraInstance->camera->updateGlobals(true);
 		if (instanceManager->getActiveCameraID() == node->cameraID) {
 			shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 		}
 	}
 
 	if (node->lightInstance.IsValid()) {
-		node->lightInstance->updateGlobals(false);
+		node->lightInstance->updateGlobals(true);
 		shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTSDATACHANGED);
 	}
 

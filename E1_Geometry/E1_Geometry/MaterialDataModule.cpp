@@ -19,8 +19,7 @@ void MaterialDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext,
 
 
 	#define HASDIFFUSE   0x1  // 0001
-	#define HASNORMAL    0x2  // 0010
-	#define HASEMISSIVE  0x4  // 0100
+	#define HASEMISSIVE  0x2  // 0100
 
 	int flags = 0;  //No flags
 
@@ -29,14 +28,6 @@ void MaterialDataModule::setModuleParamaters(ID3D11DeviceContext* deviceContext,
 
 	if (material->emissionTexture.IsValid())
 		flags |= HASEMISSIVE;  // set emissive bit
-
-	if (material->normalTexture.IsValid())
-		flags |= HASNORMAL;    // set normal bit
-
-	if (flags & HASEMISSIVE) {
-		int test = 1;
-	}
-
 
 	//Send material data to buffer
 	deviceContext->Map(MaterialDataBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

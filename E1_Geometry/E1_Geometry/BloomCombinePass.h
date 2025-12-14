@@ -52,6 +52,9 @@ public:
 		shader->shader->render(deviceContext, orthoMesh->mesh->mesh->getIndexCount());
 		renderer->setZBuffer(true);
 	}
+
+	virtual void toJson(nlohmann::json& json) {}
+	virtual void fromJson(const nlohmann::json& json) {}
 private:
 	ModuleInstance bloomModuleInstance;
 	std::shared_ptr<BloomModule> bloomModule;

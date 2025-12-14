@@ -27,6 +27,5 @@ class ShadowShader : public BaseShader {
 		ModuleInstance cubeMapSamplerStateModule;	// Module for cube map sampler
 
 		ModuleInstance diffuseMapTextureModule;		// Module for colour texture
-		ModuleInstance normalMapTextureModule;		// Module for normal texture
 		ModuleInstance emissiveMapTextureModule;	// Module for emissive texture
 };

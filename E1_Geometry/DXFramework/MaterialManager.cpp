@@ -9,11 +9,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 		if (!mat->diffuseTextureString.empty()) {
 			mat->diffuseTexture = this->textureManager->getTexture(mat->diffuseTextureString);
 		}
-
-		if (!mat->normalTextureString.empty()) {
-			mat->normalTexture = this->textureManager->getTexture(mat->normalTextureString);
-		}
-
 		if (!mat->emissiveTextureString.empty()) {
 			mat->emissionTexture = this->textureManager->getTexture(mat->emissiveTextureString);
 		}
@@ -31,7 +26,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	selectedMaterial = -1;
 	selectedDiffuseTexture = -1;
 	selectedEmissiveTexture = -1;
-	selectedNormalTexture = -1;
 	selectedHeightMapTexture = -1;
 
 	createMaterial("Default");
@@ -77,7 +71,6 @@ void MaterialManager::createMaterial(const std::string& name) {
 	mat.specularColour = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 	mat.specularPower = 32.f;
 	mat.diffuseTextureString = L"DefaultDiffuse";
-	mat.normalTextureString = L"";
 	mat.emissiveTextureString = L"";
 	mat.emissiveStrength = 1.f;
 	mat.HeightMapData = nullptr;
@@ -91,7 +84,6 @@ void MaterialManager::updateSelectedMaterial() {
 	existingNameInput[0] = '\0';
 	selectedDiffuseTexture = -1;
 	selectedEmissiveTexture = -1;
-	selectedNormalTexture = -1;
 	selectedHeightMapTexture = -1;
 
 	if (selectedMaterial < 0) {
@@ -132,7 +124,6 @@ void MaterialManager::updateSelectedMaterial() {
 
 	getSelectedTexture(selectedDiffuseTexture, mat->diffuseTextureString);
 	getSelectedTexture(selectedEmissiveTexture, mat->emissiveTextureString);
-	getSelectedTexture(selectedNormalTexture, mat->normalTextureString);
 	if (mat->HeightMapData != nullptr) {
 		getSelectedTexture(selectedHeightMapTexture, mat->HeightMapData->HeightTextureString);
 	}
@@ -147,7 +138,6 @@ bool MaterialManager::deleteMaterial(const std::string& name) {
 		selectedMaterial = -1;
 		selectedDiffuseTexture = -1;
 		selectedEmissiveTexture = -1;
-		selectedNormalTexture = -1;
 		selectedHeightMapTexture = -1;
 	}
 	return deleted;
@@ -160,7 +150,6 @@ void MaterialManager::deleteAllMaterials() {
 	selectedMaterial = -1;
 	selectedDiffuseTexture = -1;
 	selectedEmissiveTexture = -1;
-	selectedNormalTexture = -1;
 	selectedHeightMapTexture = -1;
 	materialCache.clear();
 }
@@ -263,7 +252,6 @@ void MaterialManager::imGuiRender() {
 						}
 					};
 				ComboImageSelectFunction("Select Diffuse Texture: ", selectedDiffuseTexture, &mat->diffuseTextureString, &mat->diffuseTexture);
-				ComboImageSelectFunction("Select Normal Texture: ", selectedNormalTexture, &mat->normalTextureString, &mat->normalTexture);
 				ComboImageSelectFunction("Select Emission Texture: ", selectedEmissiveTexture, &mat->emissiveTextureString, &mat->emissionTexture);
 
 				if (mat->HeightMapData != nullptr) {
@@ -276,11 +264,6 @@ void MaterialManager::imGuiRender() {
 					mat->diffuseTextureString = L"";
 					mat->diffuseTexture = TextureInstance();
 					selectedDiffuseTexture = -1;
-				}
-				if (!mat->normalTextureString.empty() && ImGui::Button("Remove Normal Texture Map")) {
-					mat->normalTextureString = L"";
-					mat->normalTexture = TextureInstance();
-					selectedNormalTexture = -1;
 				}
 				if (!mat->emissiveTextureString.empty() && ImGui::Button("Remove Emissive Texture")) {
 					mat->emissiveTextureString = L"";
@@ -304,9 +287,6 @@ void MaterialManager::to_json(nlohmann::json& j) {
 
 		if (!mat->diffuseTextureString.empty()) {
 			matJson["DiffuseTexture"] = Converters::convert_from_wstring(mat->diffuseTextureString);
-		}
-		if (!mat->normalTextureString.empty()) {
-			matJson["NormalTexture"] = Converters::convert_from_wstring(mat->normalTextureString);
 		}
 		if (!mat->emissiveTextureString.empty()) {
 			matJson["EmissiveTexture"] = Converters::convert_from_wstring(mat->emissiveTextureString);
@@ -338,7 +318,6 @@ void MaterialManager::from_json(const nlohmann::json& j) {
 		mat.emissiveStrength = matJson.at("EmissiveStrength").get<float>();
 		
 		mat.diffuseTextureString = matJson.contains("DiffuseTexture") ? Converters::convert_to_wstring(matJson.at("DiffuseTexture").get<std::string>()) : L"";
-		mat.normalTextureString = matJson.contains("NormalTexture") ? Converters::convert_to_wstring(matJson.at("NormalTexture").get<std::string>()) : L"";
 		mat.emissiveTextureString = matJson.contains("EmissiveTexture") ? Converters::convert_to_wstring(matJson.at("EmissiveTexture").get<std::string>()) : L"";
 
 		if (matJson.contains("HeightMapData")) {

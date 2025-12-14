@@ -22,9 +22,7 @@ private:
 
 
 	ModuleInstance textureSampleStateModule;	// Module for texture sampler
-
 	ModuleInstance diffuseMapTextureModule;		// Module for colour texture
-	ModuleInstance normalMapTextureModule;		// Module for normal texture
 	ModuleInstance emissiveMapTextureModule;	// Module for emissive texture
 };
 

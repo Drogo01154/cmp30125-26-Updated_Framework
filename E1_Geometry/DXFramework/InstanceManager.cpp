@@ -228,6 +228,10 @@ void InstanceManager::to_json(nlohmann::json& j) {
 			nlohmann::json& camJsonObject = camJson["Camera"];
 			camJsonObject["Transform"] = data->camera->m_transform;
 			camJsonObject["LookSpeed"] = data->camera->getLookSpeed();
+			if (data->type == CameraTypes::FPCAMERA) {
+				camJsonObject["Yaw"] = data->camera->getYaw();
+				camJsonObject["Pitch"] = data->camera->getPitch();
+			}
 
 			cameraArray.push_back(camJson);
 		}
@@ -312,6 +316,10 @@ void InstanceManager::from_json(
 		const nlohmann::json& camData = camJson["Camera"];
 		camera->m_transform = camData.at("Transform").get<Transform>();
 		camera->setLookSpeed(camData.at("LookSpeed").get<float>());
+		if (camData.contains("Yaw")) {
+			camera->setYaw(camData.at("Yaw").get<float>());
+			camera->setPitch(camData.at("Pitch").get<float>());
+		}
 
 		size_t oldID = static_cast<size_t>(camJson.at("ID").get<uint64_t>());
 		

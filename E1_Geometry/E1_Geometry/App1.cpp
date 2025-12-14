@@ -33,7 +33,6 @@ void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
 	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule1", device, hwnd);
 	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule2", device, hwnd);
 	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule3", device, hwnd);
-	shaderMgr->AddShaderModule<TextureDataModule>("TextureDataModule4", device, hwnd);
 
 	//Lights data module to send light information to shaders
 	shaderMgr->AddShaderModule<LightsDataModule>("LightsDataModule", device, hwnd, instanceMgr.get());
@@ -176,6 +175,7 @@ void App1::selectPipeline(Pipelines pipeline) {
 void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight, Input *in, bool VSYNC, bool FULL_SCREEN)
 {	
 	
+	saveAsBson = true;
 
 	// Call super/parent init function (required!)
 	BaseApplication::init(hinstance, hwnd, screenWidth, screenHeight, in, VSYNC, FULL_SCREEN);
@@ -186,9 +186,13 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	selectPipeline(Pipelines::SHADOWSWITHBLOOM);
 
 	selectedScene = -1;
-	saveAsBson = true;
+	
 	sceneName = "Default";
 	strcpy_s(SceneNameBuffer, sizeof(SceneNameBuffer), sceneName.c_str());
+
+	//sceneGraph->createBaseScene();
+
+	loadScene("Main Scene");
 }
 
 
@@ -304,6 +308,7 @@ void App1::gui()
 
 void App1::saveScene(const std::string& sceneName) {
 	nlohmann::json inputJSON;
+	passMgr->toJson(inputJSON);
 	passMgr->clearActivePasses();
 	sceneGraph->to_json(inputJSON);
 	inputJSON["activePipeline"] = activePipeline;
@@ -312,6 +317,8 @@ void App1::saveScene(const std::string& sceneName) {
 		this->sceneName = sceneName;
 	}
 	selectPipeline(activePipeline);
+	passMgr->fromJson(inputJSON);
+	
 }
 
 void App1::loadScene(const std::string& sceneName) {
@@ -324,4 +331,5 @@ void App1::loadScene(const std::string& sceneName) {
 		strcpy_s(SceneNameBuffer, sizeof(SceneNameBuffer), sceneName.c_str());
 	}
 	selectPipeline(activePipeline);
+	passMgr->fromJson(outputJSON);
 }

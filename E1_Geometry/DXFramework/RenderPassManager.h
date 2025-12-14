@@ -18,23 +18,22 @@ struct PassData {
 	std::vector<std::string> dependancies;
 };
 
-
 class RenderPassManager {
 public:
-	void calcualtePassIndexes() {
+	inline void calcualtePassIndexes() {
 		activePassIndexes.clear();
 		for (size_t i = 0; i < activePassList.size(); ++i) {
 			activePassIndexes.emplace(activePassList[i].first, i);
 		}
 	}
 
-	void RenderAll(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
+	inline void RenderAll(ID3D11DeviceContext* deviceContext, ID3D11Device* device) {
 		for (auto& [name, pass] : activePassList) {
 			pass->Render(deviceContext, device);
 		}
 	}
 
-	std::shared_ptr<renderPass> InitPass(const std::string& name) {
+	inline std::shared_ptr<renderPass> InitPass(const std::string& name) {
 		//If pass alaready active return it;
 		if (activePassIndexes.contains(name)) {
 			return activePassList[activePassIndexes[name]].second;
@@ -59,7 +58,7 @@ public:
 	}
 
 	template<typename PassType, typename... Args>
-	void AddPassConstructionFunction(const std::string& name, std::vector<std::string> dependancies, Args&&... args) {
+	inline void AddPassConstructionFunction(const std::string& name, std::vector<std::string> dependancies, Args&&... args) {
 		auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
 
 		passConstructionFunction constructionFunction = [argsTuple = std::move(argsTuple)](size_t stage, passDependancies& deps) -> std::shared_ptr<renderPass> {
@@ -84,10 +83,34 @@ public:
 		}
 	}
 
-	void clearActivePasses() {
+	inline void clearActivePasses() {
 		activePassList.clear();
 		activePassIndexes.clear();
 		potentialPasses.clear();
+	}
+
+	inline void toJson(nlohmann::json& json) {
+		json["PassData"] = nlohmann::json::object();
+		nlohmann::json& passJson = json["PassData"];
+		for (auto& it : activePassList) {
+			if (std::string* jsonString = it.second->getJsonString()) {
+				it.second->toJson(passJson[*jsonString]);
+			}
+		}
+	}
+
+	inline void fromJson(const nlohmann::json& json) {
+		if (json.contains("PassData")) {
+			const nlohmann::json& passJson = json["PassData"];
+			for (auto& it : activePassList) {
+				if (std::string* jsonString = it.second->getJsonString()) {
+					if (passJson.contains(*jsonString)) {
+						it.second->fromJson(passJson[*jsonString]);
+					}
+				}
+			}
+		}
+		
 	}
 
 private:

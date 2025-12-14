@@ -18,7 +18,14 @@ Camera::Camera()
 
 float Camera::getLookSpeed() const { return lookSpeed; }
 
+float Camera::getYaw() const { return yaw; }
+float Camera::getPitch() const { return pitch; }
+
 void Camera::setLookSpeed(float speed) { this->lookSpeed = speed; }
+void Camera::setYaw(float yaw) { this->yaw = yaw; }
+void Camera::setPitch(float pitch) { this->pitch = pitch; }
+
+
 
 const XMFLOAT3& Camera::getGlobalPosition() const {
 	return globalPosition;

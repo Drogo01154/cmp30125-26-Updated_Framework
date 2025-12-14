@@ -29,7 +29,7 @@ public:
 		matrixDataModule = shaderManager->getShaderModuleID("MatrixDataModule");
 		lightDepthDataModule = shaderManager->getShaderModuleID("LightDepthDataModule");
 		heightMapDataModule = shaderManager->getShaderModuleID("HeightMapDataModule");
-		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule4");
+		heightMapTextureModule = shaderManager->getShaderModuleID("TextureDataModule3");
 
 		DepthShader = shaderManager->getGeometryShader("DepthShader");
 		HeightMapDepthShader = shaderManager->getGeometryShader("HeightDepthShader");
@@ -222,6 +222,9 @@ public:
 	ShadowMapArray* getShadowMapArray() { return &shadowMapArray; }
 	CubeMapArray* getCubeMapArray() { return &cubeMapArray; }
 	const XMFLOAT2* getTexelSize() { return &texelSize; }
+
+	virtual void toJson(nlohmann::json& json) {}
+	virtual void fromJson(const nlohmann::json& json) {}
 private:
 
 	ShadowMapArray shadowMapArray;

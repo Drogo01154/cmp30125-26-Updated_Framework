@@ -1,7 +1,7 @@
 #include"lightCommon_ps.hlsl"
-StructuredBuffer<float4x4> lightViewProjs : register(t4); // lightProjectionMatrix * lightViewMatrix on the CPU
-Texture2DArray shadowMaps : register(t5);
-TextureCubeArray cubeMaps : register(t6);
+StructuredBuffer<float4x4> lightViewProjs : register(t3); // lightProjectionMatrix * lightViewMatrix on the CPU
+Texture2DArray shadowMaps : register(t4);
+TextureCubeArray cubeMaps : register(t5);
 SamplerComparisonState ShadowMapSampler : register(s1);
 SamplerComparisonState CubeMapSampler : register(s2);
 

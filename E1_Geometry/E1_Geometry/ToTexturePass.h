@@ -24,6 +24,9 @@ public:
 
 	void Render(ID3D11DeviceContext* deviceContext, ID3D11Device* device) = 0;
 
+	virtual void toJson(nlohmann::json& json) = 0;
+	virtual void fromJson(const nlohmann::json& json) = 0;
+
 protected:
 
 	//Modules
