@@ -37,8 +37,7 @@ struct OutputType
     float3 worldPos : TEXCOORD0;
     float3 viewVector : TEXCOORD1;
     float2 tex : TEXCOORD2;
-    float3 normal : TEXCOORD3;
-    float3 vertexNormal : TEXCOORD4;
+    float3 normal : NORMAL;
 };
 
 
@@ -46,21 +45,18 @@ OutputType main(InputType input)
 {
     OutputType output;
     
-    //Increase Vertex Y position by heighMultiplier.
-    input.position.y += heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
-    
     float heightC = heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
     float heightE = heightMapTexture.SampleLevel(textureSampler, input.tex + float2(offset.x, 0), 0) * heightMultiplier;
     float heightW = heightMapTexture.SampleLevel(textureSampler, input.tex - float2(offset.x, 0), 0) * heightMultiplier;
     float heightN = heightMapTexture.SampleLevel(textureSampler, input.tex + float2(0, offset.y), 0) * heightMultiplier;
     float heightS = heightMapTexture.SampleLevel(textureSampler, input.tex - float2(0, offset.y), 0) * heightMultiplier;
 
-// Tangent & bitangent per vertex
     float3 tangent = normalize(float3(2.0 * worldStep.x, heightE - heightW, 0));
     float3 bitangent = normalize(float3(0, heightN - heightS, 2.0 * worldStep.y));
+    
 
-// Vertex normal in world space
-    output.vertexNormal = normalize(cross(bitangent, tangent));
+    output.normal = normalize(cross(bitangent, tangent));
+    input.position.y += heightC;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);

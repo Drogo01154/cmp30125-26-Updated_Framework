@@ -33,6 +33,9 @@ OutputType main(InputType input)
 {
     OutputType output;
     
+    float heightC = heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
+    input.position.y += heightC;
+    
     // Calculate the position of the vertex against the world, view, and projection matrices.
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);

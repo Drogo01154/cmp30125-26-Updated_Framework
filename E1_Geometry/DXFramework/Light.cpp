@@ -116,11 +116,11 @@ void Light::setType(lightTypes type)
 
 	case lightTypes::directional:
 		viewMatrixes.resize(1);
-		minConstBias = 0.001f;
-		maxConstBias = 0.002f;
+		minConstBias = 0.0001f;
+		maxConstBias = 0.0002f;
 
-		minSlopeBias = 0.05f;
-		maxSlopeBias = 0.5f;
+		minSlopeBias = 0.00001f;
+		maxSlopeBias = 0.01f;
 		break;
 	case lightTypes::spot:
 		viewMatrixes.resize(1);
@@ -182,7 +182,7 @@ void Light::setFOV(float fov) { FOV = fov; }
 void Light::setOrthoWidth(float orthoWidth) { this->orthoWidth = orthoWidth; }
 void Light::setOrthoHeight(float orthoHeight) { this->orthoHeight = orthoHeight; }
 void Light::setConstBias(float constBias) { this->constBias = constBias; }
-void Light::setSlopeBias(float slopeBias) { this->slopeBias; }
+void Light::setSlopeBias(float slopeBias) { this->slopeBias = slopeBias; }
 
 //getters
 
@@ -323,8 +323,8 @@ bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 			}
 			ImGui::TreePop();
 		}
-		if (ImGui::SliderFloat("Constant Bias: ", &constBias, minConstBias, maxConstBias)) { lightUpdated = true; }
-		if (ImGui::SliderFloat("Slope Bias: ", &slopeBias, minSlopeBias, maxSlopeBias)) { lightUpdated = true; }
+		if (ImGui::SliderFloat("Constant Bias: ", &constBias, minConstBias, maxConstBias, "%.6f")) { lightUpdated = true; }
+		if (ImGui::SliderFloat("Slope Bias: ", &slopeBias, minSlopeBias, maxSlopeBias, "%.6f")) { lightUpdated = true; }
 		ImGui::TreePop();
 	}
 	
