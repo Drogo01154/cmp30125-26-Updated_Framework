@@ -189,7 +189,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//sceneGraph->createBaseScene();
 
-	loadScene("Test Plane");
+	loadScene("Main Scene");
 }
 
 
