@@ -72,7 +72,9 @@ struct ModuleData {
 #define ShaderInstance Instance<std::string, ShaderData>
 #define ModuleInstance Instance<std::string, ModuleData>
 
-
+/*
+	Shader manager stores active shaders and modules while also storing instantiaton functions for lazy loading them
+*/
 class ShaderManager {
 public:
 	ShaderManager();

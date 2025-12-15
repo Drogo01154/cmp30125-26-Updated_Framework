@@ -16,7 +16,8 @@ float4 main(InputType input) : SV_TARGET
     input.normal = calculateHeightMapNormal(input.tex);
     
     // Get diffuse Colour
-    float4 diffuse = getDiffuse(input.tex * UVScale);
+    //float4 diffuse = getDiffuse(input.tex * UVScale);
+    float4 diffuse = float4(input.normal, 1.f);
     float4 emissive = calcEmissive(input.tex);
     
     float4 finalColour = ambientLight * diffuse;

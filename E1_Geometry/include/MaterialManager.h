@@ -7,7 +7,9 @@
 #include "ShaderManager.h"
 #include "Converters.h"
 #include "SerializationHelpers.h"
-
+/*
+	Class for creating, editing, saving and loading materials 
+*/
 class MaterialManager {
 public:
 	//Constructor

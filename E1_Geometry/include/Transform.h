@@ -8,7 +8,10 @@
 #include "Nlohmann/json.hpp"
 
 using namespace DirectX;
-
+/*
+	Universal transform class.
+	Based on Skateboards Transform Class by Einars Bruveris 
+*/
 class Transform
 {
 private:

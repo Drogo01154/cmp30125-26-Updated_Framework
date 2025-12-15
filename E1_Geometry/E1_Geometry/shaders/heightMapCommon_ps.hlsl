@@ -16,8 +16,18 @@ float getHeight(float2 coord)
     return heightMapTexture.Sample(heightSampler, coord) * heightMultiplier;
 }
 
+float3 calculateHeightMapNormal(float3 worldPos)
+{
+    float3 dpdx = ddx(worldPos);
+    float3 dpdy = ddy(worldPos);
+    
+    float3 normal =  normalize(cross(dpdy, dpdx));
+    
+    return normalize((normal + ddx(normal) + ddy(normal)) * 0.333f);
+}
 float3 calculateHeightMapNormal(float2 tex)
 {
+    
     float heightN = getHeight(float2(tex.x, tex.y + offset.y));
     float heightS = getHeight(float2(tex.x, tex.y - offset.y));
     float heightE = getHeight(float2(tex.x + offset.x, tex.y));

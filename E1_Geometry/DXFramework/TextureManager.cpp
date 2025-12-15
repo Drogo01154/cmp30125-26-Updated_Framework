@@ -15,6 +15,7 @@ TextureManager::TextureManager(ID3D11Device* ldevice, ID3D11DeviceContext* ldevi
 	addDefaultTexture();
 }
 
+//Function for loading texture
 TextureInstance TextureManager::loadTexture(const std::wstring& uid, const std::wstring& filename)
 {
 	ComPtr<ID3D11ShaderResourceView> texture;
@@ -115,6 +116,7 @@ void TextureManager::generateTexture(ID3D11Device* device)
 }
 */
 
+//Creates default texture?????
 void TextureManager::addDefaultTexture()
 {
 	ComPtr<ID3D11ShaderResourceView> texture;

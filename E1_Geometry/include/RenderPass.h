@@ -13,6 +13,11 @@
 
 #define passDependancies std::unordered_map<std::string, std::shared_ptr<renderPass>>
 
+/*
+	Render Pass class used by render pass mager
+	Set up to allow ImGui and parsing functionality
+	Map of dependancies allow passes to rely on each other
+*/
 class renderPass {
 public:
 

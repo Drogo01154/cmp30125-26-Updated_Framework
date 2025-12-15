@@ -3,14 +3,14 @@
 #include "Light.h"
 
 //Constructor
-
-
 Light::Light(lightTypes type) :
 	attenuation(0.05f, 0.01f, 0.001f, 100.f),
 	diffuseColour(1.0f, 1.0f, 1.0f, 1.f),
 	innerCone(XMConvertToRadians(8.f)),
 	outerCone(XMConvertToRadians(20.f))
 {
+
+	//set light near/far plane
 	lightNear = 0.1f;
 	lightFar = 25.0f;
 
@@ -21,9 +21,10 @@ Light::Light(lightTypes type) :
 		orthoHeight = 50.f;
 	}
 	else if (type == lightTypes::spot) {
-		FOV = XMConvertToRadians(45.0f); // 45° cone
+		FOV = XMConvertToRadians(45.0f);
 	}
 
+	//Sets const and slope bias to minium value
 	constBias = minConstBias;
 	slopeBias = minSlopeBias;
 }
@@ -31,7 +32,7 @@ Light::Light(lightTypes type) :
 // create view matrix, based on light position and lookat. Used for shadow mapping.
 void Light::generateViewMatrix()
 {
-
+	//Generate 6 view matrices if point light
 	if (type == lightTypes::point) {
 		for (int face = 0; face < 6; ++face)
 		{
@@ -42,27 +43,29 @@ void Light::generateViewMatrix()
 			);
 		}
 	}
+	//else generate 1 for spot
 	else if(type == lightTypes::spot){
 		XMVECTOR forward = cleanVector3(m_transform.getWorldForward());
 		XMVECTOR up = cleanVector3(m_transform.getWorldUp());
 		// Create the view matrix from the three vectors.
 		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + forward, up);
 	}
-	else {
+	else { // Else 1 for directional
 
-
-
+		//Gets forward vector
 		XMVECTOR forward = m_transform.getWorldForward();
-		
-		//Choose fallback up if near
+
+		//Gets global up unless forward too close to up, then uses global forward
 		XMVECTOR tempUp = XMVectorSet(0, 1, 0, 0);
 		float dotForwardUp = fabs(XMVectorGetX(XMVector3Dot(forward, tempUp)));
 		if (dotForwardUp > 0.99f) {
 			tempUp = XMVectorSet(0, 0, 1, 0);
 		}
-		
+		//Calculates right from cross product.
 		XMVECTOR right = XMVector3Normalize(XMVector3Cross(tempUp, forward));
+		//Recalculates up to make sure orthogonal
 		XMVECTOR up = XMVector3Normalize(XMVector3Cross(forward, right));
+		//generates view matrix
 		viewMatrixes[0] = XMMatrixLookAtLH(globalPosition, globalPosition + forward, up);
 	}
 }
@@ -73,6 +76,10 @@ void Light::generateProjectionMatrix(float aspect)
 	switch (type) {
 	case lightTypes::point:
 	{
+		/*
+			If point FOV should be 90 degrees
+			screen aspect 1 since maps need to have the same width and heihgt (hence CUBE map)
+		*/
 		float fieldOfView = (float)XM_PI / 2.0f;
 		float screenAspect = 1.0f;
 		// Create the projection matrix for the light.
@@ -80,10 +87,12 @@ void Light::generateProjectionMatrix(float aspect)
 	}
 		break;
 	case lightTypes::directional:
+		//Directional light uses orthographic projection, since direction is always uniform
 		projectionMatrix = XMMatrixOrthographicLH(orthoWidth, orthoHeight, lightNear, lightFar);
 		break;
 
 	case lightTypes::spot:
+		//Calculates spot from stored FOV value, aspect ratio of shadow map, near and far plane
 		projectionMatrix = XMMatrixPerspectiveFovLH(FOV, aspect, lightNear, lightFar);
 		break;
 	}
@@ -93,38 +102,41 @@ void Light::setType(lightTypes type)
 {
 	this->type = type;
 
+	//Sets min/max slope and const bias values as well as number of view matrices 
+	//based on light type
 	switch (type) {
 	case lightTypes::point:
 		viewMatrixes.resize(6);
 
-		minConstBias = 0.001f;   // slider minimum
-		maxConstBias = 0.005f;   // slider maximum
-		minSlopeBias = 0.004f;   // slider minimum
-		maxSlopeBias = 0.01f;    // slider maximum
+		minConstBias = 0.001f;
+		maxConstBias = 0.005f;
+		minSlopeBias = 0.004f;
+		maxSlopeBias = 0.01f;
 		break;
 
 	case lightTypes::directional:
 		viewMatrixes.resize(1);
-		minConstBias = 0.001f;   // tiny, just to avoid acne
-		maxConstBias = 0.002f;    // small enough to avoid floating shadows
+		minConstBias = 0.001f;
+		maxConstBias = 0.002f;
 
-		minSlopeBias = 0.05f;     // shallow slopes
-		maxSlopeBias = 0.5f;      // steep slopes
+		minSlopeBias = 0.05f;
+		maxSlopeBias = 0.5f;
 		break;
 	case lightTypes::spot:
 		viewMatrixes.resize(1);
 
-		minConstBias = 0.0f;   // small offset to avoid acne
+		minConstBias = 0.0f;
 		maxConstBias = 0.005f;
 
-		minSlopeBias = 0.001f;   // tiny slope bias
-		maxSlopeBias = 0.01f;    // small enough for steep slopes
+		minSlopeBias = 0.001f;
+		maxSlopeBias = 0.01f;
 		break;
 	default:
 		throw std::runtime_error("Error: Light type does not exist!");
 	}
 }
 
+//setters
 void Light::setAttenuation(float constant, float linear, float quadratic, float cutoffDistance)
 {
 	attenuation = XMFLOAT4(constant, linear, quadratic, cutoffDistance);
@@ -164,6 +176,16 @@ void Light::setLookAt(const XMFLOAT3& lookAt)
 	this->lookAt = XMVectorSet(lookAt.x, lookAt.y, lookAt.z, 1.0f);
 }
 
+void Light::setFar(float inFar) { lightFar = inFar; }
+void Light::setNear(float inNear) { lightNear = inNear; }
+void Light::setFOV(float fov) { FOV = fov; }
+void Light::setOrthoWidth(float orthoWidth) { this->orthoWidth = orthoWidth; }
+void Light::setOrthoHeight(float orthoHeight) { this->orthoHeight = orthoHeight; }
+void Light::setConstBias(float constBias) { this->constBias = constBias; }
+void Light::setSlopeBias(float slopeBias) { this->slopeBias; }
+
+//getters
+
 const XMFLOAT4& Light::getAttenuation() const
 {
 	return attenuation;
@@ -199,19 +221,6 @@ const XMMATRIX& Light::getProjectionMatrix() const
 	return projectionMatrix;
 }
 
-void Light::updateGlobals(bool updateTransform)
-{
-	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
-	XMMATRIX globalMatrix = m_transform.getGlobalMatrix();
-	XMVECTOR outTranslation, outRotation, outScale;
-	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
-
-	globalPosition = outTranslation;
-
-	globalRotation = QuaternionToEuler(outRotation);
-	globalDirection = XMVector3Normalize(XMVector3Rotate(XMVectorSet(0, 0, 1, 0), XMQuaternionNormalize(outRotation)));
-
-}
 XMFLOAT3 Light::getGlobalPosition() const 
 {
 	return XMFLOAT3(XMVectorGetX(globalPosition), XMVectorGetY(globalPosition), XMVectorGetZ(globalPosition));
@@ -232,14 +241,6 @@ std::span<const char* const> Light::GetLightTypeStrings() {
 	return LightTypeStrings;
 }
 
-void Light::setFar(float inFar) { lightFar = inFar; }
-void Light::setNear(float inNear) { lightNear = inNear; }
-void Light::setFOV(float fov) { FOV = fov; }
-void Light::setOrthoWidth(float orthoWidth) { this->orthoWidth = orthoWidth; }
-void Light::setOrthoHeight(float orthoHeight) { this->orthoHeight = orthoHeight; }
-void Light::setConstBias(float constBias) { this->constBias = constBias; }
-void Light::setSlopeBias(float slopeBias) { this->slopeBias; }
-
 float Light::getFar() const { return lightFar; }
 float Light::getNear() const { return lightNear; }
 float Light::getFOV() const { return FOV; }
@@ -248,7 +249,22 @@ float Light::getOrthoHeight() const { return orthoHeight; }
 float Light::getConstBias() const { return constBias; }
 float Light::getSlopeBias() const { return slopeBias; }
 
+//Function to update lights stored transform values based on its transform class and inherited transforms
+void Light::updateGlobals(bool updateTransform)
+{
+	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
+	XMMATRIX globalMatrix = m_transform.getGlobalMatrix();
+	XMVECTOR outTranslation, outRotation, outScale;
+	XMMatrixDecompose(&outScale, &outRotation, &outTranslation, globalMatrix);
 
+	globalPosition = outTranslation;
+
+	globalRotation = QuaternionToEuler(outRotation);
+	globalDirection = XMVector3Normalize(XMVector3Rotate(XMVectorSet(0, 0, 1, 0), XMQuaternionNormalize(outRotation)));
+
+}
+
+//Light ImGui menu
 bool Light::imGuiRender(size_t transformIncrement, bool& projectionChanged) {
 
 	XMFLOAT3 lightPos = getGlobalPosition();

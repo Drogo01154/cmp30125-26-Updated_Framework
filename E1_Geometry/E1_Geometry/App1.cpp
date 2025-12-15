@@ -19,10 +19,7 @@
 #include "BlurPass.h"
 
 
-App1::App1()
-{
-	UIConstants::InitialiseSystem();
-}
+App1::App1() {}
 
 //Function for storing constructors to create different module types
 void App1::addModuleConstructors(HWND hwnd, ID3D11Device* device) {
@@ -192,7 +189,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	//sceneGraph->createBaseScene();
 
-	loadScene("Main Scene");
+	loadScene("Test Plane");
 }
 
 
@@ -205,8 +202,6 @@ App1::~App1()
 
 bool App1::frame()
 {
-	UIConstants::UpdateConstants(sWidth, sHeight);
-
 	bool result;
 
 	result = BaseApplication::frame();

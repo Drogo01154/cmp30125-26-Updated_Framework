@@ -30,6 +30,10 @@ struct CameraData {
 
 struct OrthoMeshData;
 
+/*
+	Instance manager class for caching Camera, Light and Mesh instances
+*/
+
 class InstanceManager {
 public:
 	InstanceManager(

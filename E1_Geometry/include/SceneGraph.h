@@ -24,6 +24,10 @@ struct sceneNode {
 	std::weak_ptr<sceneNode> parent;
 };
 
+/*
+	Scene graph class allows for easy setup of heirarchy between object and the scene.#
+
+*/
 class SceneGraph {
 public:
 	SceneGraph() = delete;
@@ -49,7 +53,6 @@ public:
 
 	void duplicateNode(std::shared_ptr<sceneNode> node, std::shared_ptr<sceneNode> newParent);
 
-	//ImGui function for attaching mesh to scene node
 	void imGuiMeshCreation(std::shared_ptr<sceneNode> node);
 	void imGuiCameraCreation(std::shared_ptr<sceneNode> node);
 	void imGuiLightCreation(std::shared_ptr<sceneNode> node);

@@ -5,15 +5,27 @@ TextureCubeArray cubeMaps : register(t5);
 SamplerComparisonState ShadowMapSampler : register(s1);
 SamplerComparisonState CubeMapSampler : register(s2);
 
+// Is the gemoetry in our shadow map
+bool hasDepthData(float2 uv)
+{
+    if (uv.x < 0.f || uv.x > 1.f || uv.y < 0.f || uv.y > 1.f)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 static const float kernelWeights[25] =
 {
-        1.f / 256.f, 4.f / 256.f, 6.f / 256.f, 4.f / 256.f, 1.f / 256.f,
-        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
-        6.f / 256.f, 24.f / 256.f, 36.f / 256.f, 24.f / 256.f, 6.f / 256.f,
-        4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
-        1.f / 256.f, 4.f / 256.f, 6.f / 256.f, 4.f / 256.f, 1.f / 256.f
+    1.f / 256.f, 4.f / 256.f, 6.f / 256.f, 4.f / 256.f, 1.f / 256.f,
+    4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
+    6.f / 256.f, 24.f / 256.f, 36.f / 256.f, 24.f / 256.f, 6.f / 256.f,
+    4.f / 256.f, 16.f / 256.f, 24.f / 256.f, 16.f / 256.f, 4.f / 256.f,
+    1.f / 256.f, 4.f / 256.f, 6.f / 256.f, 4.f / 256.f, 1.f / 256.f
 };
 
+//Calculates difference in direction along X/Y offset in texels
 float3 calcCubeOffsetDirection(float3 direction, float2 offset)
 {
     float3 up = (abs(direction.y) > 0.999) ?
@@ -26,9 +38,10 @@ float3 calcCubeOffsetDirection(float3 direction, float2 offset)
     
     return normalize(direction +
     (right * offset.x * texelAngle) +
-    (up * offset.y * texelAngle));  
+    (up * offset.y * texelAngle));
 }
 
+//Applies gaussean blur to non point shadow 
 float Gaussean5X5Normal(float2 pos, int mapIndex, float depthVal)
 {
     float shadow = 0;
@@ -38,18 +51,19 @@ float Gaussean5X5Normal(float2 pos, int mapIndex, float depthVal)
         [unroll]
         for (int x = -2; x < 3; x++)
         {
-            //Calculate kernel index
+            //Calculates kernel index
             int index = (y + 2) * 5 + (x + 2);
-            //Calculate sample offset
+            //Calculates UV offset
             float2 offset = { x * shadowMapTexelSize.x, y * shadowMapTexelSize.y };
-            //Accumulate weighted sample
+            //Accumulates weighted sample
             shadow += shadowMaps.SampleCmpLevelZero(ShadowMapSampler, float3(pos + offset, mapIndex), depthVal).r * kernelWeights[index];
         }
     }
-    shadow = saturate(shadow);
-    return shadow;
+    //Clamps return value 0-1
+    return saturate(shadow);
 }
 
+//Applies gaussean blur to point shadow
 float Gaussean5X5Point(float3 lightDirection, int mapIndex, float depthVal)
 {
     float shadow = 0;
@@ -64,22 +78,11 @@ float Gaussean5X5Point(float3 lightDirection, int mapIndex, float depthVal)
             shadow += cubeMaps.SampleCmpLevelZero(CubeMapSampler, float4(sampleDir, mapIndex), depthVal) * kernelWeights[index];
         }
     }
-    shadow = saturate(shadow);
-    return shadow;
+    //Clamps return value 0-1
+    return saturate(shadow);
 }
-
-// Is the gemoetry in our shadow map
-bool hasDepthData(float2 uv)
-{
-    if (uv.x < 0.f || uv.x > 1.f || uv.y < 0.f || uv.y > 1.f)
-    {
-        return false;
-    }
-    return true;
-}
-
 /*
-   Converts lights 
+   Converts lights view position to projected coodinates
 */
 float2 getProjectiveCoords(float4 lightViewPosition)
 {
@@ -89,7 +92,7 @@ float2 getProjectiveCoords(float4 lightViewPosition)
     projTex += float2(0.5f, 0.5f);
     return projTex;
 }
-
+//Calculates shadow factor
 float calculateShadow(int lightID, float3 worldPos, float3 normal)
 {
     static const float2 offsets[8] =
@@ -122,7 +125,6 @@ float calculateShadow(int lightID, float3 worldPos, float3 normal)
         float fragmentDistance = length(worldPos - lightPos) / farPlane;
                  
         shadow = Gaussean5X5Point(lightDirection, mapIndex, fragmentDistance - bias);
-
     }
     else    // Spot or directional light
     {

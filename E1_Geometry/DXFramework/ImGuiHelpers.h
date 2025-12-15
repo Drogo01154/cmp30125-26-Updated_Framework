@@ -13,94 +13,11 @@
 
 using namespace DirectX;
 
-enum buttonSizes
-{
-	SmallButton,
-	NormalButton,
-	LargeButton,
-	VerticalDummy,
-	SelectableSideButton,
-	ComboSideButton,
-};
+/*
+	ImGui helper functions.
+*/
 
-class UIConstants
-{
-	inline static ImGuiStyle baseStyle;										// Saved ImGuiStyle on initialisation
-	inline static const float baseWindowWidth = 630.f;						// Base width of window
-	inline static const float WindowBorder = 10.f;							// Base estimated value of window border
-	inline static const float BaseComboButtonWidth = 206.f;					// Base width of combo side button
-	inline static std::vector<ImVec2> UISizes;								// Vector of final Element sizes
-	inline static ImVec2 previousWindowSize;								// Previous Window Size;
-public:
-
-	//Getters for UI element standards
-	inline static const ImVec2& getSmallButtonSize() { return UISizes[SmallButton]; }
-	inline static const ImVec2& getButtonSize() { return UISizes[NormalButton]; }
-	inline static const ImVec2& getLargeButtonSize() { return UISizes[LargeButton]; }
-	inline static const ImVec2& getVertDummySize() { return UISizes[VerticalDummy]; }
-	inline static const ImVec2& getSelectableSideButtonSize() { return UISizes[SelectableSideButton]; }
-	inline static const ImVec2& getComboButtonSize() { return UISizes[ComboSideButton]; }
-
-	//Function for initialising system
-	inline static void InitialiseSystem()
-	{
-		UISizes.resize(buttonSizes::ComboSideButton + 1);	//Set vector to correct size
-		previousWindowSize = { 0.f, 0.f };
-	}
-
-	//Function for updating sizes based on current ImGui window size
-	inline static void UpdateConstants(int sWidth, int sHeight)
-	{
-		if (!ImGui::GetCurrentContext()) return; // Ensure ImGui is initialized
-
-		ImVec2 windowSize = { (float)sWidth, (float)sHeight };
-		if (windowSize.x != previousWindowSize.x)
-		{
-			previousWindowSize = windowSize;
-			float scaleFactor = windowSize.x / baseWindowWidth;
-			float MaxButtonSize = windowSize.x - (WindowBorder * scaleFactor);
-
-			float yHeight = ImGui::GetFrameHeight();
-
-			UISizes[SmallButton] = { MaxButtonSize / 3.f, yHeight };
-			UISizes[NormalButton] = { MaxButtonSize / 2.f, yHeight };
-			UISizes[LargeButton] = { MaxButtonSize, yHeight };
-			UISizes[VerticalDummy] = { 0.f, yHeight };
-			UISizes[SelectableSideButton] = { MaxButtonSize - UISizes[SmallButton].x, yHeight };
-			UISizes[ComboSideButton] = { BaseComboButtonWidth * scaleFactor, yHeight };
-		}
-	}
-};
-
-//Helper function combined combo list and button functionality
-inline bool ComboButton(const char* label, int* current_item, const std::vector<const char*>& items)
-{
-	bool changed = ImGui::Combo((std::string("##") + label).c_str(), current_item, items.data(), items.size());
-	ImGui::SameLine();
-	if (ImGui::Button(label, UIConstants::getComboButtonSize())) { return *current_item != -1; }
-	return false;
-}
-
-inline bool ArrowIterators(const std::string& _label, uint32_t& _currentItem, uint32_t _containerSize, const std::string& id = "0")
-{
-	bool iterated = false;
-	if (_containerSize > 1) // If more than 1 shape allowing switching through arrow buttons
-	{
-		if (ImGui::ArrowButton(("shape left##" + id).c_str(), ImGuiDir_Left)) {
-			_currentItem = (_currentItem == 0) ? _containerSize - 1 : _currentItem - 1;
-			iterated = true;
-		}
-		ImGui::SameLine();
-		ImGui::Selectable((_label + ": " + std::to_string(_currentItem)).c_str(), false, ImGuiSelectableFlags_Disabled, UIConstants::getButtonSize());
-		ImGui::SameLine();
-		if (ImGui::ArrowButton(("shape right##" + id).c_str(), ImGuiDir_Right)) {
-			_currentItem = (_currentItem == _containerSize - 1) ? 0 : _currentItem + 1;
-			iterated = true;
-		}
-	}
-	return iterated;
-}
-
+//Helper Function for ImGui Slider with XMFLOAT3
 inline bool ImGuiXMFloat3Slider(const char* label, XMFLOAT3& vec, 
 	float v_min, float v_max, 
 	const char* format = "%.3f", 
@@ -109,6 +26,7 @@ inline bool ImGuiXMFloat3Slider(const char* label, XMFLOAT3& vec,
 	return ImGui::SliderFloat3(label, reinterpret_cast<float*>(&vec.x), v_min, v_max, format, flags);
 }
 
+//Helper Function for ImGui Slider with XMVector with three values
 inline bool ImGuiXMVECTORSlider3(const char* label, XMVECTOR& vec, 
 	float v_min, float v_max, 
 	const char* format = "%.3f", 
@@ -126,6 +44,7 @@ inline bool ImGuiXMVECTORSlider3(const char* label, XMVECTOR& vec,
 	return updated;
 }
 
+//Helper function for ImGui drag slider with XMFLOAT3
 inline bool ImGuiDragXMFLOAT3(const char* label, XMFLOAT3& vec,
 	float v_speed = 1.0f, float v_min = 0.0f,
 	float v_max = 0.0f, const char* format = "%.3f",
@@ -134,6 +53,7 @@ inline bool ImGuiDragXMFLOAT3(const char* label, XMFLOAT3& vec,
 	return ImGui::DragFloat3(label, &vec.x, v_speed, v_min, v_max, format, flags);
 }
 
+//Helper function for ImGui drag slider with XMVector of three values
 inline bool ImGuiDragXMVECTOR3(const char* label, XMVECTOR& vec,
 	float v_speed = 1.0f, float v_min = 0.0f,
 	float v_max = 0.0f, const char* format = "%.3f",
@@ -152,26 +72,31 @@ inline bool ImGuiDragXMVECTOR3(const char* label, XMVECTOR& vec,
 	return updated;
 }
 
+//Helper function for wrapping degrees -180, 180
 inline float WrapDegrees(float deg) {
 	deg = fmodf(deg + 180.f, 360.f);
 	if (deg < 0.f) deg += 360.f;
 	return deg - 180.f;
 }
 
+//Helper function for wrapping radians -PI, PI
 inline float WrapRadians(float rad) {
 	rad = fmodf(rad + XM_PI, XM_2PI);
 	if (rad < 0.f) rad += XM_2PI;
 	return rad - XM_PI;
 }
 
+//Helper function for wrapping XMFLOAT3 values -180, 180 degrees
 inline XMFLOAT3 WrapDegrees(const XMFLOAT3& deg) {
 	return XMFLOAT3(WrapDegrees(deg.x), WrapDegrees(deg.y), WrapDegrees(deg.z));
 }
 
-inline XMFLOAT3 WrapRadians(const XMFLOAT3& deg) {
-	return XMFLOAT3(WrapRadians(deg.x), WrapRadians(deg.y), WrapRadians(deg.z));
+//Helper function for wrapping XMFLOAT3 value -PI, PI
+inline XMFLOAT3 WrapRadians(const XMFLOAT3& rad) {
+	return XMFLOAT3(WrapRadians(rad.x), WrapRadians(rad.y), WrapRadians(rad.z));
 }
 
+//Helper function for using IMGUI slider in degrees on stored Quaternion
 inline bool ImGuiQuatEulerSlider3Degrees(const char* label,
 	XMVECTOR& quat,
 	float v_min = -180.f, float v_max = 180.f,
@@ -185,6 +110,7 @@ inline bool ImGuiQuatEulerSlider3Degrees(const char* label,
 		XMVECTOR quat;
 	};
 
+	//stores values between calls
 	static std::unordered_map<std::string, cachedRotation> cache;
 
 	//Convert quaternion -> Euler (degrees)
@@ -205,16 +131,18 @@ inline bool ImGuiQuatEulerSlider3Degrees(const char* label,
 		XMFLOAT3 radians = ToRadians(wrapped);
 		XMVECTOR newQuat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&radians));
 
-		// Continuity: ensure closest quaternion
-		if (XMVectorGetX(XMQuaternionDot(newQuat, entry.quat)) < 0.0f)
+		//Ensure closest quaternion
+		if (XMVectorGetX(XMQuaternionDot(newQuat, entry.quat)) < 0.0f) {
 			newQuat = XMVectorNegate(newQuat);
-
+		}
+			
 		entry.quat = newQuat;
 		quat = newQuat;
 	}
 	return updated;
 }
 
+//Helper function for using IMGUI slider in radians on stored Quaternion
 inline bool ImGuiQuatEulerSlider3Radians(const char* label,
 	XMVECTOR& quat,
 	float v_min = -XM_PI, float v_max = XM_PI,

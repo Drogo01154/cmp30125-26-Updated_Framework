@@ -29,8 +29,6 @@ MaterialManager::MaterialManager(ShaderManager* shaderManager, TextureManager* t
 	selectedHeightMapTexture = -1;
 
 	createMaterial("Default");
-	//Material& mat = materialCache.getValue("Default");
-	//mat.HeightMapData = std::make_unique<HeightMapInfo>();
 };
 
 //Gets material ID from name
@@ -78,6 +76,7 @@ void MaterialManager::createMaterial(const std::string& name) {
 	materialCache.emplaceID(name, std::move(mat), false);
 }
 
+//Updates ImGui settings based on selected material
 void MaterialManager::updateSelectedMaterial() {
 
 	// Reset state by default
@@ -129,6 +128,7 @@ void MaterialManager::updateSelectedMaterial() {
 	}
 }
 
+//Function to delete a set material
 bool MaterialManager::deleteMaterial(const std::string& name) {
 	bool selectedName = ((selectedMaterial >= 0) && (name == materialCache.getCachedStringVec()[selectedMaterial]));
 	bool deleted = materialCache.RemoveID(name);
@@ -143,6 +143,7 @@ bool MaterialManager::deleteMaterial(const std::string& name) {
 	return deleted;
 }
 
+//Function to delete all materials
 void MaterialManager::deleteAllMaterials() {
 	selectedMaterial = -1;
 	newNameInput[0] = '\0';
@@ -154,6 +155,7 @@ void MaterialManager::deleteAllMaterials() {
 	materialCache.clear();
 }
 
+//Getters for material names as string or char* for IMGUI combos
 const std::vector<std::string>* MaterialManager::getMaterialStrings() {
 	return &materialCache.getCachedStringVec();
 }
@@ -161,6 +163,7 @@ const std::vector<const char*>* MaterialManager::getMatrialsChars() {
 	return &materialCache.getCharVec();
 }
 
+//ImGui menu
 void MaterialManager::imGuiRender() {
 
 	if (ImGui::CollapsingHeader("Material Settings: ")) {
@@ -279,6 +282,7 @@ void MaterialManager::imGuiRender() {
 	}
 }
 
+//Serialization class and contained materials
 void MaterialManager::to_json(nlohmann::json& j) {
 	j = nlohmann::json::array();
 	materialCache.forEach([&](const std::string& ID, Material* mat) {
@@ -304,6 +308,8 @@ void MaterialManager::to_json(nlohmann::json& j) {
 		j.push_back(matJson);
 		});
 }
+
+//Parsing class and contained materials
 void MaterialManager::from_json(const nlohmann::json& j) {
 	deleteAllMaterials();
 	for (auto matJson : j) {

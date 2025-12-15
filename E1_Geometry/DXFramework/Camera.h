@@ -22,6 +22,9 @@ enum CameraTypes : int {
 	FPCAMERA
 };
 
+/*
+	Updated Camera class to use transform class and use json for serialization/parsing
+*/
 class Camera
 {
 public:

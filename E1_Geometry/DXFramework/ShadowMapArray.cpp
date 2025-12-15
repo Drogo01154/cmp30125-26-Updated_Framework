@@ -22,9 +22,6 @@ void ShadowMapArray::resize(ID3D11Device* device, std::optional<int> newSize, st
 	shadowMapWidth = mWidth == std::nullopt ? shadowMapWidth : *mWidth;
 	shadowMapHeight = mHeight == std::nullopt ? shadowMapHeight : *mHeight;
 
-	// Use typeless format because the DSV is going to interpret
-	// the bits as DXGI_FORMAT_D24_UNORM_S8_UINT, whereas the SRV is going to interpret
-	// the bits as DXGI_FORMAT_R24_UNORM_X8_TYPELESS.
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.Width = shadowMapWidth;
 	texDesc.Height = shadowMapHeight;
@@ -38,7 +35,6 @@ void ShadowMapArray::resize(ID3D11Device* device, std::optional<int> newSize, st
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-	//ID3D11Texture2D* depthMap = 0;
 	device->CreateTexture2D(&texDesc, 0, depthMapArray.GetAddressOf());
 
 	mDepthMapArrayDSV.resize(size);
@@ -62,7 +58,6 @@ void ShadowMapArray::resize(ID3D11Device* device, std::optional<int> newSize, st
 	srvDesc.Texture2DArray.FirstArraySlice = 0;
 	srvDesc.Texture2DArray.ArraySize = texDesc.ArraySize;
 	device->CreateShaderResourceView(depthMapArray.Get(), &srvDesc, mDepthMapArraySRV.GetAddressOf());
-	renderTarget.Reset();
 }
 
 ShadowMapArray::~ShadowMapArray() {
@@ -73,9 +68,7 @@ void ShadowMapArray::BindDsvAndSetNullRenderTarget(ID3D11DeviceContext* dc, int 
 	assert(slice < size);
 	dc->RSSetViewports(1, &viewport);
 
-	// Set null render target because we are only going to draw to depth buffer.
-	// Setting a null render target will disable color writes.
-	//ID3D11RenderTargetView* renderTargets[1] = { 0 };
-	dc->OMSetRenderTargets(1, renderTarget.GetAddressOf(), mDepthMapArrayDSV[slice].Get());
+	ID3D11RenderTargetView* nullRenderTarger[1] = { nullptr };
+	dc->OMSetRenderTargets(1, nullRenderTarger, mDepthMapArrayDSV[slice].Get());
 	dc->ClearDepthStencilView(mDepthMapArrayDSV[slice].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }

@@ -13,6 +13,12 @@
 #include <Nlohmann/json.hpp>
 #include <fstream>
 
+/*
+	File Handler class
+	Finds Model, Image and scene files then adds their names and paths to appropriate files. 
+	Also saves and loads json/bson files. 
+*/
+
 namespace fs = std::filesystem;
 class FileHandler {
 	//inline static std::unordered_map<std::string, bool> scenes;
@@ -30,6 +36,7 @@ class FileHandler {
 		updateVectors();
 	}
 
+	//Updates char string vectors for ImGui Combos
 	void updateVectors(bool onlyUpdateScene = false) {
 		if (!onlyUpdateScene) {
 			size_t imageNum = images.size();
@@ -58,10 +65,7 @@ class FileHandler {
 		}
 	}
 
-	~FileHandler() {
-
-	}
-
+	//Recursively loops through res folder to find files and add to appropriate maps
 	inline void LocateFiles(const wchar_t* _DirectoryPath) {
 		const std::vector<std::string> supportedTextureExtensions = {
 			".dds",
@@ -165,16 +169,18 @@ public:
 		return handler;
 	}
 
-	//Delete copy/move constructors and assignment operators
+	//Deletes copy and move constructors
 	FileHandler(const FileHandler&) = delete;
 	FileHandler(FileHandler&&) = delete;
 	FileHandler& operator=(const FileHandler&) = delete;
 	FileHandler& operator=(FileHandler&&) = delete;
 
+	//Getters for combo lists
 	const std::vector<const char*>* getImageList() const { return &imageCharList; }
 	const std::vector<const char*>* getModelList() const { return &modelCharList; }
 	const std::vector<const char*>* getSceneList() const { return &sceneCharList; }
 
+	//Function to load json file to json object
 	inline bool loadSceneJson(const std::string& sceneName, nlohmann::json& json) {
 		auto it = scenes.find(sceneName);
 		if (it == scenes.end())
@@ -208,6 +214,7 @@ public:
 		return true;
 	}
 	
+	//Function to save json file from json object - bool to select if saving as normal json or binary json
 	inline bool saveSceneJson(const std::string& sceneName, const nlohmann::json& json, bool asBson) {
 		std::string* path = nullptr;
 		
@@ -218,7 +225,6 @@ public:
 			path = &it->second.first;
 			if (it->second.second != asBson) {
 				//Update format
-				
 				try {
 					if (fs::exists(*path)) {
 						fs::remove(*path);   // deletes the file

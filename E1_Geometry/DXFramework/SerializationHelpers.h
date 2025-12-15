@@ -7,6 +7,10 @@
 #include <directxmath.h>
 #include "Nlohmann/json.hpp"
 
+/*
+    Helper functions for Serializing/parsing directX types
+*/
+
 using namespace DirectX;
 
 template<>

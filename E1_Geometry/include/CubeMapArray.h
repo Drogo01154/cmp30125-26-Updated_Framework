@@ -35,7 +35,6 @@ private:
 	std::vector<std::vector<ComPtr<ID3D11DepthStencilView>>> mCubeMapArrayDSV;
 	ComPtr<ID3D11ShaderResourceView> mCubeMapArraySRV;
 	D3D11_VIEWPORT viewport;
-	ComPtr<ID3D11RenderTargetView> renderTarget;
 	ComPtr<ID3D11Texture2D> depthMapArray;
 	int shadowMapWidth;
 	int shadowMapHeight;

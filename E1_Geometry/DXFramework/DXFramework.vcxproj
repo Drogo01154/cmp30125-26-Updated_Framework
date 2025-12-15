@@ -204,7 +204,6 @@ xcopy /S /Y "$(SolutionDir)DXFramework\*.h" "$(SolutionDir)Include\"
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="FPCamera.h" />
     <ClInclude Include="GeometryManager.h" />
-    <ClInclude Include="IDMap.h" />
     <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InstanceCache.h" />

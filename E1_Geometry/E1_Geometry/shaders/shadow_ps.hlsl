@@ -23,6 +23,5 @@ float4 main(InputType input) : SV_TARGET
         finalColour += shadowScalar * lightColour;
     }
     
-    // Multiply by diffuse texture and clamp to 0..1
     return finalColour + emissive;
 }

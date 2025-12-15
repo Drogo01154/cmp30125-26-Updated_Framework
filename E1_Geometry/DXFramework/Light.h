@@ -25,7 +25,14 @@ enum lightTypes {
 	point,
 	spot
 };
-		
+	/*
+		Updated light class to:
+		Support Spot, Point and Directional lights
+		removed ambient and moved to camera buffer
+		added more options for shadow maps based on light type
+		added differing projection and view matrix calculation based on light type
+		Serialization/Parsimg with json
+	*/
 class Light
 {
 public:

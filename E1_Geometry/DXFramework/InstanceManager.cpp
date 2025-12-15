@@ -22,16 +22,19 @@ InstanceManager::InstanceManager(
 	lightCache(),
 	cameraCache()
 {
+	//Tells shader manager camera number has changed if camera deleted
 	cameraCache.addTypeEndHandler([&](CameraData* data) {
 		if (data->camera == this->getActiveCamera()->camera) {
 			this->shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 		}
 	});
+	//Tells shader manager light number has hanged if light deleted
 	lightCache.addTypeEndHandler([&](Light* data) {
 		this->shaderManager->SetModuleDirtyflags(DirtyModuleFlags::LIGHTNUMCHANGED);
 		});
 }
 
+//Functions to try and get objects from respective caches
 GeometryInstance InstanceManager::tryGetGeometryInstance(size_t ID) {
 	return geometryCache.tryGetInstance(ID);
 }
@@ -42,6 +45,8 @@ CameraInstance InstanceManager::tryGetCameraInstance(size_t ID) {
 	return cameraCache.tryGetInstance(ID);
 }
 
+
+//Functions to remove objects from respective caches
 void InstanceManager::removeGeometryInstance(size_t ID) {
 	geometryCache.RemoveID(ID);
 }
@@ -52,6 +57,7 @@ void InstanceManager::removeCameraInstance(size_t ID) {
 	cameraCache.RemoveID(ID);
 }
 
+//Copies a geometry instance
 GeometryInstance InstanceManager::duplicateGeometryInstance(size_t& newID, size_t instID) {
 
 	GeometryData* geometryData = geometryCache.tryGetValue(instID);
@@ -65,12 +71,15 @@ GeometryInstance InstanceManager::duplicateGeometryInstance(size_t& newID, size_
 	return geometryCache.emplaceID(newID, std::move(newData));
 }
 
+//Copies a light instance
 LightInstance InstanceManager::duplicateLightInstance(size_t& newID, size_t instID) {
 	Light* lightData = lightCache.tryGetValue(instID);
 	Light newLight = *lightData;
 	return lightCache.emplaceID(newID, std::move(newLight));
 	
 }
+
+//Copies a camera instance
 CameraInstance InstanceManager::duplicateCameraInstance(size_t& newID, size_t instID) {
 	CameraData* cameraData = cameraCache.tryGetValue(instID);
 
@@ -80,11 +89,12 @@ CameraInstance InstanceManager::duplicateCameraInstance(size_t& newID, size_t in
 	CameraData newCameraData(cameraData->type, newCamera);
 	return cameraCache.emplaceID(newID, newCameraData);
 }
-
+//Returns number of each object type
 size_t InstanceManager::getNumberOfLights() { return lightCache.size(); }
 size_t InstanceManager::getNumberOfMeshes() { return geometryCache.size(); }
 size_t InstanceManager::getNumberOfCameras() { return cameraCache.size(); }
 
+//Deletion functions
 void InstanceManager::clearGeometry() {
 	geometryCache.clear();
 }
@@ -104,6 +114,7 @@ void InstanceManager::clearAll() {
 	shaderManager->SetModuleDirtyflags(DirtyModuleFlags::CAMERA);
 }
 
+//Creation functions
 GeometryInstance InstanceManager::createGeometryInstance(size_t& instanceID, MeshInstance mesh, bool addMaterial) {
 	GeometryData newData;
 	if (addMaterial) {
@@ -173,11 +184,15 @@ CameraInstance InstanceManager::createFPCamera(size_t& instanceID) {
 	return returnInst;
 }
 
+//Returns ID of currently selected camera
 size_t InstanceManager::getActiveCameraID() { return activeCameraID; }
 
+//Returns ptr to currently selected camera data
 CameraData* InstanceManager::getActiveCamera() {
 	return &cameraCache.getValue(activeCameraID);
 }
+
+//Sets camera of a given ID to be the primary one used for rendering
 void InstanceManager::setActiveCamera(size_t ID) {
 	if (cameraCache.hasID(ID)) {
 		activeCameraID = ID;
@@ -188,12 +203,14 @@ void InstanceManager::setActiveCamera(size_t ID) {
 	}
 }
 
+//Sets whether lack of instances deletes objects
 void InstanceManager::setDestroyNoInstances(bool value) {
 	geometryCache.setDeleteNoInstances(value);
 	cameraCache.setDeleteNoInstances(value);
 	lightCache.setDeleteNoInstances(value);
 }
 
+//Serializing class and contained Mesh, Camera and Light instances
 void InstanceManager::to_json(nlohmann::json& j) {
 	//Set j as object
 	j = nlohmann::json::object();
@@ -277,6 +294,7 @@ void InstanceManager::to_json(nlohmann::json& j) {
 	});
 }
 
+//Parsing class and contained Light, Camera and Mesh instances
 void InstanceManager::from_json(
 	const nlohmann::json& j,
 	std::unordered_map<size_t, size_t>* newCameraIDMap,

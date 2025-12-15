@@ -168,9 +168,6 @@
     <ClInclude Include="SerializationHelpers.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="IDMap.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="InstanceManager.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>

@@ -45,6 +45,9 @@ struct MeshData {
 
 #define MeshInstance Instance<std::string, MeshData>
 
+/*
+	Geometry manager class for caching meshes for resuse.
+*/
 class GeometryManager {
 public:
 	GeometryManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext);

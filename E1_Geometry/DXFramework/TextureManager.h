@@ -32,6 +32,9 @@ struct TextureResource {
 
 #define TextureInstance Instance<std::wstring, TextureResource>
 
+/*
+	Texture manager caches loaded textures, unloads when no longer used
+*/
 class TextureManager
 {
 public:

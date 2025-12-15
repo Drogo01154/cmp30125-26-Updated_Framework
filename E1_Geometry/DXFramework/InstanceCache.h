@@ -13,7 +13,12 @@
 #include <stdexcept>
 #include "Converters.h"
 
-
+/*
+	Instance cache handles lazy lifetime management of classes
+	Stores instances in cache that can then be retrieved through instances
+	Lazy loads/unloads values that have or dont have instances. (Can be set to not unload and just call On Zero Instance function)
+	Uses LRU cache for quick lookup. 
+*/
 
 template<typename IDType, typename ValueType>
 class InstanceCache;

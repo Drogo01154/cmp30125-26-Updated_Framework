@@ -11,18 +11,21 @@
 #include "TessellationMesh.h"
 #include "TriangleMesh.h"
 
+//Constructor
 GeometryManager::GeometryManager(ID3D11Device* device, ID3D11DeviceContext* deviceContext) : meshCache(), device(device), deviceContext(deviceContext) 
 {
+	//Make sure mesh deleted on zero instances
 	meshCache.addTypeEndHandler([](MeshData* data) {
 		data->mesh.reset();	// Make pointer empty
 		});
 }
 
-
+//Try to retrieve mesh from cache
 MeshInstance GeometryManager::tryGetMesh(const std::string& uid) {
 	return meshCache.tryGetInstance(uid);
 }
 
+//Calculate unique ID for mesh based on its type and input paramaters
 std::string GeometryManager::generateUID(MeshType type,
 	std::optional<std::string> file,
 	std::optional<int> resolution,
@@ -62,6 +65,7 @@ std::string GeometryManager::generateUID(MeshType type,
 	}
 }
 
+//Gets mesh ID byased on data
 std::string GeometryManager::determineMeshUID(MeshData* data) {
 	if (!data) return "";
 	switch (data->type) {
@@ -90,6 +94,7 @@ std::string GeometryManager::determineMeshUID(MeshData* data) {
 	}
 }
 
+//Retieves existing mesh in cache if exists, otherwise creates and sends it.
 MeshInstance GeometryManager::RetrieveAddMesh(MeshType type,
 	std::optional<std::string> file,
 	std::optional<int> resolution,
@@ -145,6 +150,7 @@ MeshInstance GeometryManager::RetrieveAddMesh(MeshType type,
 
 }
 
+
 MeshInstance GeometryManager::createAModel(const std::string& file) {
 	return RetrieveAddMesh(MeshType::AMODEL, file);
 }
@@ -193,6 +199,7 @@ std::span<const char* const> GeometryManager::GetMeshTypeStrings() {
 	return meshTypeStrings;
 }
 
+//Makes it so cache does not destroy meshes on no instance active
 void GeometryManager::setDestroyNoInstances(bool value) {
 	meshCache.setDeleteNoInstances(value);
 }

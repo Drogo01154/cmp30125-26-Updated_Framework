@@ -21,10 +21,17 @@ struct HeightMapInfo {
 	HeightMapInfo() : HeightTextureString(L"height"), HeightMultiplier(10.f), UVScale(1) {}
 	std::wstring HeightTextureString;
 	TextureInstance HeightTexture;
-	float HeightMultiplier;
+	float HeightMultiplier;						///< Scales heightmap displacement
 	float UVScale;								///< Scales UVs for texture sampling
 };
-
+/*
+	Material data struct contains objects;
+		- Specular Colour and Power
+		- Albedo colour
+		- Diffuse Texture
+		- Emissive Texture and strength
+		- Height map data if material set to be a heightmap
+*/
 struct Material
 {
 	std::string MaterialName;					///< name of material

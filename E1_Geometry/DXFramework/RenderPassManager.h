@@ -17,7 +17,10 @@ struct PassData {
 	passConstructionFunction constructionFunction;
 	std::vector<std::string> dependancies;
 };
-
+/*
+	Render pass manager stores functions for lazy loading render passes
+	Init pass adds passes and their dependant passes to scene backwards based on heirarchy of passes.
+*/
 class RenderPassManager {
 public:
 	inline void calcualtePassIndexes() {

@@ -1,11 +1,3 @@
-/**
-* \class base shader module
-* 
-* \brief loads component shader CSOs and sets paramaters
-* 
-* Base shader module class to be inherited.
-*
-*/
 #ifndef _BASESHADERMODULE_H_
 #define _BASESHADERMODULE_H_
 #include <d3d11.h>
@@ -15,7 +7,12 @@
 
 using namespace std;
 using namespace DirectX;
-
+/*
+	Class Base Shader Module
+	- Modules store buffer data for shaders
+	- Shaders set their resources from modules stored buffers 
+	- Reduces mapping and unmapping of buffers to only when data changes and not every time shader is switched.
+*/
 class BaseShaderModule
 {
 public:

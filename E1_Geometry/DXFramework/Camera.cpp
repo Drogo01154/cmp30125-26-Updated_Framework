@@ -16,17 +16,10 @@ Camera::Camera()
 	yaw = 0; pitch = 0;
 }
 
+//Getters
 float Camera::getLookSpeed() const { return lookSpeed; }
-
 float Camera::getYaw() const { return yaw; }
 float Camera::getPitch() const { return pitch; }
-
-void Camera::setLookSpeed(float speed) { this->lookSpeed = speed; }
-void Camera::setYaw(float yaw) { this->yaw = yaw; }
-void Camera::setPitch(float pitch) { this->pitch = pitch; }
-
-
-
 const XMFLOAT3& Camera::getGlobalPosition() const {
 	return globalPosition;
 }
@@ -34,6 +27,23 @@ const XMFLOAT3& Camera::getGlobalDirection() const {
 	return globalDirection;
 }
 
+XMMATRIX Camera::getViewMatrix()
+{
+	return viewMatrix;
+}
+
+XMMATRIX Camera::getOrthoViewMatrix()
+{
+	return orthoMatrix;
+}
+
+
+//Setters
+void Camera::setLookSpeed(float speed) { this->lookSpeed = speed; }
+void Camera::setYaw(float yaw) { this->yaw = yaw; }
+void Camera::setPitch(float pitch) { this->pitch = pitch; }
+
+//ImGui Menu
 bool Camera::imGuiRender(size_t transformIterator, CameraTypes type) {
 	bool cameraUpdated = false;
 	std::string outputPos = "Camera Position: X: " + std::to_string(globalPosition.x) + " Y: " + std::to_string(globalPosition.y) + " Z: " + std::to_string(globalPosition.z);
@@ -62,6 +72,7 @@ void Camera::setFrameTime(float t)
 	frameTime = t;
 }
 
+//Function for updating camera global transform values
 void Camera::updateGlobals(bool updateTransform) {
 	if (updateTransform) { m_transform.computeGlobalMatrix(true); }
 	XMMATRIX globalMatrix = m_transform.getGlobalMatrix();
@@ -78,26 +89,15 @@ void Camera::update()
 	XMVECTOR up, positionv, lookAt;
 	XMMATRIX rotationMatrix;
 	
-	// Setup the vectors
+	//Set up viedw vectors
 	positionv = XMLoadFloat3(&globalPosition);
 	lookAt = XMLoadFloat3(&globalDirection);
 	up = m_transform.getWorldUp();
-	// Translate the rotated camera position to the location of the viewer.
+	//Translate rotation of camera to its position
 	lookAt = positionv + lookAt;
 
-	// Finally create the view matrix from the three updated vectors.
+	//Create look at matrix from vectors
 	viewMatrix = XMMatrixLookAtLH(positionv, lookAt, up);
-}
-
-
-XMMATRIX Camera::getViewMatrix()
-{
-	return viewMatrix;
-}
-
-XMMATRIX Camera::getOrthoViewMatrix()
-{
-	return orthoMatrix;
 }
 
 void Camera::moveForward()
@@ -105,7 +105,7 @@ void Camera::moveForward()
 	speed = frameTime * 5.0f;
 
 	// Get forward vector from local transform
-	XMVECTOR forward = m_transform.getWorldForward(); // Z axis
+	XMVECTOR forward = m_transform.getWorldForward();
 	forward = XMVector3Normalize(forward);
 
 	// Scale by speed
@@ -121,7 +121,7 @@ void Camera::moveBackward()
 	speed = frameTime * 5.0f;
 
 	// Get forward vector from local transform
-	XMVECTOR forward = m_transform.getWorldForward(); // Z axis
+	XMVECTOR forward = m_transform.getWorldForward();
 
 	// Scale by speed
 	XMVECTOR delta = -forward * speed;
@@ -136,7 +136,7 @@ void Camera::moveUpward()
 	speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR up = m_transform.getWorldUp(); // Y axis
+	XMVECTOR up = m_transform.getWorldUp();
 
 	// Scale by speed
 	XMVECTOR delta = up * speed;
@@ -151,7 +151,7 @@ void Camera::moveDownward()
 	speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR up = m_transform.getWorldUp(); // Y axis
+	XMVECTOR up = m_transform.getWorldUp();
 
 	// Scale by speed
 	XMVECTOR delta = -up * speed;
@@ -206,7 +206,7 @@ void Camera::strafeRight()
 	speed = frameTime * 5.0f;
 
 	// Get right vector from local transform
-	XMVECTOR right = m_transform.getWorldRight(); // Y axis
+	XMVECTOR right = m_transform.getWorldRight();
 
 	// Scale by speed
 	XMVECTOR delta = right * speed;
@@ -220,7 +220,7 @@ void Camera::strafeLeft()
 	speed = frameTime * 5.0f;
 
 	// Get up vector from local transform
-	XMVECTOR right = m_transform.getWorldRight(); // Y axis
+	XMVECTOR right = m_transform.getWorldRight();
 
 	// Scale by speed
 	XMVECTOR delta = -right * speed;
