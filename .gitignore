@@ -347,3 +347,5 @@ ASALocalRun/
 .mfractor/
 E1_Geometry/lib/debug/*.lib
 /E1_Geometry/lib/release/DXFramework.lib
+/Coursework/lib/debug/DXFramework.lib
+/Coursework/lib/release/DXFramework.lib
