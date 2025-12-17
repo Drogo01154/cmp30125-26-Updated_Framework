@@ -1,4 +1,4 @@
-#include"lightCommon_ps.hlsl"
+    #include"lightCommon_ps.hlsl"
 StructuredBuffer<float4x4> lightViewProjs : register(t3); // lightProjectionMatrix * lightViewMatrix on the CPU
 Texture2DArray shadowMaps : register(t4);
 TextureCubeArray cubeMaps : register(t5);

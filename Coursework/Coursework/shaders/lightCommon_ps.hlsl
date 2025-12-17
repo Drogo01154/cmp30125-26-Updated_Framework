@@ -40,7 +40,7 @@ float4 getDiffuse(float2 pos)
     return ((flags & HAS_DIFFUSE) != 0) ? diffuseTexture.Sample(textureSampler, pos) * baseColour : baseColour;
 }
 
-struct Light // 80 bytes
+struct Light    
 {
     float4 lightAttenuation;
     float4 lightDiffuse;

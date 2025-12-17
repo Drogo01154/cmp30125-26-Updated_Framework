@@ -18,12 +18,13 @@ cbuffer BloomBuffer : register(b0)
 {
     float threshold;
     float exposure;
+    float gamma;
+    float padding;
 };
 
 //Based on https://learnopengl.com/Advanced-Lighting/Bloom
 float4 main(InputType input) : SV_TARGET
 {
-    const float gamma = 2.2;
     float3 hdrColour = hdrTexture.Sample(Sampler0, input.tex).rgb;
     float3 bloomColour = blurTexture.Sample(Sampler0, input.tex).rgb;
     

@@ -20,7 +20,7 @@ float main(InputType input) : SV_Depth
     {
         depthValue = input.depthPosition.z;
     } else if (lightType == 2) // Spot light
-    {
+    {   
         depthValue = input.depthPosition.z / input.depthPosition.w;
     }
     else    // Point light

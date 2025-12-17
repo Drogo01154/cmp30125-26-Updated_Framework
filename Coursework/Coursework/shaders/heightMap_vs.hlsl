@@ -47,18 +47,18 @@ OutputType main(InputType input)
 {
     OutputType output;
 	
-	//Increase Vertex Y position by heighMultiplier.
+	//Increase Vertex Y position by heighMultiplier
     input.position.y += heightMapTexture.SampleLevel(textureSampler, input.tex, 0) * heightMultiplier;
 	
-	// Calculate the position of the vertex against the world, view, and projection matrices.
+	// Calculate the position of the vertex against the world, view, and projection matrices
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
 
-	// Store the texture coordinates for the pixel shader.
+	// Store the texture coordinates for the pixel shader
     output.tex = input.tex;
 
-	// Calculate the normal vector against the world matrix only and normalise.
+	// Calculate the normal vector against the world matrix only and normalise
     output.normal = mul(input.normal, (float3x3) worldMatrix);
     output.normal = normalize(output.normal);
     

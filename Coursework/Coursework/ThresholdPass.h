@@ -6,7 +6,8 @@
 struct BloomBufferType {
 	float threshold;
 	float exposure;
-	XMFLOAT2 padding;
+	float gamma;
+	float padding;
 };
 
 #define BloomModule ConstantDataModule<BloomBufferType>
@@ -29,6 +30,7 @@ public:
 		//Set bloom values
 		bloomBuffer.threshold = 1.f;
 		bloomBuffer.exposure = 1.f;
+		bloomBuffer.gamma = 2.2f;
 
 		bloomModuleInstance = shaderManager->getShaderModuleID("BloomDataModule");
 		bloomModule = dynamic_pointer_cast<BloomModule>(bloomModuleInstance->module);
@@ -49,17 +51,20 @@ public:
 		if (ImGui::CollapsingHeader("Bloom Settings")) {
 			if (ImGui::SliderFloat("Threshold", &bloomBuffer.threshold, 0.0f, 5.0f, "%.2f")) { updateModules = true; }
 			if (ImGui::SliderFloat("Exposure", &bloomBuffer.exposure, 0.0f, 100.0f, "%.2f")) { updateModules = true; }
+			if (ImGui::SliderFloat("Gamma", &bloomBuffer.gamma, 0.5f, 3.f, "%.2f")) { updateModules = true; }
 		}
 	}
 
 	void toJson(nlohmann::json& json) {
 		json["Threshold"] = bloomBuffer.threshold;
 		json["Exposure"] = bloomBuffer.exposure;
+		json["gamma"] = bloomBuffer.gamma;
 	}
 
 	void fromJson(const nlohmann::json& json) {
 		bloomBuffer.threshold = json.at("Threshold").get<float>();
 		bloomBuffer.exposure = json.at("Exposure").get<float>();
+		bloomBuffer.gamma = json.contains("Gamma") ? json.at("Gamma").get<float>() : 2.2f;
 		updateModules = true;
 	}
 private: 

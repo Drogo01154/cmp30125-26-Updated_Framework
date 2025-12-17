@@ -12,7 +12,7 @@ struct InputType
     float3 normal : NORMAL;
 };
 
-cbuffer BloomBuffer : register(b0)
+cbuffer BlurBuffer : register(b0)
 {
     bool horizontal;
     float2 texelSize;

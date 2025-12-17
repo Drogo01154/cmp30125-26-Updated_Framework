@@ -56,6 +56,7 @@ OutputType main(InputType input)
     
 
     output.normal = normalize(cross(bitangent, tangent));
+    
     input.position.y += heightC;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.

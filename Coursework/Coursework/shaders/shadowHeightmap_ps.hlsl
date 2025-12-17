@@ -27,6 +27,5 @@ float4 main(InputType input) : SV_TARGET
         finalColour += shadowScalar * lightColour;
 
     }
-    //return finalColour;
     return finalColour + emissive;
 }

@@ -21,6 +21,5 @@ float4 main(InputType input) : SV_Target
         finalColour += calculateLight(diffuse, i, input.worldPos, input.normal, input.viewVector);
     }
     
-    // Multiply by diffuse texture and clamp to 0..1
     return finalColour + emissive;
 }

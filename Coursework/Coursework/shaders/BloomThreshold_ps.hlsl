@@ -14,8 +14,10 @@ struct InputType
 
 cbuffer BloomBuffer : register(b0)
 {
-    float threshold;    
-    float intensity;
+    float threshold;
+    float exposure;
+    float gamma;
+    float padding;
 };
 
 //Based on https://learnopengl.com/Advanced-Lighting/Bloom
